@@ -1,16 +1,17 @@
 version: '3.1'
 
 services:
-
   mongo:
-    image: mongo
+    container_name: chronos_mongo
+    image: mongo:4.4.0-bionic
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: local
 
   mongo-express:
-    image: mongo-express
+    container_name: chronos_mongo-express
+    image: mongo-express:0.54.0
     restart: always
     ports:
       - 8081:8081
@@ -19,6 +20,8 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: local
 
   api:
+    container_name: chronos_api
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile
