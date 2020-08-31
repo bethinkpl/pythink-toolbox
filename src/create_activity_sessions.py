@@ -1,5 +1,6 @@
-import datetime
-from typing import List, TypedDict
+import itertools
+from datetime import datetime
+from typing import List, TypedDict, Optional
 import logging
 
 import pandas as pd
@@ -10,12 +11,24 @@ MAX_TIME_BETWEEN_EVENTS_FOR_CREATE_SESSION = pd.Timedelta(minutes=5)
 MIN_FOCUS_SESSION_TIME = pd.Timedelta(minutes=15)
 MAX_BREAK_TIME = pd.Timedelta(minutes=30)
 
-logger = logging.getLogger("Create Sessions")
+logger = logging.getLogger("Create Activity Sessions")
 
 
-def create_sessions(start_date, end_date):
+class ActivitySession(TypedDict):
+    user_id: int
+    start_time: datetime
+    end_time: datetime
+    is_active: bool
+    is_focus: bool
+    is_break: bool
+
+
+def main(start_time: datetime, end_time: datetime) -> List[ActivitySession]:
+    """Create activity_sessions for all users
+    who had activity_events between given timestamps."""
+
     users_activity_events = src.activity_events.read(
-        start_date=start_date, end_date=end_date
+        start_time=start_time, end_time=end_time
     )
 
     users_activity_events_groups = users_activity_events.groupby("user_id").client_time
@@ -24,21 +37,33 @@ def create_sessions(start_date, end_date):
         "Creating activity_sessions for %i users.", len(users_activity_events_groups)
     )
 
-    activity_sessions = (
+    user_activity_sessions = (
+        _create_user_activity_sessions(user_id=user_id, activity_events=activity_events)
+        for user_id, activity_events in users_activity_events_groups
+    )
+
+    return list(itertools.chain.from_iterable(user_activity_sessions))
+
+
+def _create_user_activity_sessions(
+    user_id: int, activity_events: pd.Series
+) -> List[ActivitySession]:
+
+    logger.info("Creating activity_sessions for user %i.", user_id)
+
+    return (
         activity_events.pipe(_initialize_sessions_creation)
         .pipe(
-            _create_active_sessions,
+            _add_last_active_session,
             last_active_session=_read_last_active_session_for_user(user_id),
         )
+        .pipe(_create_active_sessions,)
         .pipe(_fill_with_inactive_sessions)
         .pipe(_determine_if_focus)
         .pipe(_determine_if_break)
         .pipe(_sessions_validation)
         .pipe(_to_dict, user_id=user_id)
-        for user_id, activity_events in users_activity_events_groups
     )
-
-    return [session for sessions in activity_sessions for session in sessions]
 
 
 def _initialize_sessions_creation(activity_events: pd.Series) -> pd.DataFrame:
@@ -52,17 +77,25 @@ def _initialize_sessions_creation(activity_events: pd.Series) -> pd.DataFrame:
     )
 
 
-def _create_active_sessions(
-    initialized_sessions: pd.DataFrame, last_active_session: pd.DataFrame
+def _add_last_active_session(
+    initialized_sessions: pd.DataFrame, last_active_session: Optional[pd.DataFrame]
 ) -> pd.DataFrame:
     logger.debug("initialized_sessions: \n", initialized_sessions)
     logger.debug("last_active_session: \n", last_active_session)
 
+    if last_active_session:
+        return pd.concat([last_active_session, initialized_sessions])
+
+    return initialized_sessions
+
+
+def _create_active_sessions(sessions_with_last_active: pd.DataFrame,) -> pd.DataFrame:
+    logger.debug("sessions_with_last_active: \n", sessions_with_last_active)
+
     return (
-        pd.concat([last_active_session, initialized_sessions])
-        .assign(
-            events_group_id=lambda df: (
-                df.start_time.sub(df.start_time.shift(1))
+        sessions_with_last_active.assign(
+            events_group_id=lambda df_: (
+                df_.start_time.sub(df_.start_time.shift(1))
                 .gt(MAX_TIME_BETWEEN_EVENTS_FOR_CREATE_SESSION)
                 .cumsum()
             )
@@ -76,6 +109,9 @@ def _create_active_sessions(
 
 def _fill_with_inactive_sessions(active_sessions: pd.DataFrame) -> pd.DataFrame:
     logger.debug("active_sessions: \n", active_sessions)
+
+    if len(active_sessions) == 1:
+        return active_sessions
 
     inactive_sessions = (
         active_sessions.assign(
@@ -159,20 +195,11 @@ def _sessions_validation(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-class ActivitySession(TypedDict):
-    user_id: int
-    start_time: datetime.datetime
-    end_time: datetime.datetime
-    is_active: bool
-    is_focus: bool
-    is_break: bool
-
-
 def _to_dict(activity_sessions: pd.DataFrame, user_id) -> List[ActivitySession]:
     return activity_sessions.assign(user_id=user_id).to_dict(orient="records")
 
 
-def _read_last_active_session_for_user(user_id: int) -> pd.DataFrame:
+def _read_last_active_session_for_user(user_id: int) -> Optional[pd.DataFrame]:
     # FIXME move to different place?
     # FIXME pop last active session from mongo
     return pd.DataFrame(
