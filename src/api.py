@@ -6,11 +6,11 @@ from flask import Flask, request
 app = Flask(__name__)
 
 
-def get_learning_time(user_id: int, start_date: int, end_date: int, unit: str = "ms") -> int:
-    return randint(0, 1000000)
+def get_learning_time(user_id: int, start_date: str, end_date: str) -> int:
+    return user_id + 5
 
 
-def get_learning_time_daily(user_id: int, start_date: int, end_date: int) -> Dict[int, int]:
+def get_learning_time_daily(user_id: int, start_date: str, end_date: str) -> Dict[str, int]:
     return {
         "2000-01-01": 100,
         "2000-01-02": 300,
@@ -18,19 +18,19 @@ def get_learning_time_daily(user_id: int, start_date: int, end_date: int) -> Dic
     }
 
 
-def get_break_time_daily(user_id: int, start_date: int, end_date: int) -> Dict[int, int]:
+def get_break_time_daily(user_id: int, start_date: str, end_date: str) -> Dict[str, int]:
     return {
-        "2000-01-01": 100,
-        "2000-01-02": 300,
-        "2000-01-03": 250
+        "2000-01-01": 200,
+        "2000-01-02": 400,
+        "2000-01-03": 50
     }
 
 
-def get_focus_time_daily(user_id: int, start_date: int, end_date: int) -> Dict[int, int]:
+def get_focus_time_daily(user_id: int, start_date: str, end_date: str) -> Dict[str, int]:
     return {
-        "2000-01-01": 100,
-        "2000-01-02": 300,
-        "2000-01-03": 250
+        "2000-01-01": 150,
+        "2000-01-02": 20,
+        "2000-01-03": 150
     }
 
 
@@ -52,21 +52,21 @@ def get_users_learning_time() -> Tuple[Dict[str, dict], int]:
 
 
 @app.route('/learning_time_daily/<int:user_id>', methods=['POST'])
-def get_user_learning_time_daily(user_id: int) -> Dict[int, int]:
+def get_user_learning_time_daily(user_id: int) -> Dict[str, int]:
     body = request.get_json()
     return get_learning_time_daily(user_id, body["start_date"], body["end_date"])
 
 
 @app.route('/break_time_daily/<int:user_id>', methods=['POST'])
-def get_user_break_time_daily(user_id: int) -> Dict[int, int]:
+def get_user_break_time_daily(user_id: int) -> Dict[str, int]:
     body = request.get_json()
     return get_break_time_daily(user_id, body["start_date"], body["end_date"])
 
 
 @app.route('/focus_time_daily/<int:user_id>', methods=['POST'])
-def get_user_focus_time_daily(user_id: int) -> Dict[int, int]:
+def get_user_focus_time_daily(user_id: int) -> Dict[str, int]:
     body = request.get_json()
     return get_focus_time_daily(user_id, body["start_date"], body["end_date"])
 
 
-app.run()
+app.run(host='127.0.0.1', port='5000')
