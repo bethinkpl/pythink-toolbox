@@ -104,17 +104,17 @@ def _determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> pd.DataFr
 
     return activity_sessions_with_focus.assign(
         is_break=lambda df: (
-            ~df["is_active"]
-            & df["duration"].map(lambda duration: duration < MAX_BREAK_TIME)
-            & df["is_focus"].shift(1)
-            & df["is_focus"].shift(-1)
+            ~df.is_active
+            & df.duration.map(lambda duration: duration < MAX_BREAK_TIME)
+            & df.is_focus.shift(1)
+            & df.is_focus.shift(-1)
         )
     ).drop("duration", axis="columns")
 
 
 def _sessions_validation(df: pd.DataFrame) -> pd.DataFrame:
 
-    if not df.empty:
+    if df.empty:
         raise ValidationError("Activity sessions are empty 👎")
 
     if not df.columns.to_list() == [
@@ -126,24 +126,24 @@ def _sessions_validation(df: pd.DataFrame) -> pd.DataFrame:
     ]:
         raise ValidationError("Activity sessions has wrong columns 👎")
 
-    if not df.iloc[0]["session_start"]:
+    if not df.iloc[0].is_active:
         raise ValidationError("Activity sessions' first session is not active 👎")
 
-    if not df.iloc[-1]["session_start"]:
+    if not df.iloc[-1].is_active:
         raise ValidationError("Activity sessions' last session is not active 👎")
 
     if not df.equals(df.drop_duplicates(subset="session_start")):
         logger.debug("Duplicated rows:\n", df[df.duplicated(keep=False)])
         raise ValidationError("Duplicates appeared in activity sessions 👎")
 
-    if not df.equals(df.sort_values(["session_start", "session_end"])):
+    if not df.equals(df.sort_values(["start_time", "end_time"])):
         raise ValidationError("Activity sessions are not sorted 👎")
 
     inactives_that_lasts_too_short = (
         df.query("is_active == False")
         .assign(
-            duration=lambda df_: df_["session_end"].sub(df_["session_start"]),
-            lasts_less_than_should=lambda df_: df_["duration"]
+            duration=lambda df_: df_.end_time.sub(df_.start_time),
+            lasts_less_than_should=lambda df_: df_.duration
             < MAX_TIME_BETWEEN_EVENTS_FOR_CREATE_SESSION,
         )
         .query("lasts_less_than_should == True")
@@ -169,7 +169,6 @@ class ActivitySession(TypedDict):
 
 
 def _to_dict(activity_sessions: pd.DataFrame, user_id) -> List[ActivitySession]:
-    # FIXME ISODate()
     return activity_sessions.assign(user_id=user_id).to_dict(orient="records")
 
 
