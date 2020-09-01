@@ -1,7 +1,5 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
-from typing import Union
-
 import hypothesis.strategies
 import numpy as np  # type: ignore[import]
 
