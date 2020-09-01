@@ -13,5 +13,5 @@ import src.testing.search_strategies
         hypothesis.strategies.floats(min_value=0.0, max_value=1.0)
     )
 )
-def test_add_nans_strategy(nan_or_float: Union[np.nan, float]) -> None:
+def test_add_nans_strategy(nan_or_float: float) -> None:
     assert np.isnan(nan_or_float) or (0 <= nan_or_float <= 1)
