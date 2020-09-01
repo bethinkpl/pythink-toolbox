@@ -15,7 +15,7 @@ class Scenario(TypedDict):
 
 def _transform_scenarios_for_parametrization(
     scenarios: Sequence[Mapping[str, object]],
-) -> Tuple[str, List[tuple]]:
+) -> Tuple[str, List[Tuple[object, ...]]]:
     """Helper function for `parametrize()`"""
 
     argnames = ",".join([arg for arg in scenarios[0].keys() if arg != "desc"])

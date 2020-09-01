@@ -10,8 +10,8 @@ import src.validations
 
 
 class CheckOutputScenario(src.testing.parametrization.Scenario):
-    dtype: Type
-    checks: Optional[List[Callable]]
+    dtype: Type[Any]
+    checks: Optional[List[Callable[..., Any]]]
     input_: Any
     raises_error: bool
     error_msg: Optional[str]
@@ -69,10 +69,10 @@ SCENARIOS = [
 ]
 
 
-@src.testing.parametrization.parametrize(SCENARIOS)
+@src.testing.parametrization.parametrize(SCENARIOS)  # type: ignore[misc]
 def test_check_output(
-    dtype: Type,
-    checks: Optional[List[Callable]],
+    dtype: Type[Any],
+    checks: Optional[List[Callable[..., Any]]],
     input_: Any,
     raises_error: bool,
     error_msg: Optional[str],
@@ -107,7 +107,7 @@ SCENARIOS = [
 ]
 
 
-@src.testing.parametrization.parametrize(SCENARIOS)
+@src.testing.parametrization.parametrize(SCENARIOS)  # type: ignore[misc]
 def test_is_json(test_string: str, expected_output: bool) -> None:
     assert src.validations.is_json(test_string) == expected_output
 
@@ -130,7 +130,7 @@ def test_create_id_like_validation_column() -> None:
 
 
 class CheckScenario(src.testing.parametrization.Scenario):
-    check: Callable
+    check: Callable[..., Any]
     value: Any
     should_pass: bool
 
@@ -217,8 +217,8 @@ CHECK_SCENARIOS = [
 ]
 
 
-@src.testing.parametrization.parametrize(CHECK_SCENARIOS)
+@src.testing.parametrization.parametrize(CHECK_SCENARIOS)  # type: ignore[misc]
 def test_Check(  # pylint: disable=invalid-name
-    check: Callable, value: Any, should_pass: bool
+    check: Callable[..., Any], value: Any, should_pass: bool
 ) -> None:
     assert check(value) is should_pass

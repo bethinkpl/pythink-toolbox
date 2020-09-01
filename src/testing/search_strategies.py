@@ -8,8 +8,8 @@ import pandas as pd  # type: ignore[import]
 
 @hypothesis.strategies.composite
 def add_nans_strategy(
-    draw: Any, strategy: hypothesis.strategies.SearchStrategy
-) -> hypothesis.strategies.SearchStrategy:
+    draw: Any, strategy: hypothesis.strategies.SearchStrategy[Any]
+) -> Any:
     """Strategy for getting either value from passed strategy or np.NaN."""
 
     return draw(

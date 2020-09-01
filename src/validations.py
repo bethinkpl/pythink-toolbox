@@ -14,42 +14,50 @@ class Check:
     same = lambda x: x
 
     @classmethod
-    def greater(cls, value: Any, map_: Callable = same) -> Callable:
+    def greater(cls, value: Any, map_: Callable[..., Any] = same) -> Callable[..., Any]:
         """Check if object value is greater than value."""
         return lambda x: map_(x) > value
 
     @classmethod
-    def greater_or_equal(cls, value: Any, map_: Callable = same) -> Callable:
+    def greater_or_equal(
+        cls, value: Any, map_: Callable[..., Any] = same
+    ) -> Callable[..., Any]:
         """Check if object value is greater or equal than value."""
         return lambda x: map_(x) >= value
 
     @classmethod
-    def less(cls, value: Any, map_: Callable = same) -> Callable:
+    def less(cls, value: Any, map_: Callable[..., Any] = same) -> Callable[..., Any]:
         """Check if object value is less than value."""
         return lambda x: map_(x) < value
 
     @classmethod
-    def less_or_equal(cls, value: Any, map_: Callable = same) -> Callable:
+    def less_or_equal(
+        cls, value: Any, map_: Callable[..., Any] = same
+    ) -> Callable[..., Any]:
         """Check if object value is less or equal than value."""
         return lambda x: map_(x) <= value
 
     @classmethod
-    def equals(cls, value: Any, map_: Callable = same) -> Callable:
+    def equals(cls, value: Any, map_: Callable[..., Any] = same) -> Callable[..., Any]:
         """Check if object value equals value."""
         return lambda x: map_(x) == value
 
     @classmethod
-    def no_duplicates(cls, map_: Callable = same) -> Callable:
+    def no_duplicates(cls, map_: Callable[..., Any] = same) -> Callable[..., Any]:
         """Check if object contains duplicates."""
         return lambda sequence: len(set(map_(sequence))) == len(map_(sequence))
 
     @classmethod
-    def contains_type_only(cls, type_: Type, map_: Callable = same) -> Callable:
+    def contains_type_only(
+        cls, type_: Type[Any], map_: Callable[..., Any] = same
+    ) -> Callable[..., Any]:
         """Check if object contains only object of type_."""
         return lambda sequence: all(isinstance(x, type_) for x in map_(sequence))
 
 
-def check_output(dtype: Type, checks: Optional[Sequence[Callable]] = None) -> Callable:
+def check_output(
+    dtype: Type[Any], checks: Optional[Sequence[Callable[..., Any]]] = None
+) -> Callable[..., Any]:
     """Decorator used for custom checking output of specified dtype.
 
     Args:
@@ -68,7 +76,7 @@ def check_output(dtype: Type, checks: Optional[Sequence[Callable]] = None) -> Ca
         ValidationError: Validation for `func` failed for check of index 1.
     """
 
-    def decorator_check_output(func: Callable) -> Callable:
+    def decorator_check_output(func: Callable[..., Any]) -> Callable[..., Any]:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
 
             func_output = func(*args, **kwargs)
