@@ -1,0 +1,15 @@
+.idea
+.python-version
+.metaflow
+.ipynb_checkpoints/
+.storage
+__pycache__
+/lace_flows.egg-info/
+*Untitled.ipynb
+.DS_Store
+/.mypy_cache/
+.env
+coverage/*
+.hypothesis/
+*/.hypothesis/
+lace_potocks.egg-info/
