@@ -1,5 +1,5 @@
-from consts.api_tests import URL
+from consts.api_tests import URL_BASE
 
 
 def get_url(route: str) -> str:
-    return URL + route
+    return f"{URL_BASE}{route}"

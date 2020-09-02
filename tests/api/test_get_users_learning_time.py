@@ -4,7 +4,7 @@ import requests
 from consts.api_tests import HEADERS, STATUS_OK
 from tests.api.url_helpers import get_url
 
-test_data = {
+TEST_DATA = {
     "users": [
         {
           "id": 299,
@@ -21,12 +21,12 @@ test_data = {
 
 
 def test_get_users_learning_time():
-    response = requests.post(get_url('learning_time'), headers=HEADERS, data=json.dumps(test_data))
+    response = requests.post(get_url('learning_time'), headers=HEADERS, data=json.dumps(TEST_DATA))
     assert response.status_code == STATUS_OK
     assert response.json() == {
         "users_learning_time":
         {
-            "299": 304,
-            "5994": 5999
+            "299": 650,
+            "5994": 650
         }
     }
