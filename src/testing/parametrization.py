@@ -21,7 +21,7 @@ def _transform_scenarios_for_parametrization(
     argnames = ",".join([arg for arg in scenarios[0].keys() if arg != "desc"])
 
     argvalues = [
-        tuple([scenario[parameter] for parameter in scenario if parameter != "desc"])
+        tuple(scenario[parameter] for parameter in scenario if parameter != "desc")
         for scenario in scenarios
     ]
 
