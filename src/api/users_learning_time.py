@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 from flask import request
 
 from src.api.api import app
-from src.api.helpers import get_learning_time
+from src.api.user_learning_time import get_learning_time
 
 
 @app.route('/learning_time', methods=['POST'])

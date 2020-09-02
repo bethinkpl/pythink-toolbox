@@ -3,7 +3,14 @@ from typing import Dict
 from flask import request
 
 from src.api.api import app
-from src.api.helpers import get_break_time_daily
+
+
+def get_break_time_daily(user_id: int, start_date: str, end_date: str) -> Dict[str, int]:
+    return {
+        "2000-01-01": 200,
+        "2000-01-02": 400,
+        "2000-01-03": 50
+    }
 
 
 @app.route('/break_time_daily/<int:user_id>', methods=['POST'])

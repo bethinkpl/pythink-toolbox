@@ -3,7 +3,11 @@ from typing import Dict, Tuple
 from flask import request
 
 from src.api.api import app
-from src.api.helpers import get_learning_time
+from src.api.user_learning_time_daily import get_learning_time_daily
+
+
+def get_learning_time(user_id: int, start_date: str, end_date: str) -> int:
+    return sum(get_learning_time_daily(user_id=user_id, start_date=start_date, end_date=end_date).values())
 
 
 @app.route('/learning_time/<int:user_id>', methods=['POST'])

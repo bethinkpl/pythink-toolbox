@@ -1,7 +1,7 @@
 import json
 import requests
 
-from consts.api_tests import HEADERS, STATUS_OK
+from tests.api.consts.api_tests import HEADERS, STATUS_OK
 from tests.api.url_helpers import get_url
 
 TEST_DATA = {
