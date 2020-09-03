@@ -3,11 +3,11 @@
 import hypothesis.strategies
 import numpy as np  # type: ignore[import]
 
-import src.testing.search_strategies
+import src
 
 
 @hypothesis.given(
-    nan_or_float=src.testing.search_strategies.add_nans_strategy(  # pylint: disable=no-value-for-parameter
+    nan_or_float=src.pythink_toolbox.testing.search_strategies.add_nans_strategy(  # pylint: disable=no-value-for-parameter
         hypothesis.strategies.floats(min_value=0.0, max_value=1.0)
     )
 )
