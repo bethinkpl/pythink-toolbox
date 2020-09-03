@@ -22,7 +22,7 @@ pre-commit = "^2.6.0"
 click = "^7.1.2"
 
 [tool.poetry.scripts]
-python-toolbox = 'cli:main'
+cli = 'cli:main'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
