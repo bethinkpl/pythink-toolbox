@@ -1,8 +1,8 @@
 from typing import Dict
 
-from flask import request
+from flask import request, Blueprint
 
-from src.api.api import app
+learning_daily_bp = Blueprint('learning', __name__)
 
 
 def get_learning_time_daily(user_id: int, start_date: str, end_date: str) -> Dict[str, int]:
@@ -13,7 +13,7 @@ def get_learning_time_daily(user_id: int, start_date: str, end_date: str) -> Dic
     }
 
 
-@app.route('/learning_time_daily/<int:user_id>', methods=['POST'])
+@learning_daily_bp.route('/learning_time_daily/<int:user_id>', methods=['POST'])
 def get_user_learning_time_daily(user_id: int) -> Dict[str, int]:
     body = request.get_json()
     return get_learning_time_daily(user_id, body["start_date"], body["end_date"])
