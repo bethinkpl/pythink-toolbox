@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from pythink_toolbox.testing import parametrization
 
-import src.create_activity_sessions as tested_module
+import chronos.create_activity_sessions as tested_module
 
 
 def test_main():
