@@ -19,6 +19,9 @@ BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", No
 def read(
     start_date: Union[datetime, str], end_date: Union[datetime, str]
 ) -> pd.DataFrame:
+    """
+    Read activity events from bigquery
+    """
 
     bigquery_source = datatosk.gbq("prod")
 
@@ -39,6 +42,7 @@ def read(
 
 
 if __name__ == "__main__":
+    # pylint: disable=fixme
     # FIXME left for debugging, delete before releasing
     start = datetime.now()
     pyk = read("2020-08-24 14:00:00", "2020-08-24 15:00:00")
