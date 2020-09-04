@@ -25,7 +25,7 @@ def read(
     query = f"""
         SELECT user_id, DATETIME(client_time) as client_time
         FROM `{BIGQUERY_PLATFORM_DATASET_ID}.user_activity_events`
-        WHERE client_time BETWEEN @start_date AND @end_date 
+        WHERE client_time BETWEEN @start_date AND @end_date
         GROUP BY user_id, client_time
         ORDER BY user_id, client_time;
         """
