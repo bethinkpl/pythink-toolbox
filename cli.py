@@ -6,7 +6,7 @@ import click
 
 @click.group()
 def main() -> None:
-    """\n😎 {{ cookiecutter.project_name }} CLI 😎\n"""
+    """\n😎 CHRONOS CLI 😎\n"""
 
 
 @click.command()
@@ -15,14 +15,14 @@ def main() -> None:
 def ci(session: str, session_args: Sequence[str]) -> None:
     """Run Continuous Integration flow or part of it.\n
     Sessions defined in noxfile.py.\n
-    Run `poetry run {{ cookiecutter.project_name }} ci [session]` to run particular CI session.
+    Run `poetry run chronos ci [session]` to run particular CI session.
     Examples:
         - Run specific check:
-            `poetry run {{ cookiecutter.project_name }} ci [check-name]`
+            `poetry run chronos ci [check-name]`
         - Run specific test:
-            `poetry run {{ cookiecutter.project_name }} ci tests [package].[module].[file]:[test_function]`
+            `poetry run chronos ci tests [package].[module].[file]:[test_function]`
         - Run all checks but tests:
-            `poetry run {{ cookiecutter.project_name }} ci "not tests"
+            `poetry run chronos ci "not tests"
     """
 
     run_args = ["poetry", "run", "nox"]
