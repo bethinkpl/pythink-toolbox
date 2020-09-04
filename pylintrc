@@ -1,0 +1,15 @@
+[MESSAGES CONTROL]
+disable=
+    format, # Handled by black
+    missing-module-docstring,
+
+[MISCELLANEOUS]
+notes=FIXME
+
+[SIMILARITIES]
+min-similarity-lines=4
+
+[FORMAT]
+good-names=df, x, y, i, ci
+
+# TODO move configuration to pyproject.toml when pylint > v2.5.0
