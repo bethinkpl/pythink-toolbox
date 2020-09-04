@@ -1,4 +1,4 @@
-from importlib.metadata import version, PackageNotFoundError  # type: ignore[import]
+from importlib.metadata import version, PackageNotFoundError
 
 try:
     __version__ = version(__name__)
