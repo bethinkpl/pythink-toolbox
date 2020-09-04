@@ -7,13 +7,13 @@ from datetime import datetime
 
 import dotenv
 import datatosk
-import pandas as pd
+import pandas as pd  # type: ignore[import]
 
 
 ENV_PATH = Path(".") / ".env"
 dotenv.load_dotenv(dotenv_path=ENV_PATH)
 
-BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", None)
+BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", "")
 
 
 def read(
@@ -38,7 +38,7 @@ def read(
         "end_date": end_date,
     }
 
-    return bigquery_source.read(query=query, params=params)
+    return bigquery_source.read(query=query, params=params)  # type: ignore[arg-type]
 
 
 if __name__ == "__main__":
