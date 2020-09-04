@@ -42,7 +42,7 @@ def write_activity_sessions(activity_sessions: pd.DataFrame) -> None:
 
 
 def read_activity_sessions_by_user(user_id: int) -> pd.DataFrame:
-    return mongo_source.read.to_list(
+    return mongo_source.read.to_pandas(
         collection="activity_sessions", command="find", query={"user_id": user_id},
     )
 
