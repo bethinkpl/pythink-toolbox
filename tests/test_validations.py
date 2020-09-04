@@ -5,11 +5,11 @@ from typing import Any, Type, Callable, List, Optional
 import pandera  # type: ignore[import]
 import pytest
 
-import src.pythink_toolbox.validations
-import src.pythink_toolbox.testing
+import pythink_toolbox.validations
+import pythink_toolbox.testing
 
 
-class CheckOutputScenario(src.pythink_toolbox.testing.parametrization.Scenario):
+class CheckOutputScenario(pythink_toolbox.testing.parametrization.Scenario):
     dtype: Type[Any]
     checks: Optional[List[Callable[..., Any]]]
     input_: Any
@@ -69,7 +69,7 @@ SCENARIOS = [
 ]
 
 
-@src.pythink_toolbox.testing.parametrization.parametrize(SCENARIOS)  # type: ignore[misc]
+@pythink_toolbox.testing.parametrization.parametrize(SCENARIOS)  # type: ignore[misc]
 def test_check_output(
     dtype: Type[Any],
     checks: Optional[List[Callable[..., Any]]],
@@ -77,20 +77,20 @@ def test_check_output(
     raises_error: bool,
     error_msg: Optional[str],
 ) -> None:
-    @src.pythink_toolbox.validations.check_output(dtype=dtype, checks=checks)
+    @pythink_toolbox.validations.check_output(dtype=dtype, checks=checks)
     def test_func(input__: Any) -> Any:
         return input__
 
     if raises_error:
         with pytest.raises(
-            src.pythink_toolbox.validations.ValidationError, match=error_msg
+            pythink_toolbox.validations.ValidationError, match=error_msg
         ):
             test_func(input_)
     else:
         assert test_func(input_) == input_
 
 
-class IsJSONScenario(src.pythink_toolbox.testing.parametrization.Scenario):
+class IsJSONScenario(pythink_toolbox.testing.parametrization.Scenario):
     test_string: str
     expected_output: bool
 
@@ -109,14 +109,14 @@ SCENARIOS = [
 ]
 
 
-@src.pythink_toolbox.testing.parametrization.parametrize(SCENARIOS)  # type: ignore[misc]
+@pythink_toolbox.testing.parametrization.parametrize(SCENARIOS)  # type: ignore[misc]
 def test_is_json(test_string: str, expected_output: bool) -> None:
-    assert src.pythink_toolbox.validations.is_json(test_string) == expected_output
+    assert pythink_toolbox.validations.is_json(test_string) == expected_output
 
 
 def test_create_id_like_validation_column() -> None:
     for allow_duplicates in [True, False]:
-        output = src.pythink_toolbox.validations.create_id_like_validation_column(
+        output = pythink_toolbox.validations.create_id_like_validation_column(
             name="test", allow_duplicates=allow_duplicates
         )
 
@@ -131,7 +131,7 @@ def test_create_id_like_validation_column() -> None:
         assert output == expected_output
 
 
-class CheckScenario(src.pythink_toolbox.testing.parametrization.Scenario):
+class CheckScenario(pythink_toolbox.testing.parametrization.Scenario):
     check: Callable[..., Any]
     value: Any
     should_pass: bool
@@ -140,92 +140,92 @@ class CheckScenario(src.pythink_toolbox.testing.parametrization.Scenario):
 CHECK_SCENARIOS = [
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.greater(0),
+        check=pythink_toolbox.validations.Check.greater(0),
         value=0,
         should_pass=False,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.greater(0),
+        check=pythink_toolbox.validations.Check.greater(0),
         value=1,
         should_pass=True,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.greater_or_equal(1),
+        check=pythink_toolbox.validations.Check.greater_or_equal(1),
         value=0,
         should_pass=False,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.greater_or_equal(1),
+        check=pythink_toolbox.validations.Check.greater_or_equal(1),
         value=1,
         should_pass=True,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.less(1),
+        check=pythink_toolbox.validations.Check.less(1),
         value=1,
         should_pass=False,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.less(1),
+        check=pythink_toolbox.validations.Check.less(1),
         value=0,
         should_pass=True,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.less_or_equal(1),
+        check=pythink_toolbox.validations.Check.less_or_equal(1),
         value=2,
         should_pass=False,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.less_or_equal(1),
+        check=pythink_toolbox.validations.Check.less_or_equal(1),
         value=1,
         should_pass=True,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.equals(1),
+        check=pythink_toolbox.validations.Check.equals(1),
         value=2,
         should_pass=False,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.equals(1),
+        check=pythink_toolbox.validations.Check.equals(1),
         value=1,
         should_pass=True,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.no_duplicates(),
+        check=pythink_toolbox.validations.Check.no_duplicates(),
         value=[1, 1],
         should_pass=False,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.no_duplicates(),
+        check=pythink_toolbox.validations.Check.no_duplicates(),
         value=[1, 2],
         should_pass=True,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.contains_type_only(int),
+        check=pythink_toolbox.validations.Check.contains_type_only(int),
         value=[1, "1"],
         should_pass=False,
     ),
     CheckScenario(
         desc="",
-        check=src.pythink_toolbox.validations.Check.contains_type_only(int),
+        check=pythink_toolbox.validations.Check.contains_type_only(int),
         value=[1, 2],
         should_pass=True,
     ),
 ]
 
 
-@src.pythink_toolbox.testing.parametrization.parametrize(CHECK_SCENARIOS)  # type: ignore[misc]
+@pythink_toolbox.testing.parametrization.parametrize(CHECK_SCENARIOS)  # type: ignore[misc]
 def test_Check(  # pylint: disable=invalid-name
     check: Callable[..., Any], value: Any, should_pass: bool
 ) -> None:
