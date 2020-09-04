@@ -68,6 +68,7 @@ def _create_user_activity_sessions(
 
 def _initialize_sessions_creation(activity_events: pd.Series) -> pd.DataFrame:
     logger.debug("activity_events: \n", activity_events)
+    assert not activity_events.empty
 
     return (
         activity_events.rename("end_time")
@@ -83,19 +84,23 @@ def _add_last_active_session(
     logger.debug("initialized_sessions: \n", initialized_sessions)
     logger.debug("last_active_session: \n", last_active_session)
 
-    if last_active_session:
-        return pd.concat([last_active_session, initialized_sessions])
+    assert not initialized_sessions.empty
+
+    if last_active_session is not None:
+        return pd.concat([last_active_session, initialized_sessions], ignore_index=True)
 
     return initialized_sessions
 
 
-def _create_active_sessions(sessions_with_last_active: pd.DataFrame,) -> pd.DataFrame:
+def _create_active_sessions(sessions_with_last_active: pd.DataFrame) -> pd.DataFrame:
     logger.debug("sessions_with_last_active: \n", sessions_with_last_active)
+
+    assert not sessions_with_last_active.empty
 
     return (
         sessions_with_last_active.assign(
             events_group_id=lambda df_: (
-                df_.start_time.sub(df_.start_time.shift(1))
+                df_.start_time.sub(df_.end_time.shift(1))
                 .gt(MAX_TIME_BETWEEN_EVENTS_FOR_CREATE_SESSION)
                 .cumsum()
             )
@@ -109,6 +114,8 @@ def _create_active_sessions(sessions_with_last_active: pd.DataFrame,) -> pd.Data
 
 def _fill_with_inactive_sessions(active_sessions: pd.DataFrame) -> pd.DataFrame:
     logger.debug("active_sessions: \n", active_sessions)
+
+    assert not active_sessions.empty
 
     if len(active_sessions) == 1:
         return active_sessions
@@ -129,14 +136,18 @@ def _fill_with_inactive_sessions(active_sessions: pd.DataFrame) -> pd.DataFrame:
 def _determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> pd.DataFrame:
     logger.debug("active_and_inactive_sessions: \n", active_and_inactive_sessions)
 
+    assert not active_and_inactive_sessions.empty
+
     return active_and_inactive_sessions.assign(
-        duration=lambda df: df["end_time"].sub(df["start_time"]),
-        is_focus=lambda df: df["is_active"] & df["duration"].ge(MIN_FOCUS_SESSION_TIME),
+        duration=lambda df: df.end_time.sub(df.start_time),
+        is_focus=lambda df: df.is_active & df.duration.ge(MIN_FOCUS_SESSION_TIME),
     )
 
 
 def _determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> pd.DataFrame:
     logger.debug("activity_sessions_with_focus: \n", activity_sessions_with_focus)
+
+    assert not activity_sessions_with_focus.empty
 
     return activity_sessions_with_focus.assign(
         is_break=lambda df: (
@@ -149,6 +160,8 @@ def _determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> pd.DataFr
 
 
 def _sessions_validation(df: pd.DataFrame) -> pd.DataFrame:
+
+    # FIXME replace with pandera
 
     if df.empty:
         raise ValidationError("Activity sessions are empty 👎")
@@ -196,6 +209,9 @@ def _sessions_validation(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _to_dict(activity_sessions: pd.DataFrame, user_id) -> List[ActivitySession]:
+
+    assert not activity_sessions.empty
+
     return activity_sessions.assign(user_id=user_id).to_dict(orient="records")
 
 
