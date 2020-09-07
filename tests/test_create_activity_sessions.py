@@ -4,6 +4,7 @@ from typing import Optional
 import hypothesis
 from hypothesis.extra.pandas import series, indexes, data_frames, column
 import pandas as pd
+import pandera.errors
 import pytest
 from pythink_toolbox.testing import parametrization
 
@@ -326,13 +327,255 @@ def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None
     assert len(output) == len(active_and_inactive_sessions)
 
 
-def test__determine_if_break():
-    assert False
+@hypothesis.given(
+    activity_sessions_with_focus=data_frames(
+        [
+            column("start_time", dtype="datetime64[ns]"),
+            column("end_time", dtype="datetime64[ns]"),
+            column("is_active", dtype=bool),
+        ]
+    )
+)
+def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame):
+
+    hypothesis.assume(not activity_sessions_with_focus.empty)
+    hypothesis.assume(
+        not any(
+            activity_sessions_with_focus.start_time
+            > activity_sessions_with_focus.end_time
+        )
+    )
+    hypothesis.assume(
+        not any(pd.Timestamp(0) > activity_sessions_with_focus.end_time)
+        and not any(activity_sessions_with_focus.end_time > datetime(2100, 1, 1))
+    )
+    hypothesis.assume(
+        not any(pd.Timestamp(0) > activity_sessions_with_focus.start_time)
+        and not any(activity_sessions_with_focus.start_time > datetime(2100, 1, 1))
+    )
+    activity_sessions_with_focus = activity_sessions_with_focus.assign(
+        duration=lambda df: df.end_time.sub(df.start_time),
+        is_focus=lambda df: df.is_active & df.duration.ge(pd.Timedelta(minutes=15)),
+    )
+
+    output = tested_module._determine_if_break(
+        activity_sessions_with_focus=activity_sessions_with_focus
+    )
+    assert isinstance(output, pd.DataFrame)
+
+    for row in output.itertuples():
+        try:
+            next_row = output.iloc[row.Index + 1]
+        except IndexError:
+            next_row = pd.Series({"is_focus": False})
+        if row.is_break:
+            assert (
+                output.iloc[row.Index - 1].is_focus
+                and next_row.is_focus
+                and (row.end_time - row.start_time) <= pd.Timedelta(minutes=30)
+                and not row.is_actvie
+            )
+        else:
+            assert (
+                not output.iloc[row.Index - 1].is_focus
+                or not next_row.is_focus
+                or not (row.end_time - row.start_time) <= pd.Timedelta(minutes=30)
+                or row.is_actvie
+            )
+
+    assert output.columns.to_list() == [
+        "start_time",
+        "end_time",
+        "is_active",
+        "is_focus",
+        "is_break",
+    ]
+
+    assert pd.api.types.is_datetime64_ns_dtype(output.start_time)
+    assert pd.api.types.is_datetime64_ns_dtype(output.end_time)
+    assert pd.api.types.is_bool_dtype(output.is_active)
+    assert pd.api.types.is_bool_dtype(output.is_focus)
+    assert pd.api.types.is_bool_dtype(output.is_break)
+
+    assert len(output) == len(activity_sessions_with_focus)
 
 
-def test__sessions_validation():
-    assert False
+class SessionsValidationScenario(parametrization.Scenario):
+    activity_sessions: pd.DataFrame
+    should_pass: bool
+
+
+TEST_SCENARIOS = [
+    SessionsValidationScenario(
+        desc="Everything good, this should pass.",
+        activity_sessions=pd.DataFrame(
+            columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
+            data=[
+                [datetime(2000, 1, 1), datetime(2000, 1, 1, 1), True, False, False],
+                [datetime(2000, 1, 1, 1), datetime(2000, 1, 2), False, False, False],
+                [datetime(2000, 1, 2), datetime(2000, 1, 2, 0, 15), True, True, False],
+                [
+                    datetime(2000, 1, 2, 0, 15),
+                    datetime(2000, 1, 2, 0, 45),
+                    False,
+                    False,
+                    True,
+                ],
+                [
+                    datetime(2000, 1, 2, 0, 45),
+                    datetime(2000, 1, 2, 1, 15),
+                    True,
+                    True,
+                    False,
+                ],
+            ],
+        ),
+        should_pass=True,
+    ),
+    SessionsValidationScenario(
+        desc="Empty DataFrame",
+        activity_sessions=pd.DataFrame(
+            columns=["start_time", "end_time", "is_active", "is_focus", "is_break",]
+        ),
+        should_pass=False,
+    ),
+    SessionsValidationScenario(
+        desc="First row/last row not active",
+        activity_sessions=pd.DataFrame(
+            {
+                "session_start": [datetime(2000, 1, 1)],
+                "session_end": [datetime(2000, 1, 2)],
+                "is_active": [False],
+                "is_focus": [False],
+                "is_break": [False],
+            }
+        ),
+        should_pass=False,
+    ),
+    SessionsValidationScenario(
+        desc="Duplicate session_start",
+        activity_sessions=pd.DataFrame(
+            columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
+            data=[
+                [datetime(2000, 1, 1), datetime(2000, 1, 1, 1), True, False, False],
+                [datetime(2000, 1, 1, 1), datetime(2000, 1, 2), False, False, False],
+                [datetime(2000, 1, 1), datetime(2000, 1, 1, 1), True, False, False],
+            ],
+        ),
+        should_pass=False,
+    ),
+    SessionsValidationScenario(
+        desc="Not sorted",
+        activity_sessions=pd.DataFrame(
+            columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
+            data=[
+                [datetime(2000, 1, 2), datetime(2000, 1, 2, 0, 15), True, True, False],
+                [datetime(2000, 1, 1, 1), datetime(2000, 1, 2), False, False, False],
+                [datetime(2000, 1, 1), datetime(2000, 1, 1, 1), True, False, False],
+            ],
+        ),
+        should_pass=False,
+    ),
+    SessionsValidationScenario(
+        desc="Wrong inactive sessions duration.",
+        activity_sessions=pd.DataFrame(
+            columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
+            data=[
+                [datetime(2000, 1, 1), datetime(2000, 1, 1, 1), True, False, False],
+                [
+                    datetime(2000, 1, 1, 1),
+                    datetime(2000, 1, 1, 0, 1),
+                    False,
+                    False,
+                    False,
+                ],
+                [
+                    datetime(2000, 1, 1, 0, 1),
+                    datetime(2000, 1, 2, 0, 15),
+                    True,
+                    True,
+                    False,
+                ],
+            ],
+        ),
+        should_pass=False,
+    ),
+    SessionsValidationScenario(
+        desc="Wrong break sessions duration.",
+        activity_sessions=pd.DataFrame(
+            columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
+            data=[
+                [datetime(2000, 1, 1), datetime(2000, 1, 1, 1), True, False, False],
+                [datetime(2000, 1, 1, 1), datetime(2000, 1, 2), False, False, True],
+                [datetime(2000, 1, 2), datetime(2000, 1, 2, 0, 15), True, True, False],
+            ],
+        ),
+        should_pass=False,
+    ),
+    SessionsValidationScenario(
+        desc="end_time != next start_time.",
+        activity_sessions=pd.DataFrame(
+            columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
+            data=[
+                [datetime(2000, 1, 1), datetime(2000, 1, 1, 1), True, False, False],
+                [datetime(2000, 1, 1, 2), datetime(2000, 1, 2), False, False, False],
+                [datetime(2000, 1, 2), datetime(2000, 1, 2, 0, 15), True, True, False],
+            ],
+        ),
+        should_pass=False,
+    ),
+]
+
+
+@parametrization.parametrize(TEST_SCENARIOS)
+def test__sessions_validation(
+    activity_sessions: pd.DataFrame, should_pass: bool
+) -> None:
+    if not should_pass:
+        with pytest.raises(pandera.errors.SchemaError):
+            tested_module._sessions_validation(activity_sessions=activity_sessions)
+    else:
+        tested_module._sessions_validation(activity_sessions=activity_sessions)
 
 
 def test__to_dict():
-    assert False
+    activity_sessions = pd.DataFrame(
+        columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
+        data=[
+            [datetime(2000, 1, 1), datetime(2000, 1, 1, 1), True, False, False],
+            [datetime(2000, 1, 1, 1), datetime(2000, 1, 2), False, False, False],
+            [datetime(2000, 1, 2), datetime(2000, 1, 2, 0, 15), True, True, False],
+        ],
+    )
+    user_id = 69
+
+    output = tested_module._to_dict(
+        activity_sessions=activity_sessions, user_id=user_id
+    )
+
+    assert output == [
+        {
+            "user_id": user_id,
+            "start_time": datetime(2000, 1, 1),
+            "end_time": datetime(2000, 1, 1, 1),
+            "is_active": True,
+            "is_focus": False,
+            "is_break": False,
+        },
+        {
+            "user_id": user_id,
+            "start_time": datetime(2000, 1, 1, 1),
+            "end_time": datetime(2000, 1, 2),
+            "is_active": False,
+            "is_focus": False,
+            "is_break": False,
+        },
+        {
+            "user_id": user_id,
+            "start_time": datetime(2000, 1, 2),
+            "end_time": datetime(2000, 1, 2, 0, 15),
+            "is_active": True,
+            "is_focus": True,
+            "is_break": False,
+        },
+    ]
