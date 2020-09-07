@@ -12,13 +12,36 @@ import chronos.create_activity_sessions as tested_module
 
 
 def test_main():
-    # FIXME
+    # FIXME done when MongoDB I/O operations done
     assert False
 
 
 def test__create_user_activity_sessions():
-    # FIXME
-    assert False
+    """Testing only happy path.
+    Precise testing is made in component functions tests."""
+
+    user_id = 1
+    activity_events = pd.Series([datetime(2000, 1, 1, 0, 2)], name="client_time")
+    last_active_session = pd.DataFrame(
+        {"start_time": [datetime(2000, 1, 1)], "end_time": [datetime(2000, 1, 1, 0, 1)]}
+    )
+
+    output = tested_module._create_user_activity_sessions(
+        user_id=user_id,
+        activity_events=activity_events,
+        last_active_session=last_active_session,
+    )
+
+    assert output == [
+        {
+            "user_id": 1,
+            "start_time": datetime(2000, 1, 1),
+            "end_time": datetime(2000, 1, 1, 0, 2),
+            "is_active": True,
+            "is_focus": False,
+            "is_break": False,
+        }
+    ]
 
 
 @hypothesis.given(

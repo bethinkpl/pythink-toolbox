@@ -5,4 +5,4 @@ try:
 except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 
-# FIXME version to cli.py
+# FIXME version to cli.py when LACE-446 merged

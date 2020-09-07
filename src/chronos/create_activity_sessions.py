@@ -242,7 +242,7 @@ def _read_last_active_session_for_user(user_id: int) -> Optional[pd.DataFrame]:
     # FIXME pop last active session from mongo
     return pd.DataFrame(
         {
-            "start_time": pd.Timestamp("2018-12-14T10:40:19.691Z"),
-            "end_time": pd.Timestamp("2018-12-14T10:45:28.421Z"),
+            "start_time": [pd.Timestamp("2018-12-14T10:40:19.691Z")],
+            "end_time": [pd.Timestamp("2018-12-14T10:45:28.421Z")],
         }
     )
