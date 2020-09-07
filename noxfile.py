@@ -2,6 +2,8 @@ from typing import Any
 
 import nox
 
+LOCATIONS = ["src", "tests", "noxfile.py", "cli.py"]
+
 nox.options.sessions = ["pre_commit", "tests", "pylint", "mypy"]
 
 
@@ -24,7 +26,12 @@ def pre_commit(session: Any) -> None:
     """
     session.run("poetry", "run", "pre-commit", "install", external=True)
     session.run(
-        "poetry", "run", "pre-commit", "run", "--all-files", external=True,
+        "poetry",
+        "run",
+        "pre-commit",
+        "run",
+        "--all-files",
+        external=True,
     )
 
 
@@ -47,7 +54,7 @@ def pylint(session: Any) -> None:
     Usage:
         `poetry run nox -s pylint [-- path]`
     """
-    args = session.posargs or ["src", "tests", "noxfile.py", "cli.py"]
+    args = session.posargs or LOCATIONS
     session.run("poetry", "run", "pylint", *args, external=True)
 
 
@@ -58,7 +65,7 @@ def mypy(session: Any) -> None:
     Usage:
         `poetry run nox -s mypy [-- path]`
     """
-    args = session.posargs or ["."]
+    args = session.posargs or LOCATIONS
     session.run(
         "poetry",
         "run",

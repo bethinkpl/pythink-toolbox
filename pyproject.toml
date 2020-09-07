@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "python-toolbox"
+name = "pythink-toolbox"
 version = "0.1.0"
 description = "TODO"
 authors = []
-packages = [ { include = "src" } ]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+pandera = "^0.4.4"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
@@ -21,10 +21,13 @@ pre-commit = "^2.6.0"
 click = "^7.1.2"
 
 [tool.poetry.scripts]
-python-toolbox = 'cli:main'
+cli = 'cli:main'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+
+[tool.coverage.paths]
+source = ["src"]
 
 [tool.coverage.run]
 branch = true
