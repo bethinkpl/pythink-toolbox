@@ -4,12 +4,13 @@ from typing import List, TypedDict, Optional
 import logging
 
 import pandas as pd
+import pandera
 
 import chronos.activity_events
 
-MAX_TIME_BETWEEN_EVENTS_FOR_CREATE_SESSION = pd.Timedelta(minutes=5)
-MIN_FOCUS_SESSION_TIME = pd.Timedelta(minutes=15)
-MAX_BREAK_TIME = pd.Timedelta(minutes=30)
+MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION = pd.Timedelta(minutes=5)
+MIN_FOCUS_DURATION = pd.Timedelta(minutes=15)
+MAX_BREAK_DURATION = pd.Timedelta(minutes=30)
 
 logger = logging.getLogger("Create Activity Sessions")
 
@@ -38,7 +39,11 @@ def main(start_time: datetime, end_time: datetime) -> List[ActivitySession]:
     )
 
     user_activity_sessions = (
-        _create_user_activity_sessions(user_id=user_id, activity_events=activity_events)
+        _create_user_activity_sessions(
+            user_id=user_id,
+            activity_events=activity_events,
+            last_active_session=_read_last_active_session_for_user(user_id),
+        )
         for user_id, activity_events in users_activity_events_groups
     )
 
@@ -46,17 +51,16 @@ def main(start_time: datetime, end_time: datetime) -> List[ActivitySession]:
 
 
 def _create_user_activity_sessions(
-    user_id: int, activity_events: pd.Series
+    user_id: int,
+    activity_events: pd.Series,
+    last_active_session: Optional[pd.DataFrame],
 ) -> List[ActivitySession]:
 
     logger.info("Creating activity_sessions for user %i.", user_id)
 
     return (
         activity_events.pipe(_initialize_sessions_creation)
-        .pipe(
-            _add_last_active_session,
-            last_active_session=_read_last_active_session_for_user(user_id),
-        )
+        .pipe(_add_last_active_session, last_active_session=last_active_session)
         .pipe(_create_active_sessions,)
         .pipe(_fill_with_inactive_sessions)
         .pipe(_determine_if_focus)
@@ -101,7 +105,7 @@ def _create_active_sessions(sessions_with_last_active: pd.DataFrame) -> pd.DataF
         sessions_with_last_active.assign(
             events_group_id=lambda df_: (
                 df_.start_time.sub(df_.end_time.shift(1))
-                .gt(MAX_TIME_BETWEEN_EVENTS_FOR_CREATE_SESSION)
+                .gt(MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION)
                 .cumsum()
             )
         )
@@ -140,7 +144,7 @@ def _determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> pd.DataFr
 
     return active_and_inactive_sessions.assign(
         duration=lambda df: df.end_time.sub(df.start_time),
-        is_focus=lambda df: df.is_active & df.duration.ge(MIN_FOCUS_SESSION_TIME),
+        is_focus=lambda df: df.is_active & df.duration.ge(MIN_FOCUS_DURATION),
     )
 
 
@@ -152,67 +156,85 @@ def _determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> pd.DataFr
     return activity_sessions_with_focus.assign(
         is_break=lambda df: (
             ~df.is_active
-            & df.duration.map(lambda duration: duration < MAX_BREAK_TIME)
+            & df.duration.map(lambda duration: duration <= MAX_BREAK_DURATION)
             & df.is_focus.shift(1)
             & df.is_focus.shift(-1)
         )
     ).drop("duration", axis="columns")
 
 
-def _sessions_validation(df: pd.DataFrame) -> pd.DataFrame:
+def _sessions_validation(activity_sessions: pd.DataFrame) -> pd.DataFrame:
 
-    # FIXME replace with pandera
-
-    if df.empty:
-        raise ValidationError("Activity sessions are empty 👎")
-
-    if not df.columns.to_list() == [
-        "start_time",
-        "end_time",
-        "is_active",
-        "is_focus",
-        "is_break",
-    ]:
-        raise ValidationError("Activity sessions has wrong columns 👎")
-
-    if not df.iloc[0].is_active:
-        raise ValidationError("Activity sessions' first session is not active 👎")
-
-    if not df.iloc[-1].is_active:
-        raise ValidationError("Activity sessions' last session is not active 👎")
-
-    if not df.equals(df.drop_duplicates(subset="session_start")):
-        logger.debug("Duplicated rows:\n", df[df.duplicated(keep=False)])
-        raise ValidationError("Duplicates appeared in activity sessions 👎")
-
-    if not df.equals(df.sort_values(["start_time", "end_time"])):
-        raise ValidationError("Activity sessions are not sorted 👎")
-
-    inactives_that_lasts_too_short = (
-        df.query("is_active == False")
-        .assign(
-            duration=lambda df_: df_.end_time.sub(df_.start_time),
-            lasts_less_than_should=lambda df_: df_.duration
-            < MAX_TIME_BETWEEN_EVENTS_FOR_CREATE_SESSION,
-        )
-        .query("lasts_less_than_should == True")
+    schema = pandera.DataFrameSchema(
+        {
+            "start_time": pandera.Column(
+                pandera.DateTime,
+                checks=pandera.Check(lambda s: all(s == s.sort_values())),
+                allow_duplicates=False,
+            ),
+            "end_time": pandera.Column(
+                pandera.DateTime,
+                checks=pandera.Check(lambda s: all(s == s.sort_values())),
+                allow_duplicates=False,
+            ),
+            "is_active": pandera.Column(
+                pandera.Bool,
+                checks=[pandera.Check(lambda s: s.iloc[0] and s.iloc[-1])],
+            ),
+            "is_focus": pandera.Column(pandera.Bool),
+            "is_break": pandera.Column(pandera.Bool),
+        },
+        checks=[
+            pandera.Check(lambda df_: not df_.empty),
+            pandera.Check(
+                lambda df_: all(
+                    df_.query("is_active == False")
+                    .end_time.sub(df_.start_time)
+                    .dropna()
+                    > MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION
+                )
+                or (len(df_.query("is_active == False")) == 0)
+            ),
+            pandera.Check(
+                lambda df_: all(
+                    df_.query("is_break == True").end_time.sub(df_.start_time).dropna()
+                    <= MAX_BREAK_DURATION
+                )
+                or (len(df_.query("is_break == True")) == 0)
+            ),
+            pandera.Check(lambda df_: df_.end_time > df_.start_time),
+            pandera.Check(
+                lambda df_: df_.end_time.eq(
+                    df_.start_time.shift(-1), fill_value=df_.end_time.iloc[-1]
+                )
+            ),
+        ],
+        index=pandera.Index(
+            pandera.Int64,
+            checks=pandera.Check.greater_than_or_equal_to(0),
+            allow_duplicates=False,
+        ),
+        strict=True,
     )
-    if not inactives_that_lasts_too_short.empty:
-        logger.debug(
-            "inactives_that_lasts_too_short:\n", inactives_that_lasts_too_short
-        )
-        raise ValidationError("Inactive sessions lasts less than should👎")
 
-    logger.debug("Activity sessions validated 😎")
+    schema.validate(activity_sessions)
 
-    return df
+    return activity_sessions
 
 
-def _to_dict(activity_sessions: pd.DataFrame, user_id) -> List[ActivitySession]:
+def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySession]:
 
     assert not activity_sessions.empty
 
-    return activity_sessions.assign(user_id=user_id).to_dict(orient="records")
+    records = activity_sessions.assign(user_id=user_id)[
+        ["user_id", "start_time", "end_time", "is_active", "is_focus", "is_break"]
+    ].to_dict(orient="records")
+
+    for record in records:
+        record["start_time"] = record["start_time"].to_pydatetime()
+        record["end_time"] = record["end_time"].to_pydatetime()
+
+    return records
 
 
 def _read_last_active_session_for_user(user_id: int) -> Optional[pd.DataFrame]:
@@ -224,7 +246,3 @@ def _read_last_active_session_for_user(user_id: int) -> Optional[pd.DataFrame]:
             "end_time": pd.Timestamp("2018-12-14T10:45:28.421Z"),
         }
     )
-
-
-class ValidationError(AssertionError):
-    """ """  # FIXME fill & move
