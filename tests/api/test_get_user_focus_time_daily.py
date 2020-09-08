@@ -13,6 +13,9 @@ USER_ID = 299
 
 @pytest.mark.skip(reason="https://bethink.atlassian.net/browse/LACE-465")
 def test_get_user_focus_time_daily():
+    """
+    Covers src.api.user_focus_time_daily.get_user_focus_time_daily()
+    """
     response = requests.post(
         get_url(f"focus_time_daily/{USER_ID}"),
         headers=HEADERS,

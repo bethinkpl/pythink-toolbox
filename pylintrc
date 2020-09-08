@@ -8,6 +8,7 @@ notes=FIXME
 
 [SIMILARITIES]
 min-similarity-lines=4
+ignore-imports=yes
 
 [FORMAT]
 good-names=df, x, y, i, ci
