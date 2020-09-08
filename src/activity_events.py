@@ -7,25 +7,28 @@ from datetime import datetime
 
 import dotenv
 import datatosk
-import pandas as pd
+import pandas as pd  # type: ignore[import]
 
 
 ENV_PATH = Path(".") / ".env"
 dotenv.load_dotenv(dotenv_path=ENV_PATH)
 
-BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", None)
+BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", "")
 
 
 def read(
     start_date: Union[datetime, str], end_date: Union[datetime, str]
 ) -> pd.DataFrame:
+    """
+    Read activity events from bigquery
+    """
 
     bigquery_source = datatosk.gbq("prod")
 
     query = f"""
         SELECT user_id, DATETIME(client_time) as client_time
         FROM `{BIGQUERY_PLATFORM_DATASET_ID}.user_activity_events`
-        WHERE client_time BETWEEN @start_date AND @end_date 
+        WHERE client_time BETWEEN @start_date AND @end_date
         GROUP BY user_id, client_time
         ORDER BY user_id, client_time;
         """
@@ -35,10 +38,13 @@ def read(
         "end_date": end_date,
     }
 
-    return bigquery_source.read(query=query, params=params)
+    # pylint: disable=fixme
+    # FIXME type should be fixed in the next datatosk version, remove ignore after that.
+    return bigquery_source.read(query=query, params=params)  # type: ignore[arg-type]
 
 
 if __name__ == "__main__":
+    # pylint: disable=fixme
     # FIXME left for debugging, delete before releasing
     start = datetime.now()
     pyk = read("2020-08-24 14:00:00", "2020-08-24 15:00:00")
