@@ -7,18 +7,21 @@ from datetime import datetime
 
 import dotenv
 import datatosk
-import pandas as pd
+import pandas as pd  # type: ignore[import]
 
 
 ENV_PATH = Path("..") / ".env"
 dotenv.load_dotenv(dotenv_path=ENV_PATH)
 
-BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", None)
+BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", "")
 
 
 def read(
     start_time: Union[datetime, str], end_time: Union[datetime, str]
 ) -> pd.DataFrame:
+    """
+    Read activity events from bigquery
+    """
 
     bigquery_source = datatosk.gbq("prod")
 
@@ -35,4 +38,6 @@ def read(
         "end_time": end_time,
     }
 
-    return bigquery_source.read(query=query, params=params)
+    # pylint: disable=fixme
+    # FIXME type should be fixed in the next datatosk version, remove ignore after that.
+    return bigquery_source.read(query=query, params=params)  # type: ignore[arg-type]
