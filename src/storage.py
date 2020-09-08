@@ -13,44 +13,27 @@ mongo_source = datatosk.mongodb("chronos")
 
 
 def read_learning_time(user_ids: List) -> List:
-    pipeline = [
-        {
-            "$match": {
-                "$or": [{"is_active": {"$eq": True}}, {"is_break": {"$eq": True}}]
-            }
-        },
-        {"$match": {"user_id": {"$in": user_ids}}},
-        {
-            "$group": {
-                "_id": "$user_id",
-                "time_ms": {"$sum": {"$subtract": ["$session_end", "$session_start"]}},
-            }
-        },
-        {"$project": {"time_ms": 1, "time_h": {"$divide": ["$time_ms", 3600000]}}},
-    ]
-
     return mongo_source.read.to_list(
-        collection="activity_sessions", command="aggregate", pipeline=pipeline
+        collection="learning_time_daily_view",
+        result_filter={"user_id": {"$in": user_ids}},
     )
 
 
 def write_activity_sessions(activity_sessions: pd.DataFrame) -> None:
-    mongo_source.write(
-        collection="activity_sessions", command="insert_many", data=activity_sessions
-    )
+    mongo_source.write(collection="activity_sessions", data=activity_sessions)
     log.info(f"Wrote {len(activity_sessions)} activity sessions to storage.")
 
 
 def read_activity_sessions_by_user(user_id: int) -> pd.DataFrame:
     return mongo_source.read.to_pandas(
-        collection="activity_sessions", command="find", query={"user_id": user_id},
+        collection="activity_sessions", result_filter={"user_id": user_id},
     )
 
 
 if __name__ == "__main__":
     # FIXME Debug code, remove in production version.
     # Learning time reading example
-    print(read_learning_time([1]))
+    print(f"read_learning_time: {read_learning_time([1])}")
 
     # activity sessions writing example
     write_activity_sessions(
@@ -85,4 +68,6 @@ if __name__ == "__main__":
     )
 
     # Retrieving sessions by user ID
-    print(read_activity_sessions_by_user(user_id=123))
+    print(
+        f"read_activity_sessions_by_user:\n{read_activity_sessions_by_user(user_id=123)}"
+    )
