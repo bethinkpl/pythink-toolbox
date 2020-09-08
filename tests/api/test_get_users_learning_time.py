@@ -14,8 +14,8 @@ TEST_DATA = {
 }
 
 
-@pytest.mark.skip(reason="https://bethink.atlassian.net/browse/LACE-465")
-def test_get_users_learning_time():
+@pytest.mark.skip(reason="https://bethink.atlassian.net/browse/LACE-465")  # type: ignore
+def test_get_users_learning_time() -> None:
     """
     Covers src.api.users_learning_time_daily.get_users_learning_time()
     """

@@ -1,6 +1,6 @@
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
-from flask import request, Blueprint
+from flask import Blueprint, request
 
 from src.api.user_learning_time import get_learning_time
 
@@ -8,7 +8,7 @@ users_learning_bp = Blueprint("users_learning", __name__)
 
 
 @users_learning_bp.route("/learning_time", methods=["POST"])
-def get_users_learning_time() -> Tuple[dict, int]:
+def get_users_learning_time() -> Tuple[Dict[Any, Any], int]:
     """
     API end-point | Provides cumulative learning time for a group of users.
     """
