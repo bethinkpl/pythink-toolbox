@@ -29,4 +29,4 @@ def get_user_learning_time(user_id: int) -> Tuple[Dict[Any, Any], int]:
     user_learning_time = get_learning_time(
         user_id, body["start_date"], body["end_date"]
     )
-    return {user_id: user_learning_time}, 200
+    return {user_id: user_learning_time}, STATUS_OK
