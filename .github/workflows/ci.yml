@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install poetry
+      uses: dschep/install-poetry-action@v1.3
+      with:
+        version: 1.0.9
+        create_virtualenvs: install
+
+    - name: Install dependiencies
+      run: poetry install
+
+    - name: Run Nox-based CI
+      run: poetry run nox
