@@ -1,4 +1,6 @@
 import json
+
+import pytest
 import requests
 
 from tests.api.consts.api_tests import HEADERS, STATUS_OK
@@ -12,6 +14,7 @@ TEST_DATA = {
 }
 
 
+@pytest.mark.skip(reason="https://bethink.atlassian.net/browse/LACE-465")
 def test_get_users_learning_time():
     response = requests.post(
         get_url("learning_time"), headers=HEADERS, data=json.dumps(TEST_DATA)

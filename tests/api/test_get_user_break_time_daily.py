@@ -1,4 +1,6 @@
 import json
+
+import pytest
 import requests
 
 from tests.api.consts.api_tests import HEADERS, STATUS_OK
@@ -9,6 +11,7 @@ TEST_DATA = {"start_date": 15934399493, "end_date": 15934399490}
 USER_ID = 299
 
 
+@pytest.mark.skip(reason="https://bethink.atlassian.net/browse/LACE-465")
 def test_get_user_break_time_daily():
     response = requests.post(
         get_url(f"break_time_daily/{USER_ID}"),
