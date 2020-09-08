@@ -165,24 +165,18 @@ toml = ["toml"]
 
 [[package]]
 category = "main"
-description = ""
-develop = true
+description = "Python library for fetching data from different sources"
 name = "datatosk"
 optional = false
-python-versions = "^3.8"
+python-versions = ">=3.8,<4.0"
 version = "0.3.0"
 
 [package.dependencies]
-google-cloud-bigquery = "^1.24.0"
-mysqlclient = "^1.4.6"
-pandas = "^1.0.1"
-pandas-gbq = "^0.13.1"
-sqlalchemy = "^1.3.13"
-
-[package.source]
-reference = ""
-type = "directory"
-url = "../datatosk"
+google-cloud-bigquery = ">=1.24.0,<2.0.0"
+mysqlclient = ">=1.4.6,<2.0.0"
+pandas = ">=1.0.1,<2.0.0"
+pandas-gbq = ">=0.13.1,<0.14.0"
+sqlalchemy = ">=1.3.13,<2.0.0"
 
 [[package]]
 category = "dev"
@@ -803,7 +797,6 @@ pandera = "^0.4.4"
 reference = "22a9513446e0f2688341fd5c3ae75371935e420a"
 type = "git"
 url = "git@github.com:bethinkpl/pythink-toolbox.git"
-
 [[package]]
 category = "main"
 description = "Extensions to the standard Python datetime module"
@@ -1030,7 +1023,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "97ce9de2c23a73be14531c5c59f447616a545b3d3077e7699f6fa1dd72739d8f"
+content-hash = "3c4448812c87c74d45de6de794c9bc23f5947a28a43f73df338306bd478109ae"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1152,7 +1145,10 @@ coverage = [
     {file = "coverage-5.2.1-cp39-cp39-win_amd64.whl", hash = "sha256:b8f58c7db64d8f27078cbf2a4391af6aa4e4767cc08b37555c4ae064b8558d9b"},
     {file = "coverage-5.2.1.tar.gz", hash = "sha256:a34cb28e0747ea15e82d13e14de606747e9e484fb28d63c999483f5d5188e89b"},
 ]
-datatosk = []
+datatosk = [
+    {file = "datatosk-0.3.0-py3-none-any.whl", hash = "sha256:e039215fb644fb53c9da4ed7c5158dd4f1aecab50e12f65ce35867e04a83d22a"},
+    {file = "datatosk-0.3.0.tar.gz", hash = "sha256:bd6168e6a2482d3b2512a3f8bcd013670ac0bce40d9ed8a9cb588b9f3e13da87"},
+]
 distlib = [
     {file = "distlib-0.3.1-py2.py3-none-any.whl", hash = "sha256:8c09de2c67b3e7deef7184574fc060ab8a793e7adbb183d942c389c8b13c52fb"},
     {file = "distlib-0.3.1.zip", hash = "sha256:edf6116872c863e1aa9d5bb7cb5e05a022c519a4594dc703843343a9ddd9bff1"},

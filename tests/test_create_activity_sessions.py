@@ -1,22 +1,25 @@
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=protected-access
 from datetime import datetime
 from typing import Optional
 
 import hypothesis
 from hypothesis.extra.pandas import series, indexes, data_frames, column
-import pandas as pd
-import pandera.errors
+import pandas as pd  # type: ignore[import]
+import pandera.errors  # type: ignore[import]
 import pytest
 from pythink_toolbox.testing import parametrization
 
 import chronos.create_activity_sessions as tested_module
 
 
-def test_main():
-    # FIXME done when MongoDB I/O operations done
+@pytest.mark.skip(reason="implement when MongoDB I/O operations done")  # type: ignore[misc]
+def test_main() -> None:
     assert False
 
 
-def test__create_user_activity_sessions():
+def test__create_user_activity_sessions() -> None:
     """Testing only happy path.
     Precise testing is made in component functions tests."""
 
@@ -123,13 +126,14 @@ TEST_SCENARIOS = [
 ]
 
 
-@parametrization.parametrize(TEST_SCENARIOS)
+@parametrization.parametrize(TEST_SCENARIOS)  # type: ignore[misc]
 def test__add_last_active_session(
     initialized_sessions: pd.DataFrame,
     last_active_session: Optional[pd.DataFrame],
     raise_assertion: bool,
     expected_output: pd.DataFrame,
-):
+) -> None:
+
     if raise_assertion:
         with pytest.raises(AssertionError):
             tested_module._add_last_active_session(
@@ -152,13 +156,13 @@ class CreateActiveSessionsScenario(parametrization.Scenario):
 
 
 TEST_SCENARIOS = [
-    CreateActiveSessionsScenario(
+    CreateActiveSessionsScenario(  # type: ignore[list-item]
         desc="sessions_with_last_active empty -> raise error",
         sessions_with_last_active=pd.DataFrame(),
         raise_assertion=True,
         expected_output=pd.DataFrame(),  # value not relevant
     ),
-    CreateActiveSessionsScenario(
+    CreateActiveSessionsScenario(  # type: ignore[list-item]
         desc="only one record in sessions_with_last_active"
         " -> return the the same frame with additional is_active column",
         sessions_with_last_active=pd.DataFrame(
@@ -171,7 +175,7 @@ TEST_SCENARIOS = [
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1), True]],
         ),
     ),
-    CreateActiveSessionsScenario(
+    CreateActiveSessionsScenario(  # type: ignore[list-item]
         desc="Checking how time difference between records influence sessions creation.",
         sessions_with_last_active=pd.DataFrame(
             columns=["start_time", "end_time"],
@@ -202,7 +206,7 @@ TEST_SCENARIOS = [
 ]
 
 
-@parametrization.parametrize(TEST_SCENARIOS)
+@parametrization.parametrize(TEST_SCENARIOS)  # type: ignore[misc]
 def test__create_active_sessions(
     sessions_with_last_active: pd.DataFrame,
     raise_assertion: bool,
@@ -229,13 +233,13 @@ class FillWithInactiveSessionsScenario(parametrization.Scenario):
 
 
 TEST_SCENARIOS = [
-    FillWithInactiveSessionsScenario(
+    FillWithInactiveSessionsScenario(  # type: ignore[list-item]
         desc="active_sessions is empty -> raise error",
         active_sessions=pd.DataFrame(),
         raise_assertion=True,
         expected_output=pd.DataFrame(),  # value not relevant
     ),
-    FillWithInactiveSessionsScenario(
+    FillWithInactiveSessionsScenario(  # type: ignore[list-item]
         desc="only one active session -> return the same",
         active_sessions=pd.DataFrame(
             columns=["start_time", "end_time", "is_active"],
@@ -247,7 +251,7 @@ TEST_SCENARIOS = [
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1), True]],
         ),
     ),
-    FillWithInactiveSessionsScenario(
+    FillWithInactiveSessionsScenario(  # type: ignore[list-item]
         desc="three active sessions -> return two inactive sessions in between",
         active_sessions=pd.DataFrame(
             columns=["start_time", "end_time", "is_active"],
@@ -272,10 +276,11 @@ TEST_SCENARIOS = [
 ]
 
 
-@parametrization.parametrize(TEST_SCENARIOS)
+@parametrization.parametrize(TEST_SCENARIOS)  # type: ignore[misc]
 def test__fill_with_inactive_sessions(
     active_sessions: pd.DataFrame, raise_assertion: bool, expected_output: pd.DataFrame
 ) -> None:
+
     if raise_assertion:
         with pytest.raises(AssertionError):
             tested_module._fill_with_inactive_sessions(active_sessions=active_sessions)
@@ -359,7 +364,7 @@ def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None
         ]
     )
 )
-def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame):
+def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None:
 
     hypothesis.assume(not activity_sessions_with_focus.empty)
     hypothesis.assume(
@@ -376,6 +381,7 @@ def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame):
         not any(pd.Timestamp(0) > activity_sessions_with_focus.start_time)
         and not any(activity_sessions_with_focus.start_time > datetime(2100, 1, 1))
     )
+
     activity_sessions_with_focus = activity_sessions_with_focus.assign(
         duration=lambda df: df.end_time.sub(df.start_time),
         is_focus=lambda df: df.is_active & df.duration.ge(pd.Timedelta(minutes=15)),
@@ -396,14 +402,14 @@ def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame):
                 output.iloc[row.Index - 1].is_focus
                 and next_row.is_focus
                 and (row.end_time - row.start_time) <= pd.Timedelta(minutes=30)
-                and not row.is_actvie
+                and not row.is_active
             )
         else:
             assert (
                 not output.iloc[row.Index - 1].is_focus
                 or not next_row.is_focus
                 or not (row.end_time - row.start_time) <= pd.Timedelta(minutes=30)
-                or row.is_actvie
+                or row.is_active
             )
 
     assert output.columns.to_list() == [
@@ -429,7 +435,7 @@ class SessionsValidationScenario(parametrization.Scenario):
 
 
 TEST_SCENARIOS = [
-    SessionsValidationScenario(
+    SessionsValidationScenario(  # type: ignore[list-item]
         desc="Everything good, this should pass.",
         activity_sessions=pd.DataFrame(
             columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
@@ -455,14 +461,20 @@ TEST_SCENARIOS = [
         ),
         should_pass=True,
     ),
-    SessionsValidationScenario(
+    SessionsValidationScenario(  # type: ignore[list-item]
         desc="Empty DataFrame",
         activity_sessions=pd.DataFrame(
-            columns=["start_time", "end_time", "is_active", "is_focus", "is_break",]
+            columns=[
+                "start_time",
+                "end_time",
+                "is_active",
+                "is_focus",
+                "is_break",
+            ]
         ),
         should_pass=False,
     ),
-    SessionsValidationScenario(
+    SessionsValidationScenario(  # type: ignore[list-item]
         desc="First row/last row not active",
         activity_sessions=pd.DataFrame(
             {
@@ -475,7 +487,7 @@ TEST_SCENARIOS = [
         ),
         should_pass=False,
     ),
-    SessionsValidationScenario(
+    SessionsValidationScenario(  # type: ignore[list-item]
         desc="Duplicate session_start",
         activity_sessions=pd.DataFrame(
             columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
@@ -487,7 +499,7 @@ TEST_SCENARIOS = [
         ),
         should_pass=False,
     ),
-    SessionsValidationScenario(
+    SessionsValidationScenario(  # type: ignore[list-item]
         desc="Not sorted",
         activity_sessions=pd.DataFrame(
             columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
@@ -499,7 +511,7 @@ TEST_SCENARIOS = [
         ),
         should_pass=False,
     ),
-    SessionsValidationScenario(
+    SessionsValidationScenario(  # type: ignore[list-item]
         desc="Wrong inactive sessions duration.",
         activity_sessions=pd.DataFrame(
             columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
@@ -523,7 +535,7 @@ TEST_SCENARIOS = [
         ),
         should_pass=False,
     ),
-    SessionsValidationScenario(
+    SessionsValidationScenario(  # type: ignore[list-item]
         desc="Wrong break sessions duration.",
         activity_sessions=pd.DataFrame(
             columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
@@ -535,7 +547,7 @@ TEST_SCENARIOS = [
         ),
         should_pass=False,
     ),
-    SessionsValidationScenario(
+    SessionsValidationScenario(  # type: ignore[list-item]
         desc="end_time != next start_time.",
         activity_sessions=pd.DataFrame(
             columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
@@ -550,7 +562,7 @@ TEST_SCENARIOS = [
 ]
 
 
-@parametrization.parametrize(TEST_SCENARIOS)
+@parametrization.parametrize(TEST_SCENARIOS)  # type: ignore[misc]
 def test__sessions_validation(
     activity_sessions: pd.DataFrame, should_pass: bool
 ) -> None:
@@ -561,7 +573,7 @@ def test__sessions_validation(
         tested_module._sessions_validation(activity_sessions=activity_sessions)
 
 
-def test__to_dict():
+def test__to_dict() -> None:
     activity_sessions = pd.DataFrame(
         columns=["start_time", "end_time", "is_active", "is_focus", "is_break"],
         data=[

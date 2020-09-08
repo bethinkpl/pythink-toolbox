@@ -29,6 +29,27 @@ mypy = "^0.782"
 nox = "^2020.5.24"
 pre-commit = "^2.6.0"
 
+[tool.poetry.scripts]
+cli = 'cli:main'
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+
+[tool.coverage.paths]
+source = ["src"]
+
+[tool.coverage.run]
+branch = true
+data_file = "coverage/.coverage"
+source = ["src"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 57 #TODO cover more code
+
+[tool.coverage.html]
+directory = "coverage/html_report"
+
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"

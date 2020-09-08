@@ -3,8 +3,8 @@ from datetime import datetime
 from typing import List, TypedDict, Optional
 import logging
 
-import pandas as pd
-import pandera
+import pandas as pd  # type: ignore[import]
+import pandera  # type: ignore[import]
 
 import chronos.activity_events
 
@@ -16,6 +16,8 @@ logger = logging.getLogger("Create Activity Sessions")
 
 
 class ActivitySession(TypedDict):
+    """Activity sessions schema."""
+
     user_id: int
     start_time: datetime
     end_time: datetime
@@ -58,10 +60,12 @@ def _create_user_activity_sessions(
 
     logger.info("Creating activity_sessions for user %i.", user_id)
 
-    return (
+    activity_sessions: List[ActivitySession] = (
         activity_events.pipe(_initialize_sessions_creation)
         .pipe(_add_last_active_session, last_active_session=last_active_session)
-        .pipe(_create_active_sessions,)
+        .pipe(
+            _create_active_sessions,
+        )
         .pipe(_fill_with_inactive_sessions)
         .pipe(_determine_if_focus)
         .pipe(_determine_if_break)
@@ -69,9 +73,13 @@ def _create_user_activity_sessions(
         .pipe(_to_dict, user_id=user_id)
     )
 
+    return activity_sessions
+
 
 def _initialize_sessions_creation(activity_events: pd.Series) -> pd.DataFrame:
-    logger.debug("activity_events: \n", activity_events)
+    logger.debug(  # pylint: disable=logging-too-many-args
+        "activity_events: \n", activity_events
+    )
     assert not activity_events.empty
 
     return (
@@ -85,8 +93,12 @@ def _initialize_sessions_creation(activity_events: pd.Series) -> pd.DataFrame:
 def _add_last_active_session(
     initialized_sessions: pd.DataFrame, last_active_session: Optional[pd.DataFrame]
 ) -> pd.DataFrame:
-    logger.debug("initialized_sessions: \n", initialized_sessions)
-    logger.debug("last_active_session: \n", last_active_session)
+    logger.debug(  # pylint: disable=logging-too-many-args
+        "initialized_sessions: \n", initialized_sessions
+    )
+    logger.debug(  # pylint: disable=logging-too-many-args
+        "last_active_session: \n", last_active_session
+    )
 
     assert not initialized_sessions.empty
 
@@ -97,7 +109,9 @@ def _add_last_active_session(
 
 
 def _create_active_sessions(sessions_with_last_active: pd.DataFrame) -> pd.DataFrame:
-    logger.debug("sessions_with_last_active: \n", sessions_with_last_active)
+    logger.debug(  # pylint: disable=logging-too-many-args
+        "sessions_with_last_active: \n", sessions_with_last_active
+    )
 
     assert not sessions_with_last_active.empty
 
@@ -117,7 +131,9 @@ def _create_active_sessions(sessions_with_last_active: pd.DataFrame) -> pd.DataF
 
 
 def _fill_with_inactive_sessions(active_sessions: pd.DataFrame) -> pd.DataFrame:
-    logger.debug("active_sessions: \n", active_sessions)
+    logger.debug(  # pylint: disable=logging-too-many-args
+        "active_sessions: \n", active_sessions
+    )
 
     assert not active_sessions.empty
 
@@ -138,7 +154,9 @@ def _fill_with_inactive_sessions(active_sessions: pd.DataFrame) -> pd.DataFrame:
 
 
 def _determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> pd.DataFrame:
-    logger.debug("active_and_inactive_sessions: \n", active_and_inactive_sessions)
+    logger.debug(  # pylint: disable=logging-too-many-args
+        "active_and_inactive_sessions: \n", active_and_inactive_sessions
+    )
 
     assert not active_and_inactive_sessions.empty
 
@@ -149,7 +167,9 @@ def _determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> pd.DataFr
 
 
 def _determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> pd.DataFrame:
-    logger.debug("activity_sessions_with_focus: \n", activity_sessions_with_focus)
+    logger.debug(  # pylint: disable=logging-too-many-args
+        "activity_sessions_with_focus: \n", activity_sessions_with_focus
+    )
 
     assert not activity_sessions_with_focus.empty
 
@@ -234,12 +254,16 @@ def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySess
         record["start_time"] = record["start_time"].to_pydatetime()
         record["end_time"] = record["end_time"].to_pydatetime()
 
-    return records
+    activity_sessions_records: List[ActivitySession] = records
+
+    return activity_sessions_records
 
 
-def _read_last_active_session_for_user(user_id: int) -> Optional[pd.DataFrame]:
-    # FIXME move to different place?
-    # FIXME pop last active session from mongo
+def _read_last_active_session_for_user(
+    user_id: int,  # pylint: disable=unused-argument
+) -> Optional[pd.DataFrame]:
+    # FIXME move to different place? pylint: disable=fixme
+    # FIXME pop last active session from mongo pylint: disable=fixme
     return pd.DataFrame(
         {
             "start_time": [pd.Timestamp("2018-12-14T10:40:19.691Z")],
