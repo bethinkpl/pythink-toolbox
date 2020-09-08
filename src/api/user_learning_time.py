@@ -20,6 +20,7 @@ def get_learning_time(user_id: int, start_date: str, end_date: str) -> int:
     )
 
 
+# TODO: Try to improve the return type hint after FastAPI is introduced.
 @user_learning_bp.route("/learning_time/<int:user_id>", methods=["POST"])
 def get_user_learning_time(user_id: int) -> Tuple[Dict[Any, Any], int]:
     """

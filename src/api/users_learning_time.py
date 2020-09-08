@@ -7,6 +7,7 @@ from src.api.user_learning_time import get_learning_time
 users_learning_bp = Blueprint("users_learning", __name__)
 
 
+# TODO: Try to improve the return type hint after FastAPI is introduced.
 @users_learning_bp.route("/learning_time", methods=["POST"])
 def get_users_learning_time() -> Tuple[Dict[Any, Any], int]:
     """
