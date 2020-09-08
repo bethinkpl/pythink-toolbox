@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 from flask import Blueprint, request
 
@@ -22,7 +22,7 @@ def get_learning_time(user_id: int, start_date: str, end_date: str) -> int:
 
 # TODO: Try to improve the return type hint after FastAPI is introduced.
 @user_learning_bp.route("/learning_time/<int:user_id>", methods=["POST"])
-def get_user_learning_time(user_id: int) -> Tuple[Dict[Any, Any], int]:
+def get_user_learning_time(user_id: int) -> Dict[Any, Any]:
     """
     API end-point | Provides user's cumulative learning time.
     """
@@ -30,4 +30,4 @@ def get_user_learning_time(user_id: int) -> Tuple[Dict[Any, Any], int]:
     user_learning_time = get_learning_time(
         user_id, body["start_date"], body["end_date"]
     )
-    return {user_id: user_learning_time}, STATUS_OK
+    return {user_id: user_learning_time}
