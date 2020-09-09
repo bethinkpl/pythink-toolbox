@@ -393,22 +393,26 @@ def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None
     assert isinstance(output, pd.DataFrame)
 
     for row in output.itertuples():
+        if not row.Index:
+            prev_row = output.iloc[row.Index - 1]
+        else:
+            prev_row = pd.Series({"is_focus": False})
         try:
             next_row = output.iloc[row.Index + 1]
         except IndexError:
             next_row = pd.Series({"is_focus": False})
         if row.is_break:
             assert (
-                output.iloc[row.Index - 1].is_focus
+                prev_row.is_focus
                 and next_row.is_focus
                 and (row.end_time - row.start_time) <= pd.Timedelta(minutes=30)
                 and not row.is_active
             )
         else:
             assert (
-                not output.iloc[row.Index - 1].is_focus
+                not prev_row.is_focus
                 or not next_row.is_focus
-                or not (row.end_time - row.start_time) <= pd.Timedelta(minutes=30)
+                or not ((row.end_time - row.start_time) <= pd.Timedelta(minutes=30))
                 or row.is_active
             )
 
