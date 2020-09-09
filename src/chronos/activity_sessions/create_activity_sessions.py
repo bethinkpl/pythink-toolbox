@@ -1,12 +1,9 @@
-import itertools
 from datetime import datetime
-from typing import List, TypedDict, Optional
 import logging
+from typing import List, Optional, TypedDict
 
 import pandas as pd  # type: ignore[import]
 import pandera  # type: ignore[import]
-
-import chronos.activity_sessions.activity_events
 
 MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION = pd.Timedelta(minutes=5)
 MIN_FOCUS_DURATION = pd.Timedelta(minutes=15)
@@ -26,33 +23,7 @@ class ActivitySession(TypedDict):
     is_break: bool
 
 
-def main(start_time: datetime, end_time: datetime) -> List[ActivitySession]:
-    """Create activity_sessions for all users
-    who had activity_events between given timestamps."""
-
-    users_activity_events = chronos.activity_sessions.activity_events.read(
-        start_time=start_time, end_time=end_time
-    )
-
-    users_activity_events_groups = users_activity_events.groupby("user_id").client_time
-
-    logger.info(
-        "Creating activity_sessions for %i users.", len(users_activity_events_groups)
-    )
-
-    users_activity_sessions = (
-        _create_user_activity_sessions(
-            user_id=user_id,
-            activity_events=activity_events,
-            last_active_session=_read_last_active_session_for_user(user_id),
-        )
-        for user_id, activity_events in users_activity_events_groups
-    )
-
-    return list(itertools.chain.from_iterable(users_activity_sessions))
-
-
-def _create_user_activity_sessions(
+def create_user_activity_sessions(
     user_id: int,
     activity_events: pd.Series,
     last_active_session: Optional[pd.DataFrame],
@@ -258,16 +229,3 @@ def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySess
     activity_sessions_records: List[ActivitySession] = records
 
     return activity_sessions_records
-
-
-def _read_last_active_session_for_user(
-    user_id: int,  # pylint: disable=unused-argument
-) -> Optional[pd.DataFrame]:
-    # FIXME move to different place? pylint: disable=fixme
-    # FIXME pop last active session from mongo pylint: disable=fixme
-    return pd.DataFrame(
-        {
-            "start_time": [pd.Timestamp("2018-12-14T10:40:19.691Z")],
-            "end_time": [pd.Timestamp("2018-12-14T10:45:28.421Z")],
-        }
-    )

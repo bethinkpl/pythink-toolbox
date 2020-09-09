@@ -29,7 +29,7 @@ def test__create_user_activity_sessions() -> None:
         {"start_time": [datetime(2000, 1, 1)], "end_time": [datetime(2000, 1, 1, 0, 1)]}
     )
 
-    output = tested_module._create_user_activity_sessions(
+    output = tested_module.create_user_activity_sessions(
         user_id=user_id,
         activity_events=activity_events,
         last_active_session=last_active_session,
