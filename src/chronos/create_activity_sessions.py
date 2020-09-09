@@ -40,7 +40,7 @@ def main(start_time: datetime, end_time: datetime) -> List[ActivitySession]:
         "Creating activity_sessions for %i users.", len(users_activity_events_groups)
     )
 
-    user_activity_sessions = (
+    users_activity_sessions = (
         _create_user_activity_sessions(
             user_id=user_id,
             activity_events=activity_events,
@@ -49,7 +49,7 @@ def main(start_time: datetime, end_time: datetime) -> List[ActivitySession]:
         for user_id, activity_events in users_activity_events_groups
     )
 
-    return list(itertools.chain.from_iterable(user_activity_sessions))
+    return list(itertools.chain.from_iterable(users_activity_sessions))
 
 
 def _create_user_activity_sessions(
