@@ -63,9 +63,7 @@ def _create_user_activity_sessions(
     activity_sessions: List[ActivitySession] = (
         activity_events.pipe(_initialize_sessions_creation)
         .pipe(_add_last_active_session, last_active_session=last_active_session)
-        .pipe(
-            _create_active_sessions,
-        )
+        .pipe(_create_active_sessions)
         .pipe(_fill_with_inactive_sessions)
         .pipe(_determine_if_focus)
         .pipe(_determine_if_break)
@@ -78,7 +76,7 @@ def _create_user_activity_sessions(
 
 def _initialize_sessions_creation(activity_events: pd.Series) -> pd.DataFrame:
     logger.debug(  # pylint: disable=logging-too-many-args
-        "activity_events: \n", activity_events
+        "activity_events: \n", activity_events.to_string()
     )
     assert not activity_events.empty
 
@@ -94,10 +92,10 @@ def _add_last_active_session(
     initialized_sessions: pd.DataFrame, last_active_session: Optional[pd.DataFrame]
 ) -> pd.DataFrame:
     logger.debug(  # pylint: disable=logging-too-many-args
-        "initialized_sessions: \n", initialized_sessions
+        "initialized_sessions: \n", initialized_sessions.to_string()
     )
     logger.debug(  # pylint: disable=logging-too-many-args
-        "last_active_session: \n", last_active_session
+        "last_active_session: \n", last_active_session.to_string()
     )
 
     assert not initialized_sessions.empty
@@ -110,7 +108,7 @@ def _add_last_active_session(
 
 def _create_active_sessions(sessions_with_last_active: pd.DataFrame) -> pd.DataFrame:
     logger.debug(  # pylint: disable=logging-too-many-args
-        "sessions_with_last_active: \n", sessions_with_last_active
+        "sessions_with_last_active: \n", sessions_with_last_active.to_string()
     )
 
     assert not sessions_with_last_active.empty
@@ -132,7 +130,7 @@ def _create_active_sessions(sessions_with_last_active: pd.DataFrame) -> pd.DataF
 
 def _fill_with_inactive_sessions(active_sessions: pd.DataFrame) -> pd.DataFrame:
     logger.debug(  # pylint: disable=logging-too-many-args
-        "active_sessions: \n", active_sessions
+        "active_sessions: \n", active_sessions.to_string()
     )
 
     assert not active_sessions.empty
@@ -155,7 +153,7 @@ def _fill_with_inactive_sessions(active_sessions: pd.DataFrame) -> pd.DataFrame:
 
 def _determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> pd.DataFrame:
     logger.debug(  # pylint: disable=logging-too-many-args
-        "active_and_inactive_sessions: \n", active_and_inactive_sessions
+        "active_and_inactive_sessions: \n", active_and_inactive_sessions.to_string()
     )
 
     assert not active_and_inactive_sessions.empty
@@ -168,7 +166,7 @@ def _determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> pd.DataFr
 
 def _determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> pd.DataFrame:
     logger.debug(  # pylint: disable=logging-too-many-args
-        "activity_sessions_with_focus: \n", activity_sessions_with_focus
+        "activity_sessions_with_focus: \n", activity_sessions_with_focus.to_string()
     )
 
     assert not activity_sessions_with_focus.empty
