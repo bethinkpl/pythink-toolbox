@@ -6,7 +6,7 @@ import logging
 import pandas as pd  # type: ignore[import]
 import pandera  # type: ignore[import]
 
-import chronos.activity_events
+import chronos.activity_sessions.activity_events
 
 MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION = pd.Timedelta(minutes=5)
 MIN_FOCUS_DURATION = pd.Timedelta(minutes=15)
@@ -30,7 +30,7 @@ def main(start_time: datetime, end_time: datetime) -> List[ActivitySession]:
     """Create activity_sessions for all users
     who had activity_events between given timestamps."""
 
-    users_activity_events = chronos.activity_events.read(
+    users_activity_events = chronos.activity_sessions.activity_events.read(
         start_time=start_time, end_time=end_time
     )
 

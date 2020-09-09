@@ -11,7 +11,7 @@ import pandera.errors  # type: ignore[import]
 import pytest
 from pythink_toolbox.testing import parametrization
 
-import chronos.create_activity_sessions as tested_module
+import chronos.activity_sessions.create_activity_sessions as tested_module
 
 
 @pytest.mark.skip(reason="implement when MongoDB I/O operations done")  # type: ignore[misc]
@@ -468,13 +468,7 @@ TEST_SCENARIOS = [
     SessionsValidationScenario(  # type: ignore[list-item]
         desc="Empty DataFrame",
         activity_sessions=pd.DataFrame(
-            columns=[
-                "start_time",
-                "end_time",
-                "is_active",
-                "is_focus",
-                "is_break",
-            ]
+            columns=["start_time", "end_time", "is_active", "is_focus", "is_break"]
         ),
         should_pass=False,
     ),

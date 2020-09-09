@@ -6,7 +6,7 @@ import datatosk
 import dotenv
 import pandas as pd  # type: ignore[import]
 
-ENV_PATH = Path(".") / ".env"
+ENV_PATH = Path("..") / ".env"
 dotenv.load_dotenv(dotenv_path=ENV_PATH)
 
 mongo_source = datatosk.mongodb("chronos")
@@ -35,8 +35,7 @@ def read_activity_sessions_by_user(user_id: int) -> pd.DataFrame:
     Read activity session from mongodb for a defined user.
     """
     return mongo_source.read.to_pandas(
-        collection="activity_sessions",
-        query_filter={"user_id": user_id},
+        collection="activity_sessions", query_filter={"user_id": user_id}
     )
 
 
