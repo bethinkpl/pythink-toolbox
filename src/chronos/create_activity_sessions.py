@@ -94,8 +94,11 @@ def _add_last_active_session(
     logger.debug(  # pylint: disable=logging-too-many-args
         "initialized_sessions: \n", initialized_sessions.to_string()
     )
+    last_active_session_to_log = (
+        last_active_session.to_string() if last_active_session is not None else None
+    )
     logger.debug(  # pylint: disable=logging-too-many-args
-        "last_active_session: \n", last_active_session.to_string()
+        "last_active_session: \n", last_active_session_to_log
     )
 
     assert not initialized_sessions.empty
