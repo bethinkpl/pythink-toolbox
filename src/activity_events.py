@@ -38,9 +38,7 @@ def read(
         "end_date": end_date,
     }
 
-    # pylint: disable=fixme
-    # FIXME type should be fixed in the next datatosk version, remove ignore after that.
-    return bigquery_source.read(query=query, params=params)  # type: ignore[arg-type]
+    return bigquery_source.read(query=query, params=params)
 
 
 if __name__ == "__main__":
