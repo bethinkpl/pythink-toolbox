@@ -42,7 +42,7 @@ def read_activity_sessions_by_user(user_id: int) -> pd.DataFrame:
 if __name__ == "__main__":
     # FIXME Debug code, remove in production version. pylint: disable=fixme
     # Learning time reading example
-    print(f"read_learning_time: {read_learning_time([1])}")
+    print(f"{read_learning_time([1])=}")
 
     # activity sessions writing example
     write_activity_sessions(
