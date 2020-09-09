@@ -1,6 +1,18 @@
 from typing import Optional
 
 import pandas as pd
+import pymongo
+
+import chronos.settings
+
+client = pymongo.MongoClient(
+    host=chronos.settings.MONGO_HOST,
+    port=chronos.settings.MONGO_PORT,
+    username=chronos.settings.MONGO_USERNAME,
+    password=chronos.settings.MONGO_PASSWORD,
+)
+
+database = client.get_database(chronos.settings.MONGO_DATABASE)
 
 
 def read_last_active_session_for_user(

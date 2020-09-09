@@ -29,23 +29,26 @@ def main(start_time: datetime, end_time: datetime) -> None:
 
     for user_id, activity_events in tqdm(users_activity_events_groups):
 
-        # TODO start transaction
-        last_active_session = (
-            chronos.activity_sessions.mongo_io.read_last_active_session_for_user(
-                user_id
+        with chronos.activity_sessions.mongo_io.client.start_session() as session:
+            session.with_transaction(
+                # TODO
             )
-        )
-        # TODO delete this session
 
-        user_activity_sessions = chronos.activity_sessions.create_activity_sessions.create_user_activity_sessions(
-            user_id=user_id,
-            activity_events=activity_events,
-            last_active_session=last_active_session,
-        )
+            def callback(session):
+                last_active_session = chronos.activity_sessions.mongo_io.read_last_active_session_for_user(
+                    user_id
+                )
+                # TODO delete this session
 
-        # TODO insert user_activity_sessions
+                user_activity_sessions = chronos.activity_sessions.create_activity_sessions.create_user_activity_sessions(
+                    user_id=user_id,
+                    activity_events=activity_events,
+                    last_active_session=last_active_session,
+                )
 
-        # TODO end of transaction scope
+                # TODO insert user_activity_sessions
+
+            # TODO end of transaction scope
 
     # TODO run materialized_views functions
     #   materialized_views = [view1, view2, view3, view4]
