@@ -803,19 +803,15 @@ testing = ["fields", "hunter", "process-tests (2.0.2)", "six", "pytest-xdist", "
 
 [[package]]
 category = "main"
-description = ""
+description = "TODO"
 name = "pythink-toolbox"
 optional = false
-python-versions = "^3.8"
+python-versions = ">=3.8,<4.0"
 version = "0.1.0"
 
 [package.dependencies]
-pandera = "^0.4.4"
+pandera = ">=0.4.4,<0.5.0"
 
-[package.source]
-reference = "22a9513446e0f2688341fd5c3ae75371935e420a"
-type = "git"
-url = "git@github.com:bethinkpl/pythink-toolbox.git"
 [[package]]
 category = "main"
 description = "Extensions to the standard Python datetime module"
@@ -1042,7 +1038,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "31591a577ff184987ad45a560983d9d89688bc38d7529e8a8bed6c4493670c57"
+content-hash = "f8ed9a9f588197bdb640b84fbfbf93852c7232d27f780d38cd69ebfd7857910f"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1564,7 +1560,10 @@ pytest-cov = [
     {file = "pytest-cov-2.10.1.tar.gz", hash = "sha256:47bd0ce14056fdd79f93e1713f88fad7bdcc583dcd7783da86ef2f085a0bb88e"},
     {file = "pytest_cov-2.10.1-py2.py3-none-any.whl", hash = "sha256:45ec2d5182f89a81fc3eb29e3d1ed3113b9e9a873bcddb2a71faaab066110191"},
 ]
-pythink-toolbox = []
+pythink-toolbox = [
+    {file = "pythink-toolbox-0.1.0.tar.gz", hash = "sha256:d5a5d1993ce2c6869314e1f68039b03ad13a2e3ecaa0a720604da7c8e99ab76a"},
+    {file = "pythink_toolbox-0.1.0-py3-none-any.whl", hash = "sha256:dfd0c90eab10d0b198f3a7ec1513c8b686aae3cb0c119bdc60b0da992538401d"},
+]
 python-dateutil = [
     {file = "python-dateutil-2.8.1.tar.gz", hash = "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c"},
     {file = "python_dateutil-2.8.1-py2.py3-none-any.whl", hash = "sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"},
