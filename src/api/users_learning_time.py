@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from flask import Blueprint, request
 
-from src.api.user_learning_time import get_learning_time
+from api.user_learning_time import get_learning_time
 
 users_learning_bp = Blueprint("users_learning", __name__)
 

@@ -1,6 +1,7 @@
+import datetime
 import logging as log
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import datatosk
 import dotenv
@@ -12,12 +13,36 @@ dotenv.load_dotenv(dotenv_path=ENV_PATH)
 mongo_source = datatosk.mongodb("chronos")
 
 
-def read_learning_time(user_ids: List[int]) -> datatosk.types.ListType:
+def read_daily_learning_time(
+    user_id: int, start_date: datetime, end_date: datetime
+) -> datatosk.types.ListType:
     """
     Read user learning time from mongodb.
     """
+    result = mongo_source.read.to_list(
+        collection="daily_learning_time_view",
+        query_filter={
+            "user_id": user_id,
+            "date_hour": {"$gte": start_date, "$lt": end_date},
+        },
+    )
+    return result
+
+
+def read_daily_break_time():
+    pass
+
+
+def read_daily_focus_time():
+    pass
+
+
+def read_cumulative_learning_time(user_ids):
+    """
+    Read users' cumulative learning time from mongodb.
+    """
     return mongo_source.read.to_list(
-        collection="learning_time_daily_view",
+        collection="cumulative_learning_time_view",
         query_filter={"user_id": {"$in": user_ids}},
     )
 
@@ -35,14 +60,15 @@ def read_activity_sessions_by_user(user_id: int) -> pd.DataFrame:
     Read activity session from mongodb for a defined user.
     """
     return mongo_source.read.to_pandas(
-        collection="activity_sessions", query_filter={"user_id": user_id},
+        collection="activity_sessions",
+        query_filter={"user_id": user_id},
     )
 
 
 if __name__ == "__main__":
     # FIXME Debug code, remove in production version. pylint: disable=fixme
     # Learning time reading example
-    print(f"{read_learning_time([1])=}")
+    print(f"{read_daily_learning_time([1])=}")
 
     # activity sessions writing example
     write_activity_sessions(
