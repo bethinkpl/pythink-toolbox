@@ -54,8 +54,18 @@ def read_daily_break_time():
     pass
 
 
-def read_daily_focus_time():
-    pass
+def read_daily_focus_time(user_id: int, start_date: datetime, end_date: datetime):
+    """
+    Read user focus time from mongodb.
+    """
+    result = mongo_source.read.to_list(
+        collection="daily_focus_time_view",
+        query_filter={
+            "user_id": user_id,
+            "date_hour": {"$gte": start_date, "$lt": end_date},
+        },
+    )
+    return result
 
 
 def write_activity_sessions(activity_sessions: pd.DataFrame) -> None:
