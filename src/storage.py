@@ -29,22 +29,33 @@ def read_daily_learning_time(
     return result
 
 
+def read_cumulative_learning_time(
+    user_id: int, start_date: datetime, end_date: datetime
+) -> int:
+    """
+    Read users' cumulative learning time from mongodb.
+    """
+    result = mongo_source.read.to_list(
+        collection="daily_learning_time_view",
+        query_filter={
+            "user_id": user_id,
+            "date_hour": {"$gte": start_date, "$lt": end_date},
+        },
+        projection={"learning_time_ms": 1, "_id": 0},
+    )
+
+    # FIXME Use $sum aggregation after migration from datatosk to pymongo.
+    cumulative_learning_time = sum([row["learning_time_ms"] for row in result])
+
+    return cumulative_learning_time
+
+
 def read_daily_break_time():
     pass
 
 
 def read_daily_focus_time():
     pass
-
-
-def read_cumulative_learning_time(user_ids):
-    """
-    Read users' cumulative learning time from mongodb.
-    """
-    return mongo_source.read.to_list(
-        collection="cumulative_learning_time_view",
-        query_filter={"user_id": {"$in": user_ids}},
-    )
 
 
 def write_activity_sessions(activity_sessions: pd.DataFrame) -> None:
