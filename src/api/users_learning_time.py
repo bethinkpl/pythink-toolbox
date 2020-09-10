@@ -1,7 +1,8 @@
 from typing import Any, Dict
 
+from dateutil.parser import isoparse
 from flask import Blueprint, request
-
+from storage import read_cumulative_learning_time
 
 users_learning_bp = Blueprint("users_learning", __name__)
 
@@ -13,5 +14,12 @@ def get_users_learning_time() -> Dict[Any, Any]:
     API end-point | Provides cumulative learning time for a group of users.
     """
     body = request.get_json()
-    learning_times = {{} for user in body["users"]}
+    learning_times = {
+        user["id"]: read_cumulative_learning_time(
+            user_id=user["id"],
+            start_date=isoparse(user["start_date"]),
+            end_date=isoparse(user["end_date"]),
+        )
+        for user in body["users"]
+    }
     return learning_times
