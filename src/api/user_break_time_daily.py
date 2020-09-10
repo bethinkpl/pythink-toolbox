@@ -1,8 +1,9 @@
 from typing import Dict
 
-from flask import request, Blueprint
+from fastapi import APIRouter
+from pydantic import BaseModel
 
-break_daily_bp = Blueprint("break", __name__)
+break_daily_router = APIRouter()
 
 
 # pylint: disable=unused-argument,fixme
@@ -16,10 +17,14 @@ def get_break_time_daily(
     return {"2000-01-01": 200, "2000-01-02": 400, "2000-01-03": 50}
 
 
-@break_daily_bp.route("/break_time_daily/<int:user_id>", methods=["POST"])
-def get_user_break_time_daily(user_id: int) -> Dict[str, int]:
+class Item(BaseModel):
+    start_date: str
+    end_date: str
+
+
+@break_daily_router.post("/break_time_daily/{user_id}")
+def get_user_break_time_daily(user_id: int, item: Item) -> Dict[str, int]:
     """
     API end-point | Provides user's daily break time.
     """
-    body = request.get_json()
-    return get_break_time_daily(user_id, body["start_date"], body["end_date"])
+    return get_break_time_daily(user_id, item.start_date, item.end_date)

@@ -1,21 +1,31 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
-from flask import Blueprint, request
+from fastapi import APIRouter
+from pydantic import BaseModel
 
-from src.api.user_learning_time import get_learning_time
+from api.user_learning_time import get_learning_time
 
-users_learning_bp = Blueprint("users_learning", __name__)
+users_learning_router = APIRouter()
+
+
+class Item(BaseModel):
+    id: int
+    start_date: str
+    end_date: str
+
+
+class Users(BaseModel):
+    users: List[Item]
 
 
 # TODO: Try to improve the return type hint after FastAPI is introduced.
-@users_learning_bp.route("/learning_time", methods=["POST"])
-def get_users_learning_time() -> Dict[Any, Any]:
+@users_learning_router.post("/learning_time")
+def get_users_learning_time(item: Users) -> Dict[Any, Any]:
     """
     API end-point | Provides cumulative learning time for a group of users.
     """
-    body = request.get_json()
     learning_times = {
-        user["id"]: get_learning_time(user["id"], user["start_date"], user["end_date"])
-        for user in body["users"]
+        user.id: get_learning_time(user.id, user.start_date, user.end_date)
+        for user in item.users
     }
     return learning_times
