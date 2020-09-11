@@ -25,7 +25,6 @@ def get_break_time_daily(
     """
     Get daily break time from the data source.
     """
-
     break_time = read_daily_break_time(
         user_id=user_id, start_date=start_date, end_date=end_date
     )

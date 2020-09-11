@@ -49,7 +49,9 @@ def read_cumulative_learning_time(
     return cumulative_learning_time
 
 
-def read_daily_break_time(user_id: int, start_date: datetime, end_date: datetime):
+def read_daily_break_time(
+    user_id: int, start_date: datetime, end_date: datetime
+) -> datatosk.types.ListType:
     """
     Read user focus time from mongodb.
     """
@@ -64,7 +66,9 @@ def read_daily_break_time(user_id: int, start_date: datetime, end_date: datetime
     return result
 
 
-def read_daily_focus_time(user_id: int, start_date: datetime, end_date: datetime):
+def read_daily_focus_time(
+    user_id: int, start_date: datetime, end_date: datetime
+) -> datatosk.types.ListType:
     """
     Read user focus time from mongodb.
     """
