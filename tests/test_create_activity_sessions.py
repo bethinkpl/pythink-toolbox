@@ -309,7 +309,14 @@ def test__fill_with_inactive_sessions(
     )
 )
 def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None:
-    hypothesis.assume(not active_and_inactive_sessions.empty)
+
+    if active_and_inactive_sessions.empty:
+        try:
+            tested_module._initialize_sessions_creation(activity_events=activity_events)
+        except AssertionError:
+            assert True
+            return
+
     hypothesis.assume(
         not any(
             active_and_inactive_sessions.start_time
@@ -373,7 +380,13 @@ def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None
 )
 def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None:
 
-    hypothesis.assume(not activity_sessions_with_focus.empty)
+    if activity_sessions_with_focus.empty:
+        try:
+            tested_module._initialize_sessions_creation(activity_events=activity_events)
+        except AssertionError:
+            assert True
+            return
+
     hypothesis.assume(
         not any(
             activity_sessions_with_focus.start_time
