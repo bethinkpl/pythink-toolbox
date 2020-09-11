@@ -1,6 +1,6 @@
 from datetime import datetime
 import logging
-from typing import List, Optional, TypedDict, Union
+from typing import List, Optional, TypedDict, Union, Dict
 
 import pandas as pd  # type: ignore[import]
 import pandera  # type: ignore[import]
@@ -35,7 +35,7 @@ class ActivitySession(TypedDict):
 def create_user_activity_sessions(
     user_id: int,
     activity_events: pd.Series,
-    last_active_session: Optional[pd.DataFrame],
+    last_active_session: Optional[Dict[str, datetime]],
 ) -> List[ActivitySession]:
 
     logger.info("Creating activity_sessions for user %i.", user_id)
@@ -68,7 +68,8 @@ def _initialize_sessions_creation(activity_events: pd.Series) -> pd.DataFrame:
 
 
 def _add_last_active_session(
-    initialized_sessions: pd.DataFrame, last_active_session: Optional[pd.DataFrame]
+    initialized_sessions: pd.DataFrame,
+    last_active_session: Optional[Dict[str, datetime]],
 ) -> pd.DataFrame:
 
     _log_pandas_object("initialized_sessions", initialized_sessions)
@@ -76,7 +77,13 @@ def _add_last_active_session(
     assert not initialized_sessions.empty
 
     if last_active_session is not None:
-        return pd.concat([last_active_session, initialized_sessions], ignore_index=True)
+        return pd.concat(
+            [
+                pd.DataFrame.from_dict(last_active_session, orient="index").T,
+                initialized_sessions,
+            ],
+            ignore_index=True,
+        )
 
     return initialized_sessions
 
