@@ -1,7 +1,6 @@
 import datetime
 import logging as log
 from pathlib import Path
-from typing import Dict, List
 
 import datatosk
 import dotenv

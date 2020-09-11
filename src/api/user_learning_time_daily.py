@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import Dict
 
-from flask import jsonify, request, Blueprint
-from storage import read_daily_learning_time
-
 from dateutil.parser import isoparse
+from flask import Blueprint, jsonify, request
+from storage import read_daily_learning_time
 
 learning_daily_bp = Blueprint("learning", __name__)
 

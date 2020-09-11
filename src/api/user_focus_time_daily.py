@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Dict
 
 from dateutil.parser import isoparse
-from flask import jsonify, request, Blueprint
+from flask import Blueprint, jsonify, request
 from storage import read_daily_focus_time
 
 focus_daily_bp = Blueprint("focus", __name__)
