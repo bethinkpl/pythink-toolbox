@@ -52,7 +52,12 @@ def test__create_user_activity_sessions() -> None:
 )
 def test__initialize_sessions_creation(activity_events: pd.Series) -> None:
 
-    hypothesis.assume(not activity_events.empty)
+    if activity_events.empty:
+        try:
+            tested_module._initialize_sessions_creation(activity_events=activity_events)
+        except AssertionError:
+            assert True
+            return
 
     output = tested_module._initialize_sessions_creation(
         activity_events=activity_events
