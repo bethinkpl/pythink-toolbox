@@ -14,11 +14,6 @@ from pythink_toolbox.testing import parametrization
 import chronos.activity_sessions.create_activity_sessions as tested_module
 
 
-@pytest.mark.skip(reason="implement when MongoDB I/O operations done")  # type: ignore[misc]
-def test_main() -> None:
-    assert False
-
-
 def test__create_user_activity_sessions() -> None:
     """Testing only happy path.
     Precise testing is made in component functions tests."""
