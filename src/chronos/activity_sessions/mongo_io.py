@@ -54,7 +54,7 @@ def _run_create_user_activity_sessions_transaction(
         last_active_session: Optional[
             Dict[str, Union[datetime, bson.ObjectId]]
         ] = ACTIVITY_SESSIONS_COLLECTION.find_one_and_delete(
-            filter={"user_id": user_id, "is_focus": True},
+            filter={"user_id": user_id, "is_active": True},
             projection={"_id": 0, "start_time": 1, "end_time": 1},
             sort=[("end_time", pymongo.DESCENDING)],
             session=session,
