@@ -97,7 +97,7 @@ TEST_SCENARIOS = [
         expected_output=pd.DataFrame(),
     ),
     AddLastActiveSessionScenario(
-        desc="last_active_session=None",
+        desc="last_active_session is None",
         initialized_sessions=pd.DataFrame(
             columns=["start_time", "end_time"],
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1)]],
