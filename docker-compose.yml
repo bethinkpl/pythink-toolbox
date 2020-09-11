@@ -1,57 +1,26 @@
 version: '3.1'
-# https://gist.github.com/asoorm/7822cc742831639c93affd734e97ce4f for mongo replica setup
+
 services:
-  mongo1:
-    hostname: mongo1
-    container_name: chronos_mongo1
+  mongo:
+    container_name: chronos_mongo
     image: mongo:4.4.0-bionic
     restart: always
-    expose:
-      - 27017
     ports:
-      - 27011:27017
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "replica_set0" ]
+      - 27017:27017
+    command: --replSet replica_set0
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: local
 
-  mongo2:
-    hostname: mongo2
-    container_name: chronos_mongo2
-    image: mongo:4.4.0-bionic
+  mongo-express:
+    container_name: chronos_mongo-express
+    image: mongo-express:0.54.0
     restart: always
-    expose:
-      - 27017
     ports:
-      - 27012:27017
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "replica_set0" ]
+      - 8081:8081
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: local
-
-  mongo3:
-    hostname: mongo3
-    container_name: chronos_mongo3
-    image: mongo:4.4.0-bionic
-    restart: always
-    expose:
-      - 27017
-    ports:
-      - 27013:27017
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "replica_set0" ]
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: local
-
-#  mongo-express:
-#    container_name: chronos_mongo-express
-#    image: mongo-express:0.54.0
-#    restart: always
-#    ports:
-#      - 8081:8081
-#    environment:
-#      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-#      ME_CONFIG_MONGODB_ADMINPASSWORD: local
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: local
 
   api:
     container_name: chronos_api

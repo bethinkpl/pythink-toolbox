@@ -18,7 +18,9 @@ def main(start_time: datetime, end_time: datetime) -> None:
     users_activity_events_groups = users_activity_events.groupby("user_id").client_time
 
     for user_id, activity_events in tqdm(users_activity_events_groups):
-        chronos.activity_sessions.mongo_io.main(user_id, activity_events)
+        chronos.activity_sessions.mongo_io.main(
+            user_id, activity_events, start_time=start_time
+        )
 
 
 if __name__ == "__main__":
