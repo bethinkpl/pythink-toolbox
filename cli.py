@@ -3,8 +3,11 @@ from typing import Sequence
 
 import click
 
+from chronos import __version__
+
 
 @click.group()
+@click.version_option(version=__version__)
 def main() -> None:
     """\n😎 CHRONOS CLI 😎\n"""
 

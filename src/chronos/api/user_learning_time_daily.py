@@ -3,7 +3,7 @@ from typing import Dict
 
 from dateutil.parser import isoparse
 from flask import Blueprint, jsonify, request
-from storage import read_daily_learning_time
+from chronos.api.storage import read_daily_learning_time
 
 learning_daily_bp = Blueprint("learning", __name__)
 
@@ -15,7 +15,9 @@ def get_user_learning_time_daily(user_id: int) -> Dict[str, int]:
     """
     body = request.get_json()
     return get_learning_time_daily(
-        user_id, isoparse(body["start_date"]), isoparse(body["end_date"]),
+        user_id,
+        isoparse(body["start_date"]),
+        isoparse(body["end_date"]),
     )
 
 

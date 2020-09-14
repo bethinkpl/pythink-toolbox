@@ -1,4 +1,4 @@
-from tests.api.consts.api_tests import URL_BASE
+from tests.consts import URL_BASE
 
 
 def get_url(route: str) -> str:

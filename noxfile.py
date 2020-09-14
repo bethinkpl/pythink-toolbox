@@ -24,7 +24,12 @@ def pre_commit(session: Any) -> None:
     """
     session.run("poetry", "run", "pre-commit", "install", external=True)
     session.run(
-        "poetry", "run", "pre-commit", "run", "--all-files", external=True,
+        "poetry",
+        "run",
+        "pre-commit",
+        "run",
+        "--all-files",
+        external=True,
     )
 
 
