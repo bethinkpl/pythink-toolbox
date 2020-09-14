@@ -40,7 +40,16 @@ def tests(session: Any) -> None:
     Usage:
         `poetry run nox -s tests [-- path]`
     """
-    args = session.posargs or ["--cov=src", "--cov-report", "html", "."]
+    # args = session.posargs or ["--cov=src", "--cov-report", "html", "."] replace while:
+    # TODO LACE-465
+    args = session.posargs or [
+        "--cov=src",
+        "--cov-report",
+        "html",
+        "-m",
+        "not integration",
+        ".",
+    ]
     session.run("poetry", "run", "pytest", "-v", *args, external=True)
 
 

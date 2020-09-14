@@ -10,6 +10,7 @@ import unittest.mock
 import bson  # type: ignore[import]
 import pandas as pd  # type: ignore[import]
 import pymongo.cursor  # type: ignore[import]
+import pytest
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
 from chronos.activity_sessions.create_activity_sessions import ActivitySession
@@ -177,9 +178,9 @@ TEST_DATA = [
 ]
 
 # FIXME improve ci
+@pytest.mark.integration
 @parametrize(TEST_DATA)  # type: ignore[misc]
 def test_main(activity_events: pd.Series, expected_data: List[ActivitySession]) -> None:
-
     tested_module.main(
         user_id=TEST_USER_ID,
         activity_events=activity_events,
