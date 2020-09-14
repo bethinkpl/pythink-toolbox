@@ -1,10 +1,8 @@
 from typing import Dict, Any
 
-from fastapi import APIRouter, HTTPException
-
-from chronos.api.user_learning_time_daily import get_learning_time_daily
-
 from chronos.api.models import Item
+from chronos.api.user_learning_time_daily import get_learning_time_daily
+from fastapi import APIRouter
 
 user_learning_router = APIRouter()
 
@@ -28,7 +26,5 @@ def get_user_learning_time(user_id: int, item: Item) -> Dict[Any, Any]:
     """
     API end-point | Provides user's cumulative learning time.
     """
-    if not item:
-        raise HTTPException(status_code=404, detail="Request body not found")
     user_learning_time = get_learning_time(user_id, item.start_date, item.end_date)
     return {user_id: user_learning_time}

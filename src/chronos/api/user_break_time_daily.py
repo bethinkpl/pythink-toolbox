@@ -1,8 +1,7 @@
 from typing import Dict
 
-from fastapi import APIRouter, HTTPException
-
 from chronos.api.models import Item
+from fastapi import APIRouter
 
 break_daily_router = APIRouter()
 
@@ -23,6 +22,4 @@ def get_user_break_time_daily(user_id: int, item: Item) -> Dict[str, int]:
     """
     API end-point | Provides user's daily break time.
     """
-    if not item:
-        raise HTTPException(status_code=404, detail="Request body not found")
     return get_break_time_daily(user_id, item.start_date, item.end_date)
