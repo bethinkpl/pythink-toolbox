@@ -47,7 +47,12 @@ def test__create_user_activity_sessions() -> None:
 )
 def test__initialize_sessions_creation(activity_events: pd.Series) -> None:
 
-    hypothesis.assume(not activity_events.empty)
+    if activity_events.empty:
+        try:
+            tested_module._initialize_sessions_creation(activity_events=activity_events)
+        except AssertionError:
+            assert True
+            return
 
     output = tested_module._initialize_sessions_creation(
         activity_events=activity_events
@@ -74,7 +79,7 @@ def test__initialize_sessions_creation(activity_events: pd.Series) -> None:
 class AddLastActiveSessionScenario(parametrization.Scenario):
     initialized_sessions: pd.DataFrame
     last_active_session: Optional[pd.DataFrame]
-    raise_assertion: bool
+    raise_assertion_error: bool
     expected_output: pd.DataFrame
 
 
@@ -83,17 +88,17 @@ TEST_SCENARIOS = [
         desc="empty initialized_sessions",
         initialized_sessions=pd.DataFrame(),
         last_active_session=None,
-        raise_assertion=True,
+        raise_assertion_error=True,
         expected_output=pd.DataFrame(),
     ),
     AddLastActiveSessionScenario(
-        desc="last_active_session=None",
+        desc="last_active_session is None",
         initialized_sessions=pd.DataFrame(
             columns=["start_time", "end_time"],
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1)]],
         ),
         last_active_session=None,
-        raise_assertion=False,
+        raise_assertion_error=False,
         expected_output=pd.DataFrame(
             columns=["start_time", "end_time"],
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1)]],
@@ -109,7 +114,7 @@ TEST_SCENARIOS = [
             columns=["start_time", "end_time"],
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1)]],
         ),
-        raise_assertion=False,
+        raise_assertion_error=False,
         expected_output=pd.DataFrame(
             columns=["start_time", "end_time"],
             data=[
@@ -125,11 +130,11 @@ TEST_SCENARIOS = [
 def test__add_last_active_session(
     initialized_sessions: pd.DataFrame,
     last_active_session: Optional[pd.DataFrame],
-    raise_assertion: bool,
+    raise_assertion_error: bool,
     expected_output: pd.DataFrame,
 ) -> None:
 
-    if raise_assertion:
+    if raise_assertion_error:
         with pytest.raises(AssertionError):
             tested_module._add_last_active_session(
                 initialized_sessions=initialized_sessions,
@@ -146,7 +151,7 @@ def test__add_last_active_session(
 
 class CreateActiveSessionsScenario(parametrization.Scenario):
     sessions_with_last_active: pd.DataFrame
-    raise_assertion: bool
+    raise_assertion_error: bool
     expected_output: pd.DataFrame
 
 
@@ -154,7 +159,7 @@ TEST_SCENARIOS = [
     CreateActiveSessionsScenario(  # type: ignore[list-item]
         desc="sessions_with_last_active empty -> raise error",
         sessions_with_last_active=pd.DataFrame(),
-        raise_assertion=True,
+        raise_assertion_error=True,
         expected_output=pd.DataFrame(),  # value not relevant
     ),
     CreateActiveSessionsScenario(  # type: ignore[list-item]
@@ -164,7 +169,7 @@ TEST_SCENARIOS = [
             columns=["start_time", "end_time"],
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1)]],
         ),
-        raise_assertion=False,
+        raise_assertion_error=False,
         expected_output=pd.DataFrame(
             columns=["start_time", "end_time", "is_active"],
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1), True]],
@@ -185,7 +190,7 @@ TEST_SCENARIOS = [
                 [datetime(2000, 1, 1, 0, 11, 4, 1), datetime(2000, 1, 1, 0, 11, 4, 2)],
             ],
         ),
-        raise_assertion=False,
+        raise_assertion_error=False,
         expected_output=pd.DataFrame(
             columns=["start_time", "end_time", "is_active"],
             data=[
@@ -204,11 +209,11 @@ TEST_SCENARIOS = [
 @parametrization.parametrize(TEST_SCENARIOS)  # type: ignore[misc]
 def test__create_active_sessions(
     sessions_with_last_active: pd.DataFrame,
-    raise_assertion: bool,
+    raise_assertion_error: bool,
     expected_output: pd.DataFrame,
 ) -> None:
 
-    if raise_assertion:
+    if raise_assertion_error:
         with pytest.raises(AssertionError):
             tested_module._create_active_sessions(
                 sessions_with_last_active=sessions_with_last_active
@@ -223,7 +228,7 @@ def test__create_active_sessions(
 
 class FillWithInactiveSessionsScenario(parametrization.Scenario):
     active_sessions: pd.DataFrame
-    raise_assertion: bool
+    raise_assertion_error: bool
     expected_output: pd.DataFrame
 
 
@@ -231,7 +236,7 @@ TEST_SCENARIOS = [
     FillWithInactiveSessionsScenario(  # type: ignore[list-item]
         desc="active_sessions is empty -> raise error",
         active_sessions=pd.DataFrame(),
-        raise_assertion=True,
+        raise_assertion_error=True,
         expected_output=pd.DataFrame(),  # value not relevant
     ),
     FillWithInactiveSessionsScenario(  # type: ignore[list-item]
@@ -240,7 +245,7 @@ TEST_SCENARIOS = [
             columns=["start_time", "end_time", "is_active"],
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1), True]],
         ),
-        raise_assertion=False,
+        raise_assertion_error=False,
         expected_output=pd.DataFrame(
             columns=["start_time", "end_time", "is_active"],
             data=[[datetime(2000, 1, 1), datetime(2000, 1, 1), True]],
@@ -256,7 +261,7 @@ TEST_SCENARIOS = [
                 [datetime(2000, 2, 1, 0, 11, 3), datetime(2000, 2, 1, 0, 11, 4), True],
             ],
         ),
-        raise_assertion=False,
+        raise_assertion_error=False,
         expected_output=pd.DataFrame(
             columns=["start_time", "end_time", "is_active"],
             data=[
@@ -273,10 +278,12 @@ TEST_SCENARIOS = [
 
 @parametrization.parametrize(TEST_SCENARIOS)  # type: ignore[misc]
 def test__fill_with_inactive_sessions(
-    active_sessions: pd.DataFrame, raise_assertion: bool, expected_output: pd.DataFrame
+    active_sessions: pd.DataFrame,
+    raise_assertion_error: bool,
+    expected_output: pd.DataFrame,
 ) -> None:
 
-    if raise_assertion:
+    if raise_assertion_error:
         with pytest.raises(AssertionError):
             tested_module._fill_with_inactive_sessions(active_sessions=active_sessions)
     else:
@@ -297,7 +304,16 @@ def test__fill_with_inactive_sessions(
     )
 )
 def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None:
-    hypothesis.assume(not active_and_inactive_sessions.empty)
+
+    if active_and_inactive_sessions.empty:
+        try:
+            tested_module._determine_if_focus(
+                active_and_inactive_sessions=active_and_inactive_sessions
+            )
+        except AssertionError:
+            assert True
+            return
+
     hypothesis.assume(
         not any(
             active_and_inactive_sessions.start_time
@@ -361,7 +377,15 @@ def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None
 )
 def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None:
 
-    hypothesis.assume(not activity_sessions_with_focus.empty)
+    if activity_sessions_with_focus.empty:
+        try:
+            tested_module._determine_if_break(
+                activity_sessions_with_focus=activity_sessions_with_focus
+            )
+        except AssertionError:
+            assert True
+            return
+
     hypothesis.assume(
         not any(
             activity_sessions_with_focus.start_time
