@@ -1,10 +1,13 @@
-from datetime import datetime
+# FIXME Migrate this module from datatosk to pymongo; blocked by LACE-466. pylint: disable=fixme
 import logging as log
-from pathlib import Path  # type: ignore[import]
+from datetime import datetime
+from pathlib import Path
+from typing import Iterable, Mapping, Union
 
-import datatosk
+import datatosk  # No need to resolve types from datatosk, we'll migrate to pymongo. type: ignore[import]
 import dotenv
 import pandas as pd  # type: ignore[import]
+from chronos.api.errors import TransformationError
 
 ENV_PATH = Path(".") / ".env"
 dotenv.load_dotenv(dotenv_path=ENV_PATH)
@@ -12,21 +15,21 @@ dotenv.load_dotenv(dotenv_path=ENV_PATH)
 mongo_source = datatosk.mongodb("chronos")
 
 
-# FIXME Migrate this module from datatosk to pymongo; blocked by LACE-466. pylint: disable=fixme
 def read_daily_learning_time(
     user_id: int, start_date: datetime, end_date: datetime
-) -> datatosk.types.ListType:
+) -> Iterable[Mapping[str, Union[int, str, datetime]]]:
     """
     Read user learning time from mongodb.
     """
-    result = mongo_source.read.to_list(
+    query_results = mongo_source.read.to_list(
         collection="daily_learning_time_view",
         query_filter={
             "user_id": user_id,
             "date_hour": {"$gte": start_date, "$lt": end_date},
         },
     )
-    return result
+
+    return _transform_daily_time(query_results=query_results)
 
 
 def read_cumulative_learning_time(
@@ -52,11 +55,11 @@ def read_cumulative_learning_time(
 
 def read_daily_break_time(
     user_id: int, start_date: datetime, end_date: datetime
-) -> datatosk.types.ListType:
+) -> Iterable[Mapping[str, Union[int, str, datetime]]]:
     """
     Read user focus time from mongodb.
     """
-    result = mongo_source.read.to_list(
+    query_results = mongo_source.read.to_list(
         collection="daily_break_time_view",
         query_filter={
             "user_id": user_id,
@@ -64,16 +67,16 @@ def read_daily_break_time(
         },
     )
 
-    return result
+    return _transform_daily_time(query_results=query_results)
 
 
 def read_daily_focus_time(
     user_id: int, start_date: datetime, end_date: datetime
-) -> datatosk.types.ListType:
+) -> Iterable[Mapping[str, Union[int, str, datetime]]]:
     """
     Read user focus time from mongodb.
     """
-    result = mongo_source.read.to_list(
+    query_results = mongo_source.read.to_list(
         collection="daily_focus_time_view",
         query_filter={
             "user_id": user_id,
@@ -81,7 +84,7 @@ def read_daily_focus_time(
         },
     )
 
-    return result
+    return _transform_daily_time(query_results=query_results)
 
 
 def write_activity_sessions(activity_sessions: pd.DataFrame) -> None:
@@ -100,3 +103,28 @@ def read_activity_sessions_by_user(user_id: int) -> pd.DataFrame:
         collection="activity_sessions",
         query_filter={"user_id": user_id},
     )
+
+
+def _transform_daily_time(
+    query_results: Iterable[Mapping[str, Union[int, str, datetime]]],
+) -> Iterable[Mapping[str, Union[int, str, datetime]]]:
+    rows = []
+    for row in query_results:
+        if isinstance(row["date_hour"], datetime):
+            date_hour = row["date_hour"].isoformat()
+        else:
+            raise TransformationError(
+                f"""
+                    date_hour should be an instance of datetime, {type(row['date_hour'])} given.
+                """
+            )
+
+        rows.append(
+            {
+                "user_id": row["user_id"],
+                "time_ms": row["learning_time_ms"],
+                "date_hour": date_hour,
+            }
+        )
+
+    return rows

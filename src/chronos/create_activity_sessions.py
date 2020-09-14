@@ -1,12 +1,11 @@
-import itertools
-from datetime import datetime
-from typing import List, TypedDict, Optional
 import logging
-
-import pandas as pd  # type: ignore[import]
-import pandera  # type: ignore[import]
+from datetime import datetime
+from typing import List, Optional, TypedDict
+import itertools
 
 import chronos.activity_events
+import pandas as pd  # type: ignore[import]
+import pandera  # type: ignore[import]
 
 MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION = pd.Timedelta(minutes=5)
 MIN_FOCUS_DURATION = pd.Timedelta(minutes=15)

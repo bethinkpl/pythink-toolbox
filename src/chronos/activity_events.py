@@ -7,7 +7,6 @@ import datatosk
 import dotenv
 import pandas as pd  # type: ignore[import]
 
-
 ENV_PATH = Path("..") / ".env"
 dotenv.load_dotenv(dotenv_path=ENV_PATH)
 

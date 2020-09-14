@@ -1,9 +1,8 @@
-from typing import Dict, Any
-
-from dateutil.parser import isoparse
-from flask import Blueprint, request
+from typing import Any, Dict
 
 from chronos.api.storage import read_cumulative_learning_time
+from dateutil.parser import isoparse
+from flask import Blueprint, request
 
 user_learning_bp = Blueprint("user_learning", __name__)
 

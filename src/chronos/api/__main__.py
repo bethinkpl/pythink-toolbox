@@ -1,13 +1,11 @@
-from flask import Flask
-
 from chronos.api import (
     user_break_time_daily,
-    user_learning_time_daily,
     user_focus_time_daily,
     user_learning_time,
+    user_learning_time_daily,
     users_learning_time,
 )
-
+from flask import Flask
 
 app = Flask(__name__)
 
