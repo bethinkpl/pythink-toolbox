@@ -14,6 +14,8 @@ def get_users_learning_time(item: Users) -> Dict[Any, Any]:
     """
     API end-point | Provides cumulative learning time for a group of users.
     """
+    if not item:
+        raise HTTPException(status_code=404, detail="Request body not found")
     learning_times = {
         user.id: get_learning_time(user.id, user.start_date, user.end_date)
         for user in item.users
