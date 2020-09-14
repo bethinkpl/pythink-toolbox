@@ -1,10 +1,11 @@
 # FIXME Migrate this module from datatosk to pymongo; blocked by LACE-466. pylint: disable=fixme
+# FIXME Improve typing after migration to FastAPI; blocked by LACE-464. pylint: disable=fixme
 import logging as log
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable, Mapping, Union
 
-import datatosk  # No need to resolve types from datatosk, we'll migrate to pymongo. type: ignore[import]
+import datatosk
 import dotenv
 import pandas as pd  # type: ignore[import]
 from chronos.api.errors import TransformationError
@@ -29,7 +30,7 @@ def read_daily_learning_time(
         },
     )
 
-    return _transform_daily_time(query_results=query_results)
+    return _transform_daily_time(query_results=query_results)  # type: ignore[arg-type]
 
 
 def read_cumulative_learning_time(
@@ -48,7 +49,7 @@ def read_cumulative_learning_time(
     )
 
     # FIXME Use $sum aggregation after migration from datatosk to pymongo. pylint: disable=fixme
-    cumulative_learning_time = sum([row["learning_time_ms"] for row in result])
+    cumulative_learning_time: int = sum([row["learning_time_ms"] for row in result])  # type: ignore
 
     return cumulative_learning_time
 
@@ -67,7 +68,7 @@ def read_daily_break_time(
         },
     )
 
-    return _transform_daily_time(query_results=query_results)
+    return _transform_daily_time(query_results=query_results)  # type: ignore[arg-type]
 
 
 def read_daily_focus_time(
@@ -84,7 +85,7 @@ def read_daily_focus_time(
         },
     )
 
-    return _transform_daily_time(query_results=query_results)
+    return _transform_daily_time(query_results=query_results)  # type: ignore[arg-type]
 
 
 def write_activity_sessions(activity_sessions: pd.DataFrame) -> None:
