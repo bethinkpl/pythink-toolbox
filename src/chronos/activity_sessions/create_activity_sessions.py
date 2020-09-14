@@ -16,8 +16,10 @@ def _log_pandas_object(
     identifier: str, data: Union[pd.Series, pd.DataFrame], level: str = "debug"
 ) -> None:
     msg = "{identifier}: \n{data}".format(identifier=identifier, data=data.to_string())
-    if level == "debug":
+    if level == "debug":  # pragma: no cover
         logger.debug(msg)
+    else:
+        raise ValueError
     # add other ifs when other levels are needed
 
 
