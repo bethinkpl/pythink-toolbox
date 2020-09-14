@@ -2,10 +2,11 @@ import logging
 from typing import Optional, Dict, Union
 from datetime import datetime
 
-import bson
-import pandas as pd
-import pymongo
-import pymongo.errors
+import bson  # type: ignore[import]
+import pandas as pd  # type: ignore[import]
+import pymongo  # type: ignore[import]
+from pymongo.client_session import ClientSession  # type: ignore[import]
+import pymongo.errors  # type: ignore[import]
 
 import chronos.activity_sessions
 import chronos.settings
@@ -29,7 +30,7 @@ class MongoCommitError(Exception):
     """Error that occurred while performing MongoDB commit."""
 
 
-def main(user_id: int, activity_events: pd.Series, start_time: datetime):
+def main(user_id: int, activity_events: pd.Series, start_time: datetime) -> None:
     """Perform all operation to create user activity_sessions & save it to storage."""
 
     logger.info("Run test_activity_sessions mongo operations for user_id %i", user_id)
@@ -48,7 +49,9 @@ def main(user_id: int, activity_events: pd.Series, start_time: datetime):
 
 
 def _run_create_user_activity_sessions_transaction(
-    user_id: int, activity_events: pd.Series, session
+    user_id: int,
+    activity_events: pd.Series,
+    session: ClientSession,
 ) -> None:
 
     with session.start_transaction(write_concern=pymongo.WriteConcern(w="majority")):
@@ -78,7 +81,7 @@ def _run_create_user_activity_sessions_transaction(
         logger.info("Transaction committed for user %i.", user_id)
 
 
-def _commit_transaction_with_retry(session) -> None:
+def _commit_transaction_with_retry(session: ClientSession) -> None:
     while True:
         try:
             session.commit_transaction()
@@ -101,8 +104,8 @@ def _commit_transaction_with_retry(session) -> None:
 
 
 def _run_materialized_views_update(
-    session, start_time: datetime
-):  # pylint: disable=unused-argument
+    session: ClientSession, start_time: datetime  # pylint: disable=unused-argument
+) -> None:
 
     # maybe asynchronous update materialized view after every user?
     #   materialized_views = [view1, view2, view3, view4]

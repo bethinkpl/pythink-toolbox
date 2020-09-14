@@ -4,11 +4,12 @@
 # pylint: disable=duplicate-code
 
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Union
 import unittest.mock
 
-import pandas as pd
-import pymongo.cursor
+import bson  # type: ignore[import]
+import pandas as pd  # type: ignore[import]
+import pymongo.cursor  # type: ignore[import]
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
 from chronos.activity_sessions.create_activity_sessions import ActivitySession
@@ -175,8 +176,8 @@ TEST_DATA = [
     ),
 ]
 
-# @pytest.mark.skip() FIXME improve ci
-@parametrize(TEST_DATA)
+# FIXME improve ci
+@parametrize(TEST_DATA)  # type: ignore[misc]
 def test_main(activity_events: pd.Series, expected_data: List[ActivitySession]) -> None:
 
     tested_module.main(
@@ -193,7 +194,9 @@ def test_main(activity_events: pd.Series, expected_data: List[ActivitySession]) 
     assert data == expected_data
 
 
-def _filter_id_field(query_result: pymongo.cursor.Cursor) -> List[Dict]:
+def _filter_id_field(
+    query_result: pymongo.cursor.Cursor,
+) -> List[Dict[str, Union[int, datetime, bool, bson.ObjectId]]]:
     return [
         {key: value for key, value in document.items() if key != "_id"}
         for document in query_result

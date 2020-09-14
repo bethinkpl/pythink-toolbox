@@ -1,7 +1,7 @@
 # TODO notes: handle how to constrain dates of new queries to read_activity_events and materialized_views
 from datetime import datetime
 
-from tqdm import tqdm
+from tqdm import tqdm  # type: ignore[import]
 
 import chronos.activity_sessions.create_activity_sessions
 import chronos.activity_sessions.mongo_io
