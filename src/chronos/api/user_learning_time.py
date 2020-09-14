@@ -1,9 +1,9 @@
-from typing import Any, Dict
+from typing import Dict, Any
 
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from api.user_learning_time_daily import get_learning_time_daily
+from chronos.api.user_learning_time_daily import get_learning_time_daily
 
 user_learning_router = APIRouter()
 
@@ -32,7 +32,5 @@ def get_user_learning_time(user_id: int, item: Item) -> Dict[Any, Any]:
     """
     API end-point | Provides user's cumulative learning time.
     """
-    user_learning_time = get_learning_time(
-        user_id, item.start_date, item.end_date
-    )
+    user_learning_time = get_learning_time(user_id, item.start_date, item.end_date)
     return {user_id: user_learning_time}

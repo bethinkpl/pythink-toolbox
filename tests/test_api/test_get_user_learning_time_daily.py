@@ -3,8 +3,8 @@ import json
 import pytest
 import requests
 
-from tests.api.consts.api_tests import HEADERS, STATUS_OK
-from tests.api.url_helpers import get_url
+from tests.consts import HEADERS, STATUS_OK
+from tests.test_api.url_helpers import get_url
 
 TEST_DATA = {"start_date": 15934399493, "end_date": 15934399490}
 
@@ -14,7 +14,7 @@ USER_ID = 299
 @pytest.mark.skip(reason="https://bethink.atlassian.net/browse/LACE-465")  # type: ignore
 def test_get_user_learning_time_daily() -> None:
     """
-    Covers src.api.user_learning_time_daily.get_user_learning_time_daily()
+    Covers src.test_api.user_learning_time_daily.get_user_learning_time_daily()
     """
     response = requests.post(
         get_url(f"learning_time_daily/{USER_ID}"),

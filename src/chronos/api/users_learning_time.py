@@ -1,9 +1,9 @@
-from typing import Any, Dict, List
+from typing import Dict, Any, List
 
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from api.user_learning_time import get_learning_time
+from chronos.api.user_learning_time import get_learning_time
 
 users_learning_router = APIRouter()
 
