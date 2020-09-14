@@ -1,9 +1,10 @@
 from typing import Dict, Any
 
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
 
 from chronos.api.user_learning_time_daily import get_learning_time_daily
+
+from chronos.api.models import Item
 
 user_learning_router = APIRouter()
 
@@ -19,11 +20,6 @@ def get_learning_time(user_id: int, start_date: str, end_date: str) -> int:
             user_id=user_id, start_date=start_date, end_date=end_date
         ).values()
     )
-
-
-class Item(BaseModel):
-    start_date: str
-    end_date: str
 
 
 # TODO: Try to improve the return type hint after FastAPI is introduced.

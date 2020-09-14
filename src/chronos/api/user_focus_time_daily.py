@@ -1,7 +1,8 @@
 from typing import Dict
 
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
+
+from chronos.api.models import Item
 
 focus_daily_router = APIRouter()
 
@@ -15,11 +16,6 @@ def get_focus_time_daily(
     Get daily focus time from the data source.
     """
     return {"2000-01-01": 150, "2000-01-02": 20, "2000-01-03": 150}
-
-
-class Item(BaseModel):
-    start_date: str
-    end_date: str
 
 
 @focus_daily_router.post("/focus_time_daily/{user_id}")

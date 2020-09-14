@@ -1,7 +1,8 @@
 from typing import Dict
 
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
+
+from chronos.api.models import Item
 
 learning_daily_router = APIRouter()
 
@@ -15,11 +16,6 @@ def get_learning_time_daily(
     Get daily learning time from the data source.
     """
     return {"2000-01-01": 100, "2000-01-02": 300, "2000-01-03": 250}
-
-
-class Item(BaseModel):
-    start_date: str
-    end_date: str
 
 
 @learning_daily_router.post("/learning_time_daily/{user_id}")

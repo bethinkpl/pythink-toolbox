@@ -1,7 +1,8 @@
 from typing import Dict
 
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
+
+from chronos.api.models import Item
 
 break_daily_router = APIRouter()
 
@@ -15,11 +16,6 @@ def get_break_time_daily(
     Get daily break time from the data source.
     """
     return {"2000-01-01": 200, "2000-01-02": 400, "2000-01-03": 50}
-
-
-class Item(BaseModel):
-    start_date: str
-    end_date: str
 
 
 @break_daily_router.post("/break_time_daily/{user_id}")
