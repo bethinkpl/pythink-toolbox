@@ -1,4 +1,5 @@
-from flask import Flask
+import uvicorn
+from fastapi import FastAPI
 
 from chronos.api import (
     user_break_time_daily,
@@ -8,14 +9,14 @@ from chronos.api import (
     users_learning_time,
 )
 
-app = Flask(__name__)
+app = FastAPI()
 
-app.register_blueprint(user_break_time_daily.break_daily_bp)
-app.register_blueprint(user_focus_time_daily.focus_daily_bp)
-app.register_blueprint(user_learning_time.user_learning_bp)
-app.register_blueprint(user_learning_time_daily.learning_daily_bp)
-app.register_blueprint(users_learning_time.users_learning_bp)
+app.include_router(user_break_time_daily.break_daily_router)
+app.include_router(user_focus_time_daily.focus_daily_router)
+app.include_router(user_learning_time.user_learning_router)
+app.include_router(user_learning_time_daily.learning_daily_router)
+app.include_router(users_learning_time.users_learning_router)
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port="5000", debug=True)
+    uvicorn.run(app, host="127.0.0.1", port=5000, debug=True)
