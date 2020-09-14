@@ -1,4 +1,7 @@
 """Whole activity_sessions creation flow for one user."""
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+# pylint: disable=duplicate-code
 
 from datetime import datetime
 from typing import Dict, List
@@ -172,7 +175,7 @@ TEST_DATA = [
     ),
 ]
 
-
+# @pytest.mark.skip() FIXME improve ci
 @parametrize(TEST_DATA)
 def test_main(activity_events: pd.Series, expected_data: List[ActivitySession]) -> None:
 

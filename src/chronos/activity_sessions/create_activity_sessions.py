@@ -37,6 +37,7 @@ def create_user_activity_sessions(
     activity_events: pd.Series,
     last_active_session: Optional[Dict[str, datetime]],
 ) -> List[ActivitySession]:
+    """Perform all operations to create activity_sessions for user."""
 
     logger.info("Creating activity_sessions for user %i.", user_id)
 
