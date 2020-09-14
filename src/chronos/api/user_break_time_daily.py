@@ -3,7 +3,7 @@ from typing import Dict
 
 from dateutil.parser import isoparse
 from flask import Blueprint, jsonify, request
-from storage import read_daily_break_time
+from chronos.api.storage import read_daily_break_time
 
 break_daily_bp = Blueprint("break", __name__)
 
