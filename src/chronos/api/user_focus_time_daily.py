@@ -1,6 +1,7 @@
-from chronos.api.storage import read_daily_focus_time
 from dateutil.parser import isoparse
 from flask import Blueprint, jsonify, request
+
+from chronos.api.storage import read_daily_focus_time
 
 focus_daily_bp = Blueprint("focus", __name__)
 

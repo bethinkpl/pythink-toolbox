@@ -1,6 +1,7 @@
-from chronos.api.storage import read_daily_learning_time
 from dateutil.parser import isoparse
 from flask import Blueprint, jsonify, request
+
+from chronos.api.storage import read_daily_learning_time
 
 learning_daily_bp = Blueprint("learning", __name__)
 
