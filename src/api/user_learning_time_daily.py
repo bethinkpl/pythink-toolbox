@@ -15,9 +15,7 @@ def get_user_learning_time_daily(user_id: int) -> Dict[str, int]:
     """
     body = request.get_json()
     return get_learning_time_daily(
-        user_id,
-        isoparse(body["start_date"]),
-        isoparse(body["end_date"]),
+        user_id, isoparse(body["start_date"]), isoparse(body["end_date"]),
     )
 
 

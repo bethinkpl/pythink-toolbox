@@ -163,19 +163,25 @@ toml = ["toml"]
 
 [[package]]
 category = "main"
-description = "Python library for fetching data from different sources"
+description = ""
+develop = true
 name = "datatosk"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = "^3.8"
 version = "1.0.0"
 
 [package.dependencies]
-google-cloud-bigquery = ">=1.24.0,<2.0.0"
-mysqlclient = ">=1.4.6,<2.0.0"
-pandas = ">=1.0.1,<2.0.0"
-pandas-gbq = ">=0.13.1,<0.14.0"
-pymongo = ">=3.11.0,<4.0.0"
-sqlalchemy = ">=1.3.13,<2.0.0"
+google-cloud-bigquery = "^1.24.0"
+mysqlclient = "^1.4.6"
+pandas = "^1.0.1"
+pandas-gbq = "^0.13.1"
+pymongo = "^3.11.0"
+sqlalchemy = "^1.3.13"
+
+[package.source]
+reference = ""
+type = "directory"
+url = "../datatosk"
 
 [[package]]
 category = "dev"
@@ -950,7 +956,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "541d936e0f9e867772a2a0a4aee2273633a862e0801f19fc4f5fc9d87aaa4ab7"
+content-hash = "bf8e617749733bc90c8f289c4ad487f55f7223ed342060ddcdddc61c4b6510cd"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1072,10 +1078,7 @@ coverage = [
     {file = "coverage-5.2.1-cp39-cp39-win_amd64.whl", hash = "sha256:b8f58c7db64d8f27078cbf2a4391af6aa4e4767cc08b37555c4ae064b8558d9b"},
     {file = "coverage-5.2.1.tar.gz", hash = "sha256:a34cb28e0747ea15e82d13e14de606747e9e484fb28d63c999483f5d5188e89b"},
 ]
-datatosk = [
-    {file = "datatosk-1.0.0-py3-none-any.whl", hash = "sha256:f684a61480d423a74027e8b30695479debcfc517dfeb9f4779dc2f2b5aa2247f"},
-    {file = "datatosk-1.0.0.tar.gz", hash = "sha256:c1fb361e27d7e6fcd3e9647569fa930f29117d946a102d4ce5785152c9a6e926"},
-]
+datatosk = []
 distlib = [
     {file = "distlib-0.3.1-py2.py3-none-any.whl", hash = "sha256:8c09de2c67b3e7deef7184574fc060ab8a793e7adbb183d942c389c8b13c52fb"},
     {file = "distlib-0.3.1.zip", hash = "sha256:edf6116872c863e1aa9d5bb7cb5e05a022c519a4594dc703843343a9ddd9bff1"},

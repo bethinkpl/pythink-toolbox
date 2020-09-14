@@ -1,6 +1,6 @@
 from flask import Flask
 
-from api import (
+from api import (  # type: ignore[import]
     user_break_time_daily,
     user_focus_time_daily,
     user_learning_time,
