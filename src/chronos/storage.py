@@ -35,7 +35,8 @@ def read_activity_sessions_by_user(user_id: int) -> pd.DataFrame:
     Read activity session from mongodb for a defined user.
     """
     return mongo_source.read.to_pandas(
-        collection="activity_sessions", query_filter={"user_id": user_id},
+        collection="activity_sessions",
+        query_filter={"user_id": user_id},
     )
 
 

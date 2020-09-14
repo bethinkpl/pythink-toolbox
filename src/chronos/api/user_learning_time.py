@@ -1,8 +1,8 @@
-from typing import Any, Dict
+from typing import Dict, Any
 
 from flask import Blueprint, request
 
-from src.api.user_learning_time_daily import get_learning_time_daily
+from chronos.api.user_learning_time_daily import get_learning_time_daily
 
 user_learning_bp = Blueprint("user_learning", __name__)
 
