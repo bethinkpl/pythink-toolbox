@@ -15,12 +15,11 @@ logger = logging.getLogger(__name__)
 def _log_pandas_object(
     identifier: str, data: Union[pd.Series, pd.DataFrame], level: str = "debug"
 ) -> None:
-    msg = "{identifier}: \n{data}".format(identifier=identifier, data=data.to_string())
+    msg = f"{identifier}: \n %s"
     if level == "debug":  # pragma: no cover
-        logger.debug(msg)
+        logger.debug(msg, data.to_string())
     else:
-        raise ValueError
-    # add other ifs when other levels are needed
+        raise NotImplementedError  # add other ifs when other levels are needed
 
 
 class ActivitySession(TypedDict):
