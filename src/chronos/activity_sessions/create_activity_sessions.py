@@ -2,8 +2,8 @@ from datetime import datetime
 import logging
 from typing import List, Optional, TypedDict, Union, Dict
 
-import pandas as pd  # type: ignore[import]
-import pandera  # type: ignore[import]
+import pandas as pd
+import pandera
 
 MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION = pd.Timedelta(minutes=5)
 MIN_FOCUS_DURATION = pd.Timedelta(minutes=15)

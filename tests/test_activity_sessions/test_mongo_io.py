@@ -7,9 +7,7 @@ from datetime import datetime
 from typing import Dict, List, Union, Callable
 import unittest.mock
 
-import bson  # type: ignore[import]
-import pandas as pd  # type: ignore[import]
-import pymongo.cursor  # type: ignore[import]
+import pandas as pd
 import pytest
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 

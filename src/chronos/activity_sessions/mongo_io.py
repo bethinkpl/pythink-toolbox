@@ -2,11 +2,11 @@ import logging
 from typing import Optional, Dict, Union
 from datetime import datetime
 
-import bson  # type: ignore[import]
-import pandas as pd  # type: ignore[import]
-import pymongo  # type: ignore[import]
-from pymongo.client_session import ClientSession  # type: ignore[import]
-import pymongo.errors  # type: ignore[import]
+import bson
+import pandas as pd
+import pymongo
+from pymongo.client_session import ClientSession
+import pymongo.errors
 
 import chronos.activity_sessions
 from chronos.settings import CLIENT, ACTIVITY_SESSIONS_COLLECTION

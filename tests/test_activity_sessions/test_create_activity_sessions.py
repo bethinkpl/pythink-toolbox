@@ -6,8 +6,8 @@ from typing import Optional, Dict
 
 import hypothesis
 from hypothesis.extra.pandas import series, indexes, data_frames, column
-import pandas as pd  # type: ignore[import]
-import pandera.errors  # type: ignore[import]
+import pandas as pd
+import pandera.errors
 import pytest
 from pythink_toolbox.testing import parametrization
 

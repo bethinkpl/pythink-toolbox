@@ -2,7 +2,7 @@
 from datetime import datetime
 import logging
 
-from tqdm import tqdm  # type: ignore[import]
+from tqdm import tqdm
 
 import chronos.activity_sessions.create_activity_sessions
 import chronos.activity_sessions.mongo_io
