@@ -16,11 +16,11 @@ def get_users_learning_time(users: Users) -> Dict[Any, Any]:
     API end-point | Provides cumulative learning time for a group of users.
     """
     learning_times = {
-        user["id"]: read_cumulative_learning_time(
-            user_id=user["id"],
-            start_date=isoparse(user["start_date"]),
-            end_date=isoparse(user["end_date"]),
+        user.id: read_cumulative_learning_time(
+            user_id=user.id,
+            start_date=isoparse(user.start_date),
+            end_date=isoparse(user.end_date),
         )
-        for user in users
+        for user in users.users
     }
     return learning_times
