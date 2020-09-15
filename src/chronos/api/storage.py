@@ -1,16 +1,16 @@
-import logging as log
 from datetime import datetime
-from pathlib import Path
 from typing import Iterable, Mapping, Union
 
-import dotenv
-import pandas as pd  # type: ignore[import]
+import pymongo
+import chronos.settings
 from chronos.api.errors import TransformationError
 
-ENV_PATH = Path(".") / ".env"
-dotenv.load_dotenv(dotenv_path=ENV_PATH)
-
-mongo_source = datatosk.mongodb("chronos")
+DATABASE = pymongo.MongoClient(
+    host=chronos.settings.MONGO_HOST,
+    port=chronos.settings.MONGO_PORT,
+    username=chronos.settings.MONGO_USERNAME,
+    password=chronos.settings.MONGO_PASSWORD,
+)[chronos.settings.MONGO_DATABASE]
 
 
 def read_daily_learning_time(
@@ -19,15 +19,14 @@ def read_daily_learning_time(
     """
     Read user learning time from mongodb.
     """
-    query_results = mongo_source.read.to_list(
-        collection="daily_learning_time_view",
-        query_filter={
+    query_results = DATABASE["daily_learning_time_view"].find(
+        filter={
             "user_id": user_id,
             "date_hour": {"$gte": start_date, "$lt": end_date},
         },
     )
 
-    return _transform_daily_time(query_results=query_results)  # type: ignore[arg-type]
+    return _transform_daily_time(query_results=query_results)
 
 
 def read_cumulative_learning_time(
@@ -36,9 +35,8 @@ def read_cumulative_learning_time(
     """
     Read users' cumulative learning time from mongodb.
     """
-    result = mongo_source.read.to_list(
-        collection="daily_learning_time_view",
-        query_filter={
+    result = DATABASE["daily_learning_time_view"].find(
+        filter={
             "user_id": user_id,
             "date_hour": {"$gte": start_date, "$lt": end_date},
         },
@@ -46,7 +44,7 @@ def read_cumulative_learning_time(
     )
 
     # FIXME Use $sum aggregation after migration from datatosk to pymongo. pylint: disable=fixme
-    cumulative_learning_time: int = sum([row["time_ms"] for row in result])  # type: ignore
+    cumulative_learning_time: int = sum([row["time_ms"] for row in result])
 
     return cumulative_learning_time
 
@@ -57,15 +55,14 @@ def read_daily_break_time(
     """
     Read user focus time from mongodb.
     """
-    query_results = mongo_source.read.to_list(
-        collection="daily_break_time_view",
-        query_filter={
+    query_results = DATABASE["daily_break_time_view"].find(
+        filter={
             "user_id": user_id,
             "date_hour": {"$gte": start_date, "$lt": end_date},
         },
     )
 
-    return _transform_daily_time(query_results=query_results)  # type: ignore[arg-type]
+    return _transform_daily_time(query_results=query_results)
 
 
 def read_daily_focus_time(
@@ -74,33 +71,14 @@ def read_daily_focus_time(
     """
     Read user focus time from mongodb.
     """
-    query_results = mongo_source.read.to_list(
-        collection="daily_focus_time_view",
-        query_filter={
+    query_results = DATABASE["daily_focus_time_view"].find(
+        filter={
             "user_id": user_id,
             "date_hour": {"$gte": start_date, "$lt": end_date},
         },
     )
 
-    return _transform_daily_time(query_results=query_results)  # type: ignore[arg-type]
-
-
-def write_activity_sessions(activity_sessions: pd.DataFrame) -> None:
-    """
-    Write activity sessions to mongodb.
-    """
-    mongo_source.write(collection="activity_sessions", data=activity_sessions)
-    log.info("Wrote %i activity sessions to storage.", len(activity_sessions))
-
-
-def read_activity_sessions_by_user(user_id: int) -> pd.DataFrame:
-    """
-    Read activity session from mongodb for a defined user.
-    """
-    return mongo_source.read.to_pandas(
-        collection="activity_sessions",
-        query_filter={"user_id": user_id},
-    )
+    return _transform_daily_time(query_results=query_results)
 
 
 def _transform_daily_time(
