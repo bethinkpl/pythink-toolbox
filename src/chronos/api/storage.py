@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Iterable, Mapping, Union
+from typing import Iterable, Mapping, TypedDict, Union
 
 import pymongo  # type: ignore[import]
 import chronos.settings
@@ -13,9 +13,20 @@ DATABASE = pymongo.MongoClient(
 )[chronos.settings.MONGO_DATABASE]
 
 
+class UserDailyTime(TypedDict):
+    user_id: int
+    time_ms: int
+    date_hour: datetime
+
+
+class UserCumulativeTime(TypedDict):
+    user_id: int
+    time_ms: int
+
+
 def read_daily_learning_time(
     user_id: int, start_date: datetime, end_date: datetime
-) -> Iterable[Mapping[str, Union[int, str, datetime]]]:
+) -> Iterable[UserDailyTime]:
     """
     Read user learning time from mongodb.
     """
@@ -51,7 +62,7 @@ def read_cumulative_learning_time(
 
 def read_daily_break_time(
     user_id: int, start_date: datetime, end_date: datetime
-) -> Iterable[Mapping[str, Union[int, str, datetime]]]:
+) -> Iterable[UserDailyTime]:
     """
     Read user focus time from mongodb.
     """
@@ -67,7 +78,7 @@ def read_daily_break_time(
 
 def read_daily_focus_time(
     user_id: int, start_date: datetime, end_date: datetime
-) -> Iterable[Mapping[str, Union[int, str, datetime]]]:
+) -> Iterable[UserDailyTime]:
     """
     Read user focus time from mongodb.
     """
@@ -83,24 +94,14 @@ def read_daily_focus_time(
 
 def _transform_daily_time(
     query_results: Iterable[Mapping[str, Union[int, str, datetime]]],
-) -> Iterable[Mapping[str, Union[int, str, datetime]]]:
-    rows = []
-    for row in query_results:
-        if isinstance(row["date_hour"], datetime):
-            date_hour = row["date_hour"].isoformat()
-        else:
-            raise TransformationError(
-                f"""
-                    date_hour should be an instance of datetime, {type(row['date_hour'])} given.
-                """
-            )
-
-        rows.append(
-            {
-                "user_id": row["user_id"],
-                "time_ms": row["time_ms"],
-                "date_hour": date_hour,
-            }
+) -> Iterable[UserDailyTime]:
+    rows = [
+        UserDailyTime(
+            user_id=row["user_id"],
+            time_ms=row["time_ms"],
+            date_hour=row["date_hour"],
         )
+        for row in query_results
+    ]
 
     return rows
