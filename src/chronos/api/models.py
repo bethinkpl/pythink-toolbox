@@ -1,9 +1,12 @@
-from typing import Optional
-
-from pydantic.main import BaseModel
+from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 
+# pylint: disable=too-few-public-methods
 class User(BaseModel):
-    id: Optional[int] = None
+    """
+    Data model for handling user learning time request body.
+    """
+
+    id: int
     start_date: str
     end_date: str

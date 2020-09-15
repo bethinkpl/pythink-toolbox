@@ -19,6 +19,7 @@ pandera = "^0.4.4"
 pythink-toolbox = "^0.1.0"
 fastapi = "^0.61.1"
 uvicorn = "^0.11.8"
+pymongo = "^3.11.0"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
@@ -47,7 +48,7 @@ source = ["src"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 51 #TODO cover more code
+fail_under = 40 #TODO cover more code
 
 [tool.coverage.html]
 directory = "coverage/html_report"

@@ -1,12 +1,12 @@
-import uvicorn
-from fastapi import FastAPI
+import uvicorn  # type: ignore[import]
+from fastapi.applications import FastAPI
 
 from chronos.api import (
     user_break_time_daily,
-    users_learning_time,
-    user_learning_time_daily,
     user_focus_time_daily,
     user_learning_time,
+    user_learning_time_daily,
+    users_learning_time,
 )
 
 app = FastAPI()
