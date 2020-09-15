@@ -117,19 +117,3 @@ def create_id_like_validation_column(
         required=True,
         name=name,
     )
-
-
-VALIDATION_CHECKS_FOR_LIST_OF_IDS = [  # pragma: no branch
-    Check.contains_type_only(int),
-    Check.no_duplicates(),
-    Check.greater_or_equal(0, map_=min),
-]
-
-USER_LEARNING_PERIODS_COLUMNS = {
-    "is_satisfaction_guarantee_compliant_based_on_survey": pandera.Column(pandera.Bool),
-    "is_satisfaction_guarantee_compliant_based_on_educational_goal": pandera.Column(
-        pandera.Bool
-    ),
-    "is_entry_exam_completed": pandera.Column(pandera.Bool),
-    "is_final_exam_completed": pandera.Column(pandera.Bool),
-}
