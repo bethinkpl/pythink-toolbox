@@ -4,7 +4,7 @@
 # pylint: disable=duplicate-code
 
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Callable
 import unittest.mock
 
 import bson  # type: ignore[import]
@@ -17,10 +17,7 @@ from chronos.activity_sessions.create_activity_sessions import ActivitySession
 import chronos.activity_sessions.mongo_io as tested_module
 
 
-TEST_USER_ID = 1
-
-
-tested_module.ACTIVITY_SESSIONS_COLLECTION.delete_many({})
+TEST_USER_ID = 108
 
 
 class MainScenario(Scenario):
@@ -177,28 +174,23 @@ TEST_DATA = [
     ),
 ]
 
-# FIXME improve ci
-@pytest.mark.integration
+
+@pytest.mark.integration  # type: ignore[misc]
 @parametrize(TEST_DATA)  # type: ignore[misc]
-def test_main(activity_events: pd.Series, expected_data: List[ActivitySession]) -> None:
+def test_main(
+    activity_events: pd.Series,
+    expected_data: List[ActivitySession],
+    get_activity_session_collection_content_without_id: Callable[
+        [], List[Dict[str, Union[int, datetime, bool]]]
+    ],
+) -> None:
+
     tested_module.main(
         user_id=TEST_USER_ID,
         activity_events=activity_events,
         start_time=unittest.mock.ANY,
     )
 
-    activity_sessions_collection_content = (
-        tested_module.ACTIVITY_SESSIONS_COLLECTION.find()
-    )
-    data = _filter_id_field(query_result=activity_sessions_collection_content)
+    data = get_activity_session_collection_content_without_id()
 
     assert data == expected_data
-
-
-def _filter_id_field(
-    query_result: pymongo.cursor.Cursor,
-) -> List[Dict[str, Union[int, datetime, bool, bson.ObjectId]]]:
-    return [
-        {key: value for key, value in document.items() if key != "_id"}
-        for document in query_result
-    ]
