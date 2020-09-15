@@ -1,8 +1,10 @@
 import os
 import pathlib
+from typing import Optional
 
 import dotenv
-import pymongo.collection
+from pymongo.collection import Collection
+from pymongo import MongoClient
 
 ROOT_DIR = pathlib.Path(__file__).parents[2]
 ENV_PATH = ROOT_DIR / ".env"
@@ -17,15 +19,34 @@ MONGO_USERNAME = os.getenv("MONGO_USER_CHRONOS", "")
 MONGO_PASSWORD = os.getenv("MONGO_PASSWORD_CHRONOS", "")
 MONGO_DATABASE = os.getenv("MONGO_DATABASE_CHRONOS", "")
 
-CLIENT = pymongo.MongoClient(
-    host=MONGO_HOST,
-    port=MONGO_PORT,
-    username=MONGO_USERNAME,
-    password=MONGO_PASSWORD,
-)
 
-CHRONOS_DB = CLIENT[MONGO_DATABASE]
+class _MongoDB:
+    def __init__(self) -> None:
+        self._client: Optional[MongoClient] = None
 
-ACTIVITY_SESSIONS_COLLECTION: pymongo.collection.Collection = (
-    CHRONOS_DB.activity_sessions
-)
+    @property
+    def client(self) -> Optional[MongoClient]:
+        """client property"""
+        if self._client is None:
+            raise AttributeError("First you need to `mongodb.init_client()`")
+        return self._client
+
+    @property
+    def activity_sessions_collection(self) -> Collection:
+        """activity_sessions_collection property"""
+        if self._client is None:
+            raise AttributeError("First you need to `mongodb.init_client()`")
+        return self._client[MONGO_DATABASE].activity_sessions
+
+    def init_client(self) -> None:
+        """Used for initializing MongoDB Client based on .env configuration."""
+        if not self._client:
+            self._client = MongoClient(
+                host=MONGO_HOST,
+                port=MONGO_PORT,
+                username=MONGO_USERNAME,
+                password=MONGO_PASSWORD,
+            )
+
+
+mongodb = _MongoDB()

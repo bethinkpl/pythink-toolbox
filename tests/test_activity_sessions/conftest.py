@@ -19,8 +19,9 @@ def _filter_id_field(
 def _get_activity_session_collection_content_without_id() -> List[
     Dict[str, Union[int, datetime, bool]]
 ]:
+
     activity_sessions_collection_content = (
-        chronos.settings.ACTIVITY_SESSIONS_COLLECTION.find()
+        chronos.settings.mongodb.activity_sessions_collection.find()
     )
 
     return _filter_id_field(query_result=activity_sessions_collection_content)
@@ -36,4 +37,12 @@ def get_activity_session_collection_content_without_id() -> Callable[
     return _get_activity_session_collection_content_without_id
 
 
-chronos.settings.ACTIVITY_SESSIONS_COLLECTION.delete_many({})
+def _clear_activity_sessions_collection() -> None:
+    chronos.settings.mongodb.init_client()
+    chronos.settings.mongodb.activity_sessions_collection.delete_many({})
+
+
+@pytest.fixture  # type: ignore[misc]
+def clear_activity_sessions_collection() -> Callable[[], None]:
+    """Fixture that clears whole activity_sessions collection."""
+    return _clear_activity_sessions_collection

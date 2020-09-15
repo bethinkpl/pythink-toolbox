@@ -10,15 +10,16 @@ import pandas as pd
 
 import chronos.activity_sessions.main
 from chronos.activity_sessions.activity_events import read
-import chronos.settings
 
-# TODO When GBQ integration ready -> replace mock/add new test
+
+# TODO LACE-465 When GBQ integration ready -> replace mock/add new test
 @pytest.mark.integration  # type: ignore[misc]
 def test_main(
     mocker: MockerFixture,
     get_activity_session_collection_content_without_id: Callable[
         [], List[Dict[str, Union[int, datetime, bool]]]
     ],
+    clear_activity_sessions_collection: Callable[[], None],
 ) -> None:
 
     mocker.patch(
@@ -32,6 +33,8 @@ def test_main(
             ],
         ),
     )
+
+    clear_activity_sessions_collection()
 
     chronos.activity_sessions.main.main(start_time=mocker.ANY, end_time=mocker.ANY)
 
@@ -57,3 +60,5 @@ def test_main(
     ]
 
     assert data == expected_data
+
+    clear_activity_sessions_collection()
