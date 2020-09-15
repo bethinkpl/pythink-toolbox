@@ -3,8 +3,8 @@ from typing import Iterable, Mapping, TypedDict, Union
 
 import pymongo  # type: ignore[import]
 import chronos.settings
-from pymongo.command_cursor import CommandCursor
-from pymongo.cursor import Cursor
+from pymongo.command_cursor import CommandCursor  # type: ignore[import]
+from pymongo.cursor import Cursor  # type: ignore[import]
 
 DATABASE = pymongo.MongoClient(
     host=chronos.settings.MONGO_HOST,
@@ -60,7 +60,7 @@ def read_cumulative_learning_time(
     if len(results) == 0:
         return 0
 
-    return results[0]["time_ms"]
+    return int(results[0]["time_ms"])
 
 
 def read_daily_break_time(
@@ -69,7 +69,7 @@ def read_daily_break_time(
     """
     Read user focus time from mongodb.
     """
-    query_results = DATABASE["daily_break_time_view"].find(
+    query_results: Cursor = DATABASE["daily_break_time_view"].find(
         filter={
             "user_id": user_id,
             "date_hour": {"$gte": start_date, "$lt": end_date},
@@ -85,7 +85,7 @@ def read_daily_focus_time(
     """
     Read user focus time from mongodb.
     """
-    query_results = DATABASE["daily_focus_time_view"].find(
+    query_results: Cursor = DATABASE["daily_focus_time_view"].find(
         filter={
             "user_id": user_id,
             "date_hour": {"$gte": start_date, "$lt": end_date},
@@ -96,7 +96,7 @@ def read_daily_focus_time(
 
 
 def _transform_daily_time(
-    query_results: Iterable[Mapping[str, Union[int, str, datetime]]],
+    query_results: Cursor,
 ) -> Iterable[UserDailyTime]:
     rows = [
         UserDailyTime(

@@ -11,7 +11,9 @@ users_learning_router = APIRouter()
 
 
 @users_learning_router.post("/learning_time")
-def get_users_learning_time(users: List[User] = Body(..., embed=True)) -> Dict:
+def get_users_learning_time(
+    users: List[User] = Body(..., embed=True)
+) -> Dict[int, int]:
     """
     API end-point | Provides cumulative learning time for a group of users.
     """
