@@ -1,15 +1,15 @@
 from dateutil.parser import isoparse
 
+from chronos.api.models import User
 from fastapi import APIRouter
-from chronos.api.storage import read_daily_break_time
 
-from chronos.api.models import Item
+from chronos.api.storage import read_daily_break_time
 
 break_daily_router = APIRouter()
 
 
 @break_daily_router.post("/break_time_daily/{user_id}")
-def get_user_break_time_daily(user_id: int, item: Item) -> str:
+def get_user_break_time_daily(user_id: int, user: User) -> Dict[str, int]:
     """
     API end-point | Provides user's daily break time.
     """
