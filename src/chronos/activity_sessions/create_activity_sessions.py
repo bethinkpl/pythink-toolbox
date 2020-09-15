@@ -12,16 +12,6 @@ MAX_BREAK_DURATION = pd.Timedelta(minutes=30)
 logger = logging.getLogger(__name__)
 
 
-def _log_pandas_object(
-    identifier: str, data: Union[pd.Series, pd.DataFrame], level: str = "debug"
-) -> None:
-    msg = f"{identifier}: \n %s"
-    if level == "debug":  # pragma: no cover
-        logger.debug(msg, data.to_string())
-    else:
-        raise NotImplementedError  # add other ifs when other levels are needed
-
-
 class ActivitySession(TypedDict):
     """Activity sessions schema."""
 
@@ -239,3 +229,13 @@ def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySess
     )
 
     return activity_sessions_records
+
+
+def _log_pandas_object(
+    identifier: str, data: Union[pd.Series, pd.DataFrame], level: str = "debug"
+) -> None:
+    msg = f"{identifier}: \n %s"
+    if level == "debug":  # pragma: no cover
+        logger.debug(msg, data.to_string())
+    else:
+        raise NotImplementedError  # add other ifs when other levels are needed
