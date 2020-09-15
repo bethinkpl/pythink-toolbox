@@ -1,3 +1,5 @@
+from typing import Dict
+
 from dateutil.parser import isoparse
 
 from fastapi import APIRouter
@@ -13,11 +15,9 @@ def get_user_learning_time_daily(user_id: int, user: User) -> Dict[str, int]:
     """
     API end-point | Provides user's daily learning time.
     """
-    learning_time: str = jsonify(
-        read_daily_learning_time(
-            user_id=user_id,
-            start_date=isoparse(user.start_date),
-            end_date=isoparse(user.end_date),
-        )
+    learning_time = read_daily_learning_time(
+        user_id=user_id,
+        start_date=isoparse(user.start_date),
+        end_date=isoparse(user.end_date),
     )
     return learning_time

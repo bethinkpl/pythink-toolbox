@@ -1,5 +1,6 @@
+from typing import Dict
+
 from dateutil.parser import isoparse
-from flask import Blueprint, jsonify, request
 
 from chronos.api.models import User
 from fastapi import APIRouter
@@ -16,7 +17,7 @@ def get_user_focus_time_daily(user_id: int, user: User) -> Dict[str, int]:
     """
     focus_time = read_daily_focus_time(
         user_id=user_id,
-        start_date=isoparse(item.start_date),
-        end_date=isoparse(item.end_date),
+        start_date=isoparse(user.start_date),
+        end_date=isoparse(user.end_date),
     )
     return focus_time

@@ -1,3 +1,5 @@
+from typing import Dict
+
 from dateutil.parser import isoparse
 
 from chronos.api.models import User
@@ -15,7 +17,7 @@ def get_user_break_time_daily(user_id: int, user: User) -> Dict[str, int]:
     """
     break_time: str = read_daily_break_time(
         user_id=user_id,
-        start_date=isoparse(item.start_date),
-        end_date=isoparse(item.end_date),
+        start_date=isoparse(user.start_date),
+        end_date=isoparse(user.end_date),
     )
     return break_time
