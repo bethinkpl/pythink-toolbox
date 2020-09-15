@@ -9,21 +9,9 @@ from pymongo.client_session import ClientSession  # type: ignore[import]
 import pymongo.errors  # type: ignore[import]
 
 import chronos.activity_sessions
-import chronos.settings
+from chronos.settings import CLIENT, ACTIVITY_SESSIONS_COLLECTION
 
 logger = logging.getLogger(__name__)
-
-CLIENT = pymongo.MongoClient(
-    host=chronos.settings.MONGO_HOST,
-    port=chronos.settings.MONGO_PORT,
-    username=chronos.settings.MONGO_USERNAME,
-    password=chronos.settings.MONGO_PASSWORD,
-)
-
-CHRONOS_DB = CLIENT[chronos.settings.MONGO_DATABASE]
-ACTIVITY_SESSIONS_COLLECTION: pymongo.collection.Collection = (
-    CHRONOS_DB.activity_sessions
-)
 
 
 class MongoCommitError(Exception):
