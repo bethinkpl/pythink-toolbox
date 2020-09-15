@@ -1,10 +1,9 @@
 from typing import Dict
 
 from dateutil.parser import isoparse
-
-from chronos.api.models import User
 from fastapi import APIRouter
 
+from chronos.api.models import User
 from chronos.api.storage import read_daily_break_time
 
 break_daily_router = APIRouter()
