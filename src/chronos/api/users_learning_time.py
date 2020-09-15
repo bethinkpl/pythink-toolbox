@@ -1,6 +1,7 @@
-from typing import Any, Dict, List
+from typing import Dict, List
 
-from fastapi import APIRouter, Body
+from fastapi.routing import APIRouter
+from fastapi.param_functions import Body
 from dateutil.parser import isoparse
 
 from chronos.api.models import User
@@ -9,11 +10,8 @@ from chronos.api.storage import read_cumulative_learning_time
 users_learning_router = APIRouter()
 
 
-# TODO: Try to improve the return type hint after FastAPI is introduced.
 @users_learning_router.post("/learning_time")
-def get_users_learning_time(
-    users: List[User] = Body(..., embed=True)
-) -> Dict[Any, Any]:
+def get_users_learning_time(users: List[User] = Body(..., embed=True)) -> Dict:
     """
     API end-point | Provides cumulative learning time for a group of users.
     """

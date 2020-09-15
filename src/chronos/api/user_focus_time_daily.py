@@ -1,7 +1,7 @@
 from typing import Dict
 
 from dateutil.parser import isoparse
-from fastapi import APIRouter
+from fastapi.routing import APIRouter
 
 from chronos.api.models import User
 from chronos.api.storage import read_daily_focus_time
