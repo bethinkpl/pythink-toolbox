@@ -1,4 +1,4 @@
-from typing import Dict, Iterable
+from typing import Iterable
 
 from dateutil.parser import isoparse
 from fastapi.routing import APIRouter

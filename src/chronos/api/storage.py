@@ -1,10 +1,11 @@
 from datetime import datetime
-from typing import Iterable, Mapping, TypedDict, Union
+from typing import Iterable, TypedDict
 
 import pymongo  # type: ignore[import]
-import chronos.settings
 from pymongo.command_cursor import CommandCursor  # type: ignore[import]
 from pymongo.cursor import Cursor  # type: ignore[import]
+
+import chronos.settings
 
 DATABASE = pymongo.MongoClient(
     host=chronos.settings.MONGO_HOST,
@@ -15,6 +16,10 @@ DATABASE = pymongo.MongoClient(
 
 
 class UserDailyTime(TypedDict):
+    """
+    Data model for daily time records.
+    """
+
     user_id: int
     time_ms: int
     date_hour: datetime
