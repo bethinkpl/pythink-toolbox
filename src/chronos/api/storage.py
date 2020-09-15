@@ -45,11 +45,11 @@ def read_cumulative_learning_time(
             "user_id": user_id,
             "date_hour": {"$gte": start_date, "$lt": end_date},
         },
-        projection={"learning_time_ms": 1, "_id": 0},
+        projection={"time_ms": 1, "_id": 0},
     )
 
     # FIXME Use $sum aggregation after migration from datatosk to pymongo. pylint: disable=fixme
-    cumulative_learning_time: int = sum([row["learning_time_ms"] for row in result])  # type: ignore
+    cumulative_learning_time: int = sum([row["time_ms"] for row in result])  # type: ignore
 
     return cumulative_learning_time
 
@@ -123,7 +123,7 @@ def _transform_daily_time(
         rows.append(
             {
                 "user_id": row["user_id"],
-                "time_ms": row["learning_time_ms"],
+                "time_ms": row["time_ms"],
                 "date_hour": date_hour,
             }
         )
