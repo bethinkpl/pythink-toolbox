@@ -2,14 +2,30 @@ import os
 import pathlib
 
 import dotenv
+import pymongo.collection
 
 ROOT_DIR = pathlib.Path(__file__).parents[2]
 ENV_PATH = ROOT_DIR / ".env"
 
 dotenv.load_dotenv(dotenv_path=ENV_PATH)
 
-MONGO_HOST = os.getenv("MONGO_HOST_CHRONOS")
+BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", "")
+
+MONGO_HOST = os.getenv("MONGO_HOST_CHRONOS", "")
 MONGO_PORT = int(os.getenv("MONGO_PORT_CHRONOS", "0"))
-MONGO_USERNAME = os.getenv("MONGO_USER_CHRONOS")
-MONGO_PASSWORD = os.getenv("MONGO_PASSWORD_CHRONOS")
-MONGO_DATABASE = os.getenv("MONGO_DATABASE_CHRONOS")
+MONGO_USERNAME = os.getenv("MONGO_USER_CHRONOS", "")
+MONGO_PASSWORD = os.getenv("MONGO_PASSWORD_CHRONOS", "")
+MONGO_DATABASE = os.getenv("MONGO_DATABASE_CHRONOS", "")
+
+CLIENT = pymongo.MongoClient(
+    host=MONGO_HOST,
+    port=MONGO_PORT,
+    username=MONGO_USERNAME,
+    password=MONGO_PASSWORD,
+)
+
+CHRONOS_DB = CLIENT[MONGO_DATABASE]
+
+ACTIVITY_SESSIONS_COLLECTION: pymongo.collection.Collection = (
+    CHRONOS_DB.activity_sessions
+)

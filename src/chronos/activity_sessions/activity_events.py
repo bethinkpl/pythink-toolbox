@@ -1,19 +1,10 @@
-import os
-
 from typing import Union
-
-from pathlib import Path
 from datetime import datetime
 
-import dotenv
 import datatosk
-import pandas as pd  # type: ignore[import]
+import pandas as pd
 
-
-ENV_PATH = Path("../..") / ".env"
-dotenv.load_dotenv(dotenv_path=ENV_PATH)
-
-BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", "")
+from chronos.settings import BIGQUERY_PLATFORM_DATASET_ID
 
 
 def read(
