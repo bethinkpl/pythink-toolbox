@@ -3,7 +3,6 @@ from typing import Iterable, Mapping, TypedDict, Union
 
 import pymongo  # type: ignore[import]
 import chronos.settings
-from chronos.api.errors import TransformationError
 
 DATABASE = pymongo.MongoClient(
     host=chronos.settings.MONGO_HOST,
