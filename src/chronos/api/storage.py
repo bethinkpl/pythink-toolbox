@@ -3,6 +3,8 @@ from typing import Iterable, Mapping, TypedDict, Union
 
 import pymongo  # type: ignore[import]
 import chronos.settings
+from pymongo.command_cursor import CommandCursor
+from pymongo.cursor import Cursor
 
 DATABASE = pymongo.MongoClient(
     host=chronos.settings.MONGO_HOST,
@@ -18,18 +20,13 @@ class UserDailyTime(TypedDict):
     date_hour: datetime
 
 
-class UserCumulativeTime(TypedDict):
-    user_id: int
-    time_ms: int
-
-
 def read_daily_learning_time(
     user_id: int, start_date: datetime, end_date: datetime
 ) -> Iterable[UserDailyTime]:
     """
     Read user learning time from mongodb.
     """
-    query_results = DATABASE["daily_learning_time_view"].find(
+    query_results: Cursor = DATABASE["daily_learning_time_view"].find(
         filter={
             "user_id": user_id,
             "date_hour": {"$gte": start_date, "$lt": end_date},
@@ -45,18 +42,25 @@ def read_cumulative_learning_time(
     """
     Read users' cumulative learning time from mongodb.
     """
-    result = DATABASE["daily_learning_time_view"].find(
-        filter={
-            "user_id": user_id,
-            "date_hour": {"$gte": start_date, "$lt": end_date},
-        },
-        projection={"time_ms": 1, "_id": 0},
+    cursor: CommandCursor = DATABASE["daily_learning_time_view"].aggregate(
+        pipeline=[
+            {
+                "$match": {
+                    "user_id": user_id,
+                    "date_hour": {"$gte": start_date, "$lt": end_date},
+                }
+            },
+            {"$group": {"_id": "null", "time_ms": {"$sum": "$time_ms"}}},
+            {"$project": {"time_ms": 1, "_id": 0}},
+        ],
     )
 
-    # FIXME Use $sum aggregation after migration from datatosk to pymongo. pylint: disable=fixme
-    cumulative_learning_time: int = sum([row["time_ms"] for row in result])
+    results = list(cursor)
 
-    return cumulative_learning_time
+    if len(results) == 0:
+        return 0
+
+    return results[0]["time_ms"]
 
 
 def read_daily_break_time(
