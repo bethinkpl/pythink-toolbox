@@ -1,6 +1,6 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from dateutil.parser import isoparse
 
 from chronos.api.models import User
