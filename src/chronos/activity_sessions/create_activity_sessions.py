@@ -222,11 +222,7 @@ def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySess
 
     activity_sessions_records: List[ActivitySession] = records
 
-    logger.debug(
-        f"activity_sessions to insert to mongo db: \n {activity_sessions}".format(
-            activity_sessions=activity_sessions
-        )
-    )
+    logger.debug("activity_sessions to insert to mongo db: \n %s", activity_sessions)
 
     return activity_sessions_records
 
