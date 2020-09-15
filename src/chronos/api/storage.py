@@ -1,11 +1,8 @@
-# FIXME Migrate this module from datatosk to pymongo; blocked by LACE-466. pylint: disable=fixme
-# FIXME Improve typing after migration to FastAPI; blocked by LACE-464. pylint: disable=fixme
 import logging as log
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable, Mapping, Union
 
-import datatosk
 import dotenv
 import pandas as pd  # type: ignore[import]
 from chronos.api.errors import TransformationError
