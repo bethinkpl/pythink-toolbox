@@ -1,7 +1,11 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8-alpine3.10
+FROM tiangolo/uvicorn-gunicorn:python3.8
 
-COPY ./src /src
+RUN pip install poetry
+
 COPY poetry.lock poetry.lock
 COPY pyproject.toml pyproject.toml
 
-RUN poetry install
+RUN poetry config virtualenvs.create false \
+    && poetry install
+
+COPY ./src /src
