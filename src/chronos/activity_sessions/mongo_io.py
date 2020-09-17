@@ -9,7 +9,7 @@ from pymongo.client_session import ClientSession
 import pymongo.errors
 
 import chronos.activity_sessions
-from chronos.settings import mongodb
+from chronos.mongodb import mongodb
 
 logger = logging.getLogger(__name__)
 
