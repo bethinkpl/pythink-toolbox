@@ -11,7 +11,7 @@ import pandera.errors
 import pytest
 from pythink_toolbox.testing import parametrization
 
-import chronos.activity_sessions.create_activity_sessions as tested_module
+import chronos.activity_sessions.creation_transformations as tested_module
 
 
 def test__create_user_activity_sessions() -> None:
@@ -25,7 +25,7 @@ def test__create_user_activity_sessions() -> None:
         "end_time": datetime(2000, 1, 1, 0, 1),
     }
 
-    output = tested_module.create_user_activity_sessions(
+    output = tested_module.generate_user_activity_sessions(
         user_id=user_id,
         activity_events=activity_events,
         last_active_session=last_active_session,

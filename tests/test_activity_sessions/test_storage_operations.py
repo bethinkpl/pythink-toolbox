@@ -11,8 +11,8 @@ import pandas as pd
 import pytest
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
-from chronos.activity_sessions.create_activity_sessions import ActivitySession
-import chronos.activity_sessions.mongo_io as tested_module
+from chronos.activity_sessions.creation_transformations import ActivitySession
+import chronos.activity_sessions.storage_operations as tested_module
 
 
 TEST_USER_ID = 108
@@ -186,7 +186,7 @@ def test_main(
     tested_module.main(
         user_id=TEST_USER_ID,
         activity_events=activity_events,
-        start_time=unittest.mock.ANY,
+        reference_time=unittest.mock.ANY,
     )
 
     data = get_activity_session_collection_content_without_id()

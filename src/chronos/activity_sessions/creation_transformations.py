@@ -23,7 +23,7 @@ class ActivitySession(TypedDict):
     is_break: bool
 
 
-def create_user_activity_sessions(
+def generate_user_activity_sessions(
     user_id: int,
     activity_events: pd.Series,
     last_active_session: Optional[Dict[str, datetime]],

@@ -7,7 +7,7 @@ import pandas as pd
 from chronos.settings import BIGQUERY_PLATFORM_DATASET_ID
 
 
-def read(
+def read_activity_events_between_datetimes(
     start_time: Union[datetime, str], end_time: Union[datetime, str]
 ) -> pd.DataFrame:
     """
