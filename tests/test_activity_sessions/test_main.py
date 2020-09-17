@@ -9,7 +9,9 @@ from pythink_toolbox.testing.mocking import transform_function_to_target_string
 import pandas as pd
 
 import chronos.activity_sessions.main
-from chronos.activity_sessions.activity_events_source import read
+from chronos.activity_sessions.activity_events_source import (
+    read_activity_events_between_datetimes,
+)
 
 
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
@@ -23,7 +25,7 @@ def test_main(
 ) -> None:
 
     mocker.patch(
-        transform_function_to_target_string(read),
+        transform_function_to_target_string(read_activity_events_between_datetimes),
         return_value=pd.DataFrame(
             columns=["user_id", "client_time"],
             data=[
