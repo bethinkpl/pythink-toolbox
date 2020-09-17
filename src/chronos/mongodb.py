@@ -1,7 +1,6 @@
 from typing import Optional
 
 from pymongo import MongoClient
-from pymongo.collection import Collection
 
 from chronos.settings import (
     MONGO_DATABASE,
@@ -12,26 +11,11 @@ from chronos.settings import (
 )
 
 
-class _MongoDB:
+class _MongoDBClient:
     def __init__(self) -> None:
         self._client: Optional[MongoClient] = None
 
-    @property
-    def client(self) -> Optional[MongoClient]:
-        """client property"""
-        if self._client is None:
-            raise AttributeError("First you need to `mongodb.init_client()`")
-        return self._client
-
-    @property
-    def activity_sessions_collection(self) -> Collection:
-        """activity_sessions_collection property"""
-        if self._client is None:
-            raise AttributeError("First you need to `mongodb.init_client()`")
-        return self._client[MONGO_DATABASE].activity_sessions
-
-    def init_client(self) -> None:
-        """Used for initializing MongoDB Client based on .env configuration."""
+    def __call__(self):
         if not self._client:
             self._client = MongoClient(
                 host=MONGO_HOST,
@@ -40,5 +24,11 @@ class _MongoDB:
                 password=MONGO_PASSWORD,
             )
 
+        return self._client
 
-mongodb = _MongoDB()
+
+def get_activity_sessions_collection():
+    return get_client()[MONGO_DATABASE].activity_sessions
+
+
+get_client = _MongoDBClient()

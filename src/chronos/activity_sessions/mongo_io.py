@@ -9,7 +9,7 @@ from pymongo.client_session import ClientSession
 import pymongo.errors
 
 import chronos.activity_sessions
-from chronos.mongodb import mongodb
+from chronos.mongodb import get_client, get_activity_sessions_collection
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +23,7 @@ def main(user_id: int, activity_events: pd.Series, start_time: datetime) -> None
 
     logger.info("Run test_activity_sessions mongo operations for user_id %i", user_id)
 
-    mongodb.init_client()
-
-    if mongodb.client is None:
-        raise AttributeError("No MongoDB client :(")
-
-    with mongodb.client.start_session() as session:
+    with get_client().start_session() as session:
         try:
             _run_create_user_activity_sessions_transaction(
                 user_id=user_id,
@@ -42,16 +37,14 @@ def main(user_id: int, activity_events: pd.Series, start_time: datetime) -> None
 
 
 def _run_create_user_activity_sessions_transaction(
-    user_id: int,
-    activity_events: pd.Series,
-    session: ClientSession,
+    user_id: int, activity_events: pd.Series, session: ClientSession
 ) -> None:
 
     with session.start_transaction(write_concern=pymongo.WriteConcern(w="majority")):
 
         last_active_session: Optional[
             Dict[str, Union[datetime, bson.ObjectId]]
-        ] = mongodb.activity_sessions_collection.find_one_and_delete(
+        ] = get_activity_sessions_collection().find_one_and_delete(
             filter={"user_id": user_id, "is_active": True},
             projection={"_id": 0, "start_time": 1, "end_time": 1},
             sort=[("end_time", pymongo.DESCENDING)],
@@ -66,7 +59,7 @@ def _run_create_user_activity_sessions_transaction(
             last_active_session=last_active_session,
         )
 
-        mongodb.activity_sessions_collection.insert_many(
+        get_activity_sessions_collection().insert_many(
             user_activity_sessions, session=session
         )
 
