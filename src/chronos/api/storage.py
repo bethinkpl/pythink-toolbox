@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Iterable, TypedDict
+from typing import List, TypedDict
 
 import pymongo
 from pymongo.command_cursor import CommandCursor
@@ -28,7 +28,7 @@ class UserDailyTime(TypedDict):
 
 def read_daily_learning_time(
     user_id: int, start_date: datetime, end_date: datetime
-) -> Iterable[UserDailyTime]:
+) -> List[UserDailyTime]:
     """
     Read user learning time from mongodb.
     """
@@ -71,13 +71,14 @@ def read_cumulative_learning_time(
 
 def read_daily_break_time(
     user_id: int, start_date: datetime, end_date: datetime
-) -> Iterable[UserDailyTime]:
+) -> List[UserDailyTime]:
     """
     Read user focus time from mongodb.
     """
     query_results: Cursor = DATABASE["daily_break_time_view"].find(
         filter={
             "user_id": user_id,
+            # TODO consider using date ranges in aggregations.
             "date_hour": {"$gte": start_date, "$lt": end_date},
         },
     )
@@ -87,7 +88,7 @@ def read_daily_break_time(
 
 def read_daily_focus_time(
     user_id: int, start_date: datetime, end_date: datetime
-) -> Iterable[UserDailyTime]:
+) -> List[UserDailyTime]:
     """
     Read user focus time from mongodb.
     """
@@ -103,7 +104,7 @@ def read_daily_focus_time(
 
 def _transform_daily_time(
     query_results: Cursor,
-) -> Iterable[UserDailyTime]:
+) -> List[UserDailyTime]:
     rows = [
         UserDailyTime(
             user_id=row["user_id"],
