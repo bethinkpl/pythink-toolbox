@@ -4,7 +4,7 @@ from dateutil.parser import isoparse
 from fastapi.routing import APIRouter
 
 from chronos.api.models import UserLearningTime
-from chronos.api.storage import UserDailyTime, read_daily_focus_time
+from chronos.api.storage_operations import UserDailyTime, read_daily_focus_time
 
 focus_daily_router = APIRouter()
 
