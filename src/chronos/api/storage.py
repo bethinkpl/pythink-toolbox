@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import List, TypedDict
 
 import pymongo
-from pymongo.command_cursor import CommandCursor
 from pymongo.cursor import Cursor
 
 import chronos.settings
@@ -48,25 +47,9 @@ def read_cumulative_learning_time(
     """
     Read users' cumulative learning time from mongodb.
     """
-    cursor: CommandCursor = DATABASE["daily_learning_time_view"].aggregate(
-        pipeline=[
-            {
-                "$match": {
-                    "user_id": user_id,
-                    "date_hour": {"$gte": start_time, "$lt": end_time},
-                }
-            },
-            {"$group": {"_id": "null", "time_ms": {"$sum": "$time_ms"}}},
-            {"$project": {"time_ms": 1, "_id": 0}},
-        ],
-    )
+    daily_learning_time = read_daily_learning_time(user_id, start_time, end_time)
 
-    results = list(cursor)
-
-    if len(results) == 0:
-        return 0
-
-    return int(results[0]["time_ms"])
+    return sum(doc["time_ms"] for doc in daily_learning_time)
 
 
 def read_daily_break_time(
