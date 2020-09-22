@@ -7,6 +7,7 @@ from pymongo.cursor import Cursor
 
 import chronos.settings
 
+# FIXME Unify with changes made in LACE-466; pylint: disable=fixme
 DATABASE = pymongo.MongoClient(
     host=chronos.settings.MONGO_HOST,
     port=chronos.settings.MONGO_PORT,
