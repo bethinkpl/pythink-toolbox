@@ -34,7 +34,7 @@ def read_daily_learning_time(
     query_results: Cursor = DATABASE["daily_learning_time_view"].find(
         filter={
             "user_id": user_id,
-            "date_hour": {"$gte": start_date, "$lt": end_date},
+            "date_hour": {"$gte": start_date, "$lte": end_date},
         },
     )
 
