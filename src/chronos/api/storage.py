@@ -27,7 +27,7 @@ class UserDailyTime(TypedDict):
 
 
 def read_daily_learning_time(
-    user_id: int, start_date: datetime, end_date: datetime
+    user_id: int, start_time: datetime, end_time: datetime
 ) -> List[UserDailyTime]:
     """
     Read user learning time from mongodb.
@@ -35,7 +35,7 @@ def read_daily_learning_time(
     query_results: Cursor = DATABASE["daily_learning_time_view"].find(
         filter={
             "user_id": user_id,
-            "date_hour": {"$gte": start_date, "$lte": end_date},
+            "date_hour": {"$gte": start_time, "$lt": end_time},
         },
     )
 
@@ -43,7 +43,7 @@ def read_daily_learning_time(
 
 
 def read_cumulative_learning_time(
-    user_id: int, start_date: datetime, end_date: datetime
+    user_id: int, start_time: datetime, end_time: datetime
 ) -> int:
     """
     Read users' cumulative learning time from mongodb.
@@ -53,7 +53,7 @@ def read_cumulative_learning_time(
             {
                 "$match": {
                     "user_id": user_id,
-                    "date_hour": {"$gte": start_date, "$lt": end_date},
+                    "date_hour": {"$gte": start_time, "$lt": end_time},
                 }
             },
             {"$group": {"_id": "null", "time_ms": {"$sum": "$time_ms"}}},
@@ -70,7 +70,7 @@ def read_cumulative_learning_time(
 
 
 def read_daily_break_time(
-    user_id: int, start_date: datetime, end_date: datetime
+    user_id: int, start_time: datetime, end_time: datetime
 ) -> List[UserDailyTime]:
     """
     Read user focus time from mongodb.
@@ -79,7 +79,7 @@ def read_daily_break_time(
         filter={
             "user_id": user_id,
             # TODO consider using date ranges in aggregations.
-            "date_hour": {"$gte": start_date, "$lt": end_date},
+            "date_hour": {"$gte": start_time, "$lt": end_time},
         },
     )
 
@@ -87,7 +87,7 @@ def read_daily_break_time(
 
 
 def read_daily_focus_time(
-    user_id: int, start_date: datetime, end_date: datetime
+    user_id: int, start_time: datetime, end_time: datetime
 ) -> List[UserDailyTime]:
     """
     Read user focus time from mongodb.
@@ -95,7 +95,7 @@ def read_daily_focus_time(
     query_results: Cursor = DATABASE["daily_focus_time_view"].find(
         filter={
             "user_id": user_id,
-            "date_hour": {"$gte": start_date, "$lt": end_date},
+            "date_hour": {"$gte": start_time, "$lt": end_time},
         },
     )
 

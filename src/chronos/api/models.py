@@ -8,5 +8,5 @@ class UserLearningTime(BaseModel):
     """
 
     user_id: int
-    start_date: str
-    end_date: str
+    start_time: str
+    end_time: str

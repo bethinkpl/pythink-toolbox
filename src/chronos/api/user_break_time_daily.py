@@ -18,7 +18,7 @@ def get_user_break_time_daily(
     """
     break_time = read_daily_break_time(
         user_id=user_id,
-        start_date=isoparse(user_learning_time.start_date),
-        end_date=isoparse(user_learning_time.end_date),
+        start_time=isoparse(user_learning_time.start_time),
+        end_time=isoparse(user_learning_time.end_time),
     )
     return break_time

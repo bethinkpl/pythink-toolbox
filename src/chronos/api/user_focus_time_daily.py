@@ -18,7 +18,7 @@ def get_user_focus_time_daily(
     """
     focus_time = read_daily_focus_time(
         user_id=user_id,
-        start_date=isoparse(user_learning_time.start_date),
-        end_date=isoparse(user_learning_time.end_date),
+        start_time=isoparse(user_learning_time.start_time),
+        end_time=isoparse(user_learning_time.end_time),
     )
     return focus_time

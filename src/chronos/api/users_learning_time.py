@@ -20,8 +20,8 @@ def get_users_learning_time(
     learning_times = {
         user_learning_time.user_id: read_cumulative_learning_time(
             user_id=user_learning_time.user_id,
-            start_date=isoparse(user_learning_time.start_date),
-            end_date=isoparse(user_learning_time.end_date),
+            start_time=isoparse(user_learning_time.start_time),
+            end_time=isoparse(user_learning_time.end_time),
         )
         for user_learning_time in users
     }
