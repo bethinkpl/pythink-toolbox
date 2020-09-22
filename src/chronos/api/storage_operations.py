@@ -34,6 +34,7 @@ def read_daily_learning_time(
     query_results: Cursor = DATABASE["daily_learning_time_view"].find(
         filter={
             "user_id": user_id,
+            # TODO use date ranges. Blocked by LACE-459.
             "date_hour": {"$gte": start_time, "$lt": end_time},
         },
     )
@@ -61,7 +62,7 @@ def read_daily_break_time(
     query_results: Cursor = DATABASE["daily_break_time_view"].find(
         filter={
             "user_id": user_id,
-            # TODO consider using date ranges in aggregations.
+            # TODO use date ranges. Blocked by LACE-459.
             "date_hour": {"$gte": start_time, "$lt": end_time},
         },
     )
@@ -78,6 +79,7 @@ def read_daily_focus_time(
     query_results: Cursor = DATABASE["daily_focus_time_view"].find(
         filter={
             "user_id": user_id,
+            # TODO use date ranges. Blocked by LACE-459.
             "date_hour": {"$gte": start_time, "$lt": end_time},
         },
     )
