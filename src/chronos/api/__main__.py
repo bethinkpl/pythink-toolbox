@@ -1,4 +1,4 @@
-import uvicorn  # type: ignore[import]
+import uvicorn
 from fastapi.applications import FastAPI
 
 from chronos.api import (

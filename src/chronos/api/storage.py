@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Iterable, TypedDict
 
-import pymongo  # type: ignore[import]
-from pymongo.command_cursor import CommandCursor  # type: ignore[import]
-from pymongo.cursor import Cursor  # type: ignore[import]
+import pymongo
+from pymongo.command_cursor import CommandCursor
+from pymongo.cursor import Cursor
 
 import chronos.settings
 
