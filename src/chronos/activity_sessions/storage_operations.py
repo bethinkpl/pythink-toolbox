@@ -10,7 +10,7 @@ from pymongo.client_session import ClientSession
 from pymongo.collection import Collection
 
 import chronos.activity_sessions
-from chronos.storage import get_client, get_activity_sessions_collection
+import chronos.storage
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +24,9 @@ def main(user_id: int, activity_events: pd.Series, reference_time: datetime) -> 
 
     logger.info("Run test_activity_sessions mongo operations for user_id %i", user_id)
 
-    collection = get_activity_sessions_collection()
+    collection = chronos.storage.get_activity_sessions_collection()
 
-    with get_client().start_session() as session:
+    with chronos.storage.get_client().start_session() as session:
         try:
             _run_user_crud_operations_transaction(
                 user_id=user_id,
@@ -68,7 +68,11 @@ def _run_user_crud_operations_transaction(
             last_active_session=last_active_session,
         )
 
-        collection.insert_many(user_activity_sessions, session=session)
+        collection.insert_many(
+            user_activity_sessions, session=session
+        )  # FIXME add schema version
+        # FIXME add schema validation
+        # TODO consider document per user_id with "sessions_array" or "date_array" - the Bucket Pattern
 
         _commit_transaction_with_retry(session=session)
         logger.info("Transaction committed for user %i.", user_id)
@@ -100,65 +104,68 @@ def _run_materialized_views_update(
     reference_time: datetime, collection: Collection
 ) -> None:
 
-    # maybe asynchronous update materialized view after every user?
-    #   materialized_views = [view1, view2, view3, view4]
-    #   for materialized_view in materialized_views:
-    #       update_materialized_view(materialized_view=materialized_view, start_time=start_time)
+    for materialized_view in chronos.storage.materialized_views:
 
-    match_step = {
-        "$match": {
-            "$or": [{"is_active": {"$eq": True}}, {"is_break": {"$eq": True}}],
-            "start_time": {"$gte": reference_time},
+        match_stage = {
+            **materialized_view.match_stage_conds,
+            "end_time": {"$gte": reference_time},
         }
-    }
 
-    group_step = {
-        "$group": {
+        project_stage = {
             "_id": {
                 "user_id": "$user_id",
-                "date_hour": {
-                    "$dateToString": {"format": "%Y-%m-%d %H", "date": "$start_time"}
-                },  # FIXME cannot just cast start_time to string - this leads to more than one hour aggregated times
+                "start_time": "$start_time",
+                "end_time": "$end_time",
             },
             "duration_ms": {"$sum": {"$subtract": ["$end_time", "$start_time"]}},
         }
-    }
 
-    project_step = {
-        "$project": {
-            "_id": bson.ObjectId(),
-            "user_id": "$_id.user_id",
-            "time_range": {
-                "start": {
-                    "$dateFromString": {
-                        "dateString": "$_id.date_hour",
-                        "format": "%Y-%m-%d %H",
-                    }
-                },
-                "end": {
-                    "$add": [
-                        {
-                            "$dateFromString": {
-                                "dateString": "$_id.date_hour",
-                                "format": "%Y-%m-%d %H",
-                            }
-                        },
-                        60 * 60 * 1000,
-                    ]
-                },
-            },
-            "duration_ms": 1,
-        }
-    }
-    merge_step = {
-        "$merge": {"into": "daily_learning_time_mv", "whenMatched": "replace"}
-    }
+        merge_stage = {"into": materialized_view.name, "whenMatched": "replace"}
 
-    collection.aggregate([match_step, group_step, project_step, merge_step])
+        collection.aggregate(
+            [
+                {"$match": match_stage},
+                {"$project": project_stage},
+                {"$merge": merge_stage},
+            ]
+        )
 
 
 if __name__ == "__main__":
     _run_materialized_views_update(
         reference_time=datetime(1970, 1, 1),
-        collection=get_activity_sessions_collection(),
+        collection=chronos.storage.get_activity_sessions_collection(),
     )
+
+    # TODO example query for daily_learning_time:
+    #  [
+    #  {
+    #      $match:
+    #          {
+    #              "_id.user_id": 2,
+    #              "_id.end_time": {$gt: ISODate("2019-01-01")}}
+    #  },
+    #  {
+    #     $group:
+    #         {
+    #             _id: {
+    #                 "user_id": "$_id.user_id",
+    #                 "date": {
+    #                     "$dateToString": {"format": "%Y-%m-%d", "date": "$_id.start_time"}
+    #                 }
+    #             },
+    #             duration_ms: {$sum: "$duration_ms"}
+    #         }
+    #   },
+    #  {
+    #      $project: {
+    #          _id: 0,
+    #          user_id: "$_id.user_id",
+    #          date: "$_id.date",
+    #          duration_ms: 1
+    #      }
+    #  },
+    #  {
+    #      $sort: {date: 1}
+    #  }
+    #      ]
