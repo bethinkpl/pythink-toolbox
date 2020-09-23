@@ -1,12 +1,12 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi.applications import FastAPI
 
 from chronos.api import (
     user_break_time_daily,
-    users_learning_time,
-    user_learning_time_daily,
     user_focus_time_daily,
     user_learning_time,
+    user_learning_time_daily,
+    users_learning_time,
 )
 
 from chronos.logger import logger
@@ -22,4 +22,6 @@ app.include_router(users_learning_time.users_learning_router)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=5000, debug=True)
+    uvicorn.run(
+        "chronos.api.__main__:app", host="127.0.0.1", port=5000, debug=True, reload=True
+    )
