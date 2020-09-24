@@ -37,9 +37,7 @@ def main(user_id: int, activity_events: pd.Series, reference_time: datetime) -> 
         except _MongoCommitError:
             raise  # TODO LACE-471
 
-        _run_materialized_views_update(
-            reference_time=reference_time, collection=collection
-        )
+        _update_materialized_views(reference_time=reference_time, collection=collection)
 
 
 def _run_user_crud_operations_transaction(
@@ -82,13 +80,11 @@ def _commit_transaction_with_retry(session: ClientSession) -> None:
     while True:
         try:
             session.commit_transaction()
-
             break
         except (
             pymongo.errors.ConnectionFailure,
             pymongo.errors.OperationFailure,
         ) as err:
-            # Can retry commit
             if err.has_error_label("UnknownTransactionCommitResult"):
                 logging.error(
                     "UnknownTransactionCommitResult, retrying " "commit operation ..."
@@ -100,39 +96,16 @@ def _commit_transaction_with_retry(session: ClientSession) -> None:
             ) from err
 
 
-def _run_materialized_views_update(
+def _update_materialized_views(
     reference_time: datetime, collection: Collection
 ) -> None:
 
     for materialized_view in chronos.storage.materialized_views:
-
-        match_stage = {
-            **materialized_view.match_stage_conds,
-            "end_time": {"$gte": reference_time},
-        }
-
-        project_stage = {
-            "_id": {
-                "user_id": "$user_id",
-                "start_time": "$start_time",
-                "end_time": "$end_time",
-            },
-            "duration_ms": {"$sum": {"$subtract": ["$end_time", "$start_time"]}},
-        }
-
-        merge_stage = {"into": materialized_view.name, "whenMatched": "replace"}
-
-        collection.aggregate(
-            [
-                {"$match": match_stage},
-                {"$project": project_stage},
-                {"$merge": merge_stage},
-            ]
-        )
+        materialized_view.update(collection=collection, reference_time=reference_time)
 
 
 if __name__ == "__main__":
-    _run_materialized_views_update(
+    _update_materialized_views(
         reference_time=datetime(1970, 1, 1),
         collection=chronos.storage.get_activity_sessions_collection(),
     )
