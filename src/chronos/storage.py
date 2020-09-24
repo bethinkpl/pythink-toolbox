@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Any, Dict, Callable
 from datetime import datetime
 
-import datatosk.types
 from pymongo import MongoClient
 from pymongo.collection import Collection
 
@@ -34,7 +33,7 @@ class _MongoDBClient:  # pylint: disable=too-few-public-methods
 @dataclass
 class MaterializedView:
     name: str
-    match_stage_conds: datatosk.types.JSONType  # FIXME extract types from datatosk
+    match_stage_conds: Dict[str, Any]
 
     def update(self, collection: Collection, reference_time: datetime):
         match_stage = {
@@ -51,7 +50,7 @@ class MaterializedView:
             "duration_ms": {"$sum": {"$subtract": ["$end_time", "$start_time"]}},
         }
 
-        merge_stage = {"into": self.name, "whenMatched": "replace"}
+        merge_stage = {"into": self.name + "_mv", "whenMatched": "replace"}
 
         collection.aggregate(
             [
@@ -84,4 +83,4 @@ materialized_views: Sequence[MaterializedView] = (
     ),
 )
 
-get_client = _MongoDBClient()
+get_client: Callable[[], MongoClient] = _MongoDBClient()
