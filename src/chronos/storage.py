@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional, Sequence, Any, Dict, Callable
+from typing import Optional, Sequence, Any, Dict, Callable, TypedDict
 from datetime import datetime
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
+from pymongo.database import Database
 
 from chronos.settings import (
     MONGO_DATABASE,
@@ -35,6 +36,9 @@ class MaterializedView:
     name: str
     match_stage_conds: Dict[str, Any]
 
+    def __post_init__(self):
+        self.name = self.name + "_mv"
+
     def update(self, collection: Collection, reference_time: datetime):
         match_stage = {
             **self.match_stage_conds,
@@ -45,12 +49,12 @@ class MaterializedView:
             "_id": {
                 "user_id": "$user_id",
                 "start_time": "$start_time",
-                "end_time": "$end_time",
             },
+            "end_time": 1,
             "duration_ms": {"$sum": {"$subtract": ["$end_time", "$start_time"]}},
         }
 
-        merge_stage = {"into": self.name + "_mv", "whenMatched": "replace"}
+        merge_stage = {"into": self.name, "whenMatched": "replace"}
 
         collection.aggregate(
             [
@@ -61,9 +65,24 @@ class MaterializedView:
         )
 
 
+class MaterializedViewIDSchema(TypedDict):
+    user_id: int
+    start_time: datetime
+    end_time: datetime
+
+
+class MaterializedViewSchema(TypedDict):
+    _id: MaterializedViewIDSchema
+    duration_ms: int
+
+
+def get_chronos_db() -> Database:
+    return get_client()[MONGO_DATABASE]
+
+
 def get_activity_sessions_collection() -> Collection:
     """Returns activity_sessions collection"""
-    return get_client()[MONGO_DATABASE].activity_sessions
+    return get_chronos_db().activity_sessions
 
 
 materialized_views: Sequence[MaterializedView] = (
