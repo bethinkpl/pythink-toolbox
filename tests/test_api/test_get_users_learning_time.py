@@ -9,7 +9,7 @@ from tests.test_api.url_helpers import get_url
 TEST_DATA = {
     "users": [
         {"id": 299, "start_time": 15934399493, "end_time": 15934399490},
-        {"id": 5994, "start_date": 15934399393, "end_time": 15934393490},
+        {"id": 5994, "start_time": 15934399393, "end_time": 15934393490},
     ]
 }
 
