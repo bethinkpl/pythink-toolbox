@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
-from chronos.activity_sessions.creation_transformations import ActivitySession
+from chronos.activity_sessions.generation_operations import ActivitySession
 import chronos.activity_sessions.storage_operations as tested_module
 
 
