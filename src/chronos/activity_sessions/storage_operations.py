@@ -60,7 +60,7 @@ def _run_user_crud_operations_transaction(
 
         logger.debug("last_active_session from mongo: \n%s", last_active_session)
 
-        user_activity_sessions = chronos.activity_sessions.creation_transformations.generate_user_activity_sessions(
+        user_activity_sessions = chronos.activity_sessions.generation_operations.generate_user_activity_sessions(
             user_id=user_id,
             activity_events=activity_events,
             last_active_session=last_active_session,

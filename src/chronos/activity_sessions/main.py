@@ -4,7 +4,6 @@ import logging
 
 from tqdm import tqdm
 
-import chronos.activity_sessions.creation_transformations
 import chronos.activity_sessions.storage_operations
 
 logger = logging.getLogger(__name__)
