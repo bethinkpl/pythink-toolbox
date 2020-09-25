@@ -52,7 +52,7 @@ def _get_materialized_view_content(
 ) -> List[storage.MaterializedViewSchema]:
 
     materialized_view = storage.get_chronos_db()[materialized_view_name]
-    return materialized_view.find()
+    return list(materialized_view.find())
 
 
 @pytest.fixture

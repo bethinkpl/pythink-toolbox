@@ -315,9 +315,10 @@ def test_main(
         assert actual_collection_data == step["expected_collection_data"]
 
         for mv in ["learning_time_sessions_duration_mv"]:
-            actual_learning_time_materialized_view_data = list(
-                get_materialized_view_content(mv)
+            actual_learning_time_materialized_view_data = get_materialized_view_content(
+                mv
             )
+
             assert (
                 actual_learning_time_materialized_view_data
                 == step[f"expected_{mv}_data"]
