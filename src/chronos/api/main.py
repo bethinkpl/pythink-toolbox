@@ -11,7 +11,7 @@ from chronos.api.routers import (
 
 from chronos.logger import logger
 
-logger.init_for_api(name="chronos_api")
+logger.init_for_api()
 app = FastAPI()
 
 app.include_router(user_break_time_daily.break_daily_router)
