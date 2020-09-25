@@ -34,8 +34,9 @@ def main(user_id: int, activity_events: pd.Series, reference_time: datetime) -> 
                 session=session,
                 collection=collection,
             )
-        except _MongoCommitError:
-            raise  # TODO LACE-471
+        except _MongoCommitError:  # pylint: disable=try-except-raise
+            # TODO LACE-471
+            raise
 
         _update_materialized_views(reference_time=reference_time, collection=collection)
 
@@ -68,8 +69,8 @@ def _run_user_crud_operations_transaction(
 
         collection.insert_many(
             user_activity_sessions, session=session
-        )  # FIXME add schema version
-        # FIXME add schema validation
+        )  # TODO LACE-487 add schema version
+        # TODO LACE-488 add schema validation
         # TODO consider document per user_id with "sessions_array" or "date_array" - the Bucket Pattern
 
         _commit_transaction_with_retry(session=session)

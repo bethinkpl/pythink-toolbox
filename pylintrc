@@ -2,6 +2,7 @@
 disable=
     format, # Handled by black
     missing-module-docstring,
+    missing-class-docstring
 
 [MISCELLANEOUS]
 notes=FIXME

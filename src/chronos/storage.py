@@ -6,13 +6,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
-from chronos.settings import (
-    MONGO_DATABASE,
-    MONGO_HOST,
-    MONGO_PORT,
-    MONGO_USERNAME,
-    MONGO_PASSWORD,
-)
+from chronos import settings
 
 
 class _MongoDBClient:  # pylint: disable=too-few-public-methods
@@ -22,10 +16,10 @@ class _MongoDBClient:  # pylint: disable=too-few-public-methods
     def __call__(self) -> MongoClient:
         if not self._client:
             self._client = MongoClient(
-                host=MONGO_HOST,
-                port=MONGO_PORT,
-                username=MONGO_USERNAME,
-                password=MONGO_PASSWORD,
+                host=settings.MONGO_HOST,
+                port=settings.MONGO_PORT,
+                username=settings.MONGO_USERNAME,
+                password=settings.MONGO_PASSWORD,
             )
 
         return self._client
@@ -40,16 +34,14 @@ class MaterializedView:
         self.name = self.name + "_mv"
 
     def update(self, collection: Collection, reference_time: datetime):
+        """Updates materialized view content based on `reference time`."""
         match_stage = {
             **self.match_stage_conds,
             "end_time": {"$gte": reference_time},
         }
 
         project_stage = {
-            "_id": {
-                "user_id": "$user_id",
-                "start_time": "$start_time",
-            },
+            "_id": {"user_id": "$user_id", "start_time": "$start_time"},
             "end_time": 1,
             "duration_ms": {"$sum": {"$subtract": ["$end_time", "$start_time"]}},
         }
@@ -77,11 +69,12 @@ class MaterializedViewSchema(TypedDict):
 
 
 def get_chronos_db() -> Database:
-    return get_client()[MONGO_DATABASE]
+    """Returns Chronos database."""
+    return get_client()[settings.MONGO_DATABASE]
 
 
 def get_activity_sessions_collection() -> Collection:
-    """Returns activity_sessions collection"""
+    """Returns activity_sessions collection."""
     return get_chronos_db().activity_sessions
 
 

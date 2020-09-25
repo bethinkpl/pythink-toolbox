@@ -5,6 +5,7 @@ from pymongo.cursor import Cursor
 import pytest
 
 from chronos import storage
+from chronos import settings
 
 
 def _filter_id_field(
@@ -38,7 +39,7 @@ def get_activity_session_collection_content_without_id() -> Callable[
 
 
 def _clear_storage() -> None:
-    storage.get_client().drop_database(storage.MONGO_DATABASE)
+    storage.get_client().drop_database(settings.MONGO_DATABASE)
 
 
 @pytest.fixture  # type: ignore[misc]
