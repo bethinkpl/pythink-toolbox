@@ -23,6 +23,7 @@ class MainScenario(Scenario):
     expected_collection_data: List[ActivitySession]
     expected_learning_time_sessions_duration_mv_data: List[MaterializedViewSchema]
     expected_break_sessions_duration_mv_data: List[MaterializedViewSchema]
+    expected_focus_sessions_duration_mv_data: List[MaterializedViewSchema]
 
 
 TEST_STEPS = [
@@ -80,6 +81,7 @@ TEST_STEPS = [
             },
         ],
         expected_break_sessions_duration_mv_data=[],
+        expected_focus_sessions_duration_mv_data=[],
     ),
     MainScenario(
         desc="Takes last active session & extends its duration.",
@@ -135,6 +137,7 @@ TEST_STEPS = [
             },
         ],
         expected_break_sessions_duration_mv_data=[],
+        expected_focus_sessions_duration_mv_data=[],
     ),
     MainScenario(
         desc="Takes last active session & extends its duration, so it changes to focus session.",
@@ -192,6 +195,19 @@ TEST_STEPS = [
             },
         ],
         expected_break_sessions_duration_mv_data=[],
+        expected_focus_sessions_duration_mv_data=[
+            {
+                "_id": {
+                    "user_id": TEST_USER_ID,
+                    "start_time": datetime(2000, 1, 1, 23, 59),
+                },
+                "end_time": datetime(2000, 1, 2, 0, 15),
+                "duration_ms": (
+                    datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                ).total_seconds()
+                * 1000,
+            }
+        ],
     ),
     MainScenario(
         desc="Add new sessions one focused in the end and on that is 'break' before.",
@@ -305,6 +321,30 @@ TEST_STEPS = [
                 * 1000,
             }
         ],
+        expected_focus_sessions_duration_mv_data=[
+            {
+                "_id": {
+                    "user_id": TEST_USER_ID,
+                    "start_time": datetime(2000, 1, 1, 23, 59),
+                },
+                "end_time": datetime(2000, 1, 2, 0, 15),
+                "duration_ms": (
+                    datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                ).total_seconds()
+                * 1000,
+            },
+            {
+                "_id": {
+                    "user_id": TEST_USER_ID,
+                    "start_time": datetime(2000, 1, 2, 0, 20, 1),
+                },
+                "end_time": datetime(2000, 1, 2, 0, 40),
+                "duration_ms": (
+                    datetime(2000, 1, 2, 0, 40) - datetime(2000, 1, 2, 0, 20, 1)
+                ).total_seconds()
+                * 1000,
+            },
+        ],
     ),
 ]
 
@@ -331,14 +371,18 @@ def test_main(
 
         assert actual_collection_data == step["expected_collection_data"]
 
-        for mv in ["learning_time_sessions_duration_mv", "break_sessions_duration_mv"]:
+        for materialized_view_name in [
+            "learning_time_sessions_duration_mv",
+            "break_sessions_duration_mv",
+            "focus_sessions_duration_mv",
+        ]:
             actual_learning_time_materialized_view_data = get_materialized_view_content(
-                mv
+                materialized_view_name
             )
 
             assert (
                 actual_learning_time_materialized_view_data
-                == step[f"expected_{mv}_data"]
+                == step[f"expected_{materialized_view_name}_data"]
             )
 
     clear_storage()
