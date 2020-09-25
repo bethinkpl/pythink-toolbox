@@ -1,7 +1,7 @@
-import itertools
-from datetime import datetime
-from typing import List, TypedDict, Optional
 import logging
+from datetime import datetime
+from typing import List, Optional, TypedDict
+import itertools
 
 import pandas as pd  # type: ignore[import]
 import pandera  # type: ignore[import]
