@@ -39,7 +39,7 @@ def read_daily_learning_time(
         },
     )
 
-    return _transform_daily_time(query_results=query_results)
+    return _convert_to_user_daily_time(query_results=query_results)
 
 
 def read_cumulative_learning_time(
@@ -67,7 +67,7 @@ def read_daily_break_time(
         },
     )
 
-    return _transform_daily_time(query_results=query_results)
+    return _convert_to_user_daily_time(query_results=query_results)
 
 
 def read_daily_focus_time(
@@ -84,10 +84,10 @@ def read_daily_focus_time(
         },
     )
 
-    return _transform_daily_time(query_results=query_results)
+    return _convert_to_user_daily_time(query_results=query_results)
 
 
-def _transform_daily_time(
+def _convert_to_user_daily_time(
     query_results: Cursor,
 ) -> List[UserDailyTime]:
     rows = [
