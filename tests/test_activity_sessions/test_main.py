@@ -21,7 +21,7 @@ def test_main(
     get_activity_session_collection_content_without_id: Callable[
         [], List[Dict[str, Union[int, datetime, bool]]]
     ],
-    clear_storage,
+    clear_storage: Callable[[], None],
 ) -> None:
 
     mocker.patch(

@@ -56,7 +56,7 @@ def _get_materialized_view_content(
     return list(materialized_view.find())
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore[misc]
 def get_materialized_view_content() -> Callable[
     [str], List[storage.MaterializedViewSchema]
 ]:

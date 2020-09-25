@@ -63,10 +63,12 @@ TEST_STEPS = [
                     "start_time": datetime(1999, 12, 31, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 1, 0, 0),
-                "duration_ms": (
-                    datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
             {
                 "_id": {
@@ -74,10 +76,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 1, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 0),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 0) - datetime(2000, 1, 1, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 0) - datetime(2000, 1, 1, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
         ],
         expected_break_sessions_duration_mv_data=[],
@@ -119,10 +123,12 @@ TEST_STEPS = [
                     "start_time": datetime(1999, 12, 31, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 1, 0, 0),
-                "duration_ms": (
-                    datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
             {
                 "_id": {
@@ -130,10 +136,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 1, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 5),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 5) - datetime(2000, 1, 1, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 5) - datetime(2000, 1, 1, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
         ],
         expected_break_sessions_duration_mv_data=[],
@@ -177,10 +185,12 @@ TEST_STEPS = [
                     "start_time": datetime(1999, 12, 31, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 1, 0, 0),
-                "duration_ms": (
-                    datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
             {
                 "_id": {
@@ -188,10 +198,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 1, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 15),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
         ],
         expected_break_sessions_duration_mv_data=[],
@@ -202,10 +214,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 1, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 15),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             }
         ],
     ),
@@ -269,10 +283,12 @@ TEST_STEPS = [
                     "start_time": datetime(1999, 12, 31, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 1, 0, 0),
-                "duration_ms": (
-                    datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
             {
                 "_id": {
@@ -280,10 +296,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 1, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 15),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
             {
                 "_id": {
@@ -291,10 +309,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 2, 0, 15),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 20, 1),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 20, 1) - datetime(2000, 1, 2, 0, 15)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 20, 1) - datetime(2000, 1, 2, 0, 15)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
             {
                 "_id": {
@@ -302,10 +322,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 2, 0, 20, 1),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 40),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 40) - datetime(2000, 1, 2, 0, 20, 1)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 40) - datetime(2000, 1, 2, 0, 20, 1)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
         ],
         expected_break_sessions_duration_mv_data=[
@@ -315,10 +337,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 2, 0, 15),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 20, 1),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 20, 1) - datetime(2000, 1, 2, 0, 15)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 20, 1) - datetime(2000, 1, 2, 0, 15)
+                    ).total_seconds()
+                    * 1000
+                ),
             }
         ],
         expected_focus_sessions_duration_mv_data=[
@@ -328,10 +352,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 1, 23, 59),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 15),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
             {
                 "_id": {
@@ -339,10 +365,12 @@ TEST_STEPS = [
                     "start_time": datetime(2000, 1, 2, 0, 20, 1),
                 },
                 "end_time": datetime(2000, 1, 2, 0, 40),
-                "duration_ms": (
-                    datetime(2000, 1, 2, 0, 40) - datetime(2000, 1, 2, 0, 20, 1)
-                ).total_seconds()
-                * 1000,
+                "duration_ms": int(
+                    (
+                        datetime(2000, 1, 2, 0, 40) - datetime(2000, 1, 2, 0, 20, 1)
+                    ).total_seconds()
+                    * 1000
+                ),
             },
         ],
     ),
@@ -382,7 +410,7 @@ def test_main(
 
             assert (
                 actual_learning_time_materialized_view_data
-                == step[f"expected_{materialized_view_name}_data"]
+                == step[f"expected_{materialized_view_name}_data"]  # type: ignore[misc]
             )
 
     clear_storage()

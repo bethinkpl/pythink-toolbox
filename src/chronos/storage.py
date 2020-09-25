@@ -30,10 +30,10 @@ class MaterializedView:
     name: str
     match_stage_conds: Dict[str, Any]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.name = self.name + "_mv"
 
-    def update(self, collection: Collection, reference_time: datetime):
+    def update(self, collection: Collection, reference_time: datetime) -> None:
         """Updates materialized view content based on `reference time`."""
         match_stage = {
             **self.match_stage_conds,
@@ -60,11 +60,11 @@ class MaterializedView:
 class MaterializedViewIDSchema(TypedDict):
     user_id: int
     start_time: datetime
-    end_time: datetime
 
 
 class MaterializedViewSchema(TypedDict):
     _id: MaterializedViewIDSchema
+    end_time: datetime
     duration_ms: int
 
 
