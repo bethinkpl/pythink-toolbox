@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi.applications import FastAPI
 
-from chronos.api import (
+from chronos.api.routers import (
     user_break_time_daily,
     user_focus_time_daily,
     user_learning_time,
