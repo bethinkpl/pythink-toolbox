@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import List
 
 from dateutil.parser import isoparse
 from fastapi.routing import APIRouter
@@ -12,7 +12,7 @@ focus_daily_router = APIRouter()
 @focus_daily_router.post("/focus_time_daily/{user_id}")
 def get_user_focus_time_daily(
     user_id: int, user_learning_time: UserLearningTime
-) -> Iterable[UserDailyTime]:
+) -> List[UserDailyTime]:
     """
     API end-point | Provides user's daily focus time.
     """
