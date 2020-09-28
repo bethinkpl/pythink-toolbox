@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Sequence, Any, Dict, Callable, TypedDict
+from typing import Optional, Sequence, Any, Dict, TypedDict
 from datetime import datetime
 
 from pymongo import MongoClient
@@ -9,12 +9,25 @@ from pymongo.database import Database
 from chronos import settings
 
 
-class _MongoDBClient:  # pylint: disable=too-few-public-methods
+class StorageError(Exception):
+    """Error related to storage."""
+
+
+class MongoCommitError(StorageError):
+    """Error that occurred while performing MongoDB commit."""
+
+
+class MongoDB:
     def __init__(self) -> None:
         self._client: Optional[MongoClient] = None
 
-    def __call__(self) -> MongoClient:
-        if not self._client:
+    @property
+    def client(self) -> MongoClient:
+        """
+        Returns:
+            pymongo.MongoClient
+        """
+        if self._client is None:
             self._client = MongoClient(
                 host=settings.MONGO_HOST,
                 port=settings.MONGO_PORT,
@@ -23,6 +36,27 @@ class _MongoDBClient:  # pylint: disable=too-few-public-methods
             )
 
         return self._client
+
+    @property
+    def database(self) -> Database:
+        """
+        Returns:
+            pymongo.database.Database
+        """
+        if self._client is None:
+            raise StorageError("Client is not initialized.")
+        return self._client[settings.MONGO_DATABASE]
+
+    @property
+    def activity_sessions_collection(self) -> Collection:
+        """
+        Returns:
+            pymongo.collection.Collection
+        """
+        return self.database.activity_sessions
+
+
+mongodb = MongoDB()
 
 
 @dataclass
@@ -68,16 +102,6 @@ class MaterializedViewSchema(TypedDict):
     duration_ms: int
 
 
-def get_chronos_db() -> Database:
-    """Returns Chronos database."""
-    return get_client()[settings.MONGO_DATABASE]
-
-
-def get_activity_sessions_collection() -> Collection:
-    """Returns activity_sessions collection."""
-    return get_chronos_db().activity_sessions
-
-
 materialized_views: Sequence[MaterializedView] = (
     MaterializedView(
         name="learning_time_sessions_duration",
@@ -94,5 +118,3 @@ materialized_views: Sequence[MaterializedView] = (
         match_stage_conds={"is_focus": {"$eq": True}},
     ),
 )
-
-get_client: Callable[[], MongoClient] = _MongoDBClient()

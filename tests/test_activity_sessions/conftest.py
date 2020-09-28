@@ -22,7 +22,7 @@ def _get_activity_session_collection_content_without_id() -> List[
 ]:
 
     activity_sessions_collection_content = (
-        storage.get_activity_sessions_collection().find()
+        storage.mongodb.activity_sessions_collection.find()
     )
 
     return _filter_id_field(query_result=activity_sessions_collection_content)
@@ -39,7 +39,7 @@ def get_activity_session_collection_content_without_id() -> Callable[
 
 
 def _clear_storage() -> None:
-    storage.get_client().drop_database(settings.MONGO_DATABASE)
+    storage.mongodb.client.drop_database(settings.MONGO_DATABASE)
 
 
 @pytest.fixture
@@ -52,7 +52,7 @@ def _get_materialized_view_content(
     materialized_view_name: str,
 ) -> List[storage.MaterializedViewSchema]:
 
-    materialized_view = storage.get_chronos_db()[materialized_view_name]
+    materialized_view = storage.mongodb.database[materialized_view_name]
     return list(materialized_view.find())
 
 

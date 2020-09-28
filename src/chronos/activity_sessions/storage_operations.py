@@ -15,18 +15,15 @@ import chronos.storage
 logger = logging.getLogger(__name__)
 
 
-class _MongoCommitError(Exception):
-    """Error that occurred while performing MongoDB commit."""
-
-
 def main(user_id: int, activity_events: pd.Series, reference_time: datetime) -> None:
     """Perform all operation to create user activity_sessions & save it to storage."""
 
     logger.info("Run test_activity_sessions mongo operations for user_id %i", user_id)
 
-    collection = chronos.storage.get_activity_sessions_collection()
+    with chronos.storage.mongodb.client.start_session() as session:
 
-    with chronos.storage.get_client().start_session() as session:
+        collection = chronos.storage.mongodb.activity_sessions_collection
+
         try:
             _run_user_crud_operations_transaction(
                 user_id=user_id,
@@ -34,7 +31,7 @@ def main(user_id: int, activity_events: pd.Series, reference_time: datetime) -> 
                 session=session,
                 collection=collection,
             )
-        except _MongoCommitError:  # pylint: disable=try-except-raise
+        except chronos.storage.MongoCommitError:  # pylint: disable=try-except-raise
             # TODO LACE-471
             raise
 
@@ -92,7 +89,7 @@ def _commit_transaction_with_retry(session: ClientSession) -> None:
                 )
                 continue
 
-            raise _MongoCommitError(
+            raise chronos.storage.MongoCommitError(
                 "Error during test_activity_sessions creation transaction commit."
             ) from err
 
@@ -105,41 +102,35 @@ def _update_materialized_views(
         materialized_view.update(collection=collection, reference_time=reference_time)
 
 
-if __name__ == "__main__":
-    _update_materialized_views(
-        reference_time=datetime(1970, 1, 1),
-        collection=chronos.storage.get_activity_sessions_collection(),
-    )
-
-    # TODO example query for daily_learning_time:
-    #  [
-    #  {
-    #      $match:
-    #          {
-    #              "_id.user_id": 2,
-    #              "_id.end_time": {$gt: ISODate("2019-01-01")}}
-    #  },
-    #  {
-    #     $group:
-    #         {
-    #             _id: {
-    #                 "user_id": "$_id.user_id",
-    #                 "date": {
-    #                     "$dateToString": {"format": "%Y-%m-%d", "date": "$_id.start_time"}
-    #                 }
-    #             },
-    #             duration_ms: {$sum: "$duration_ms"}
-    #         }
-    #   },
-    #  {
-    #      $project: {
-    #          _id: 0,
-    #          user_id: "$_id.user_id",
-    #          date: "$_id.date",
-    #          duration_ms: 1
-    #      }
-    #  },
-    #  {
-    #      $sort: {date: 1}
-    #  }
-    #      ]
+# TODO example query for daily_learning_time:
+#  [
+#  {
+#      $match:
+#          {
+#              "_id.user_id": 2,
+#              "_id.end_time": {$gt: ISODate("2019-01-01")}}
+#  },
+#  {
+#     $group:
+#         {
+#             _id: {
+#                 "user_id": "$_id.user_id",
+#                 "date": {
+#                     "$dateToString": {"format": "%Y-%m-%d", "date": "$_id.start_time"}
+#                 }
+#             },
+#             duration_ms: {$sum: "$duration_ms"}
+#         }
+#   },
+#  {
+#      $project: {
+#          _id: 0,
+#          user_id: "$_id.user_id",
+#          date: "$_id.date",
+#          duration_ms: 1
+#      }
+#  },
+#  {
+#      $sort: {date: 1}
+#  }
+#      ]
