@@ -28,7 +28,7 @@ def _get_activity_session_collection_content_without_id() -> List[
     return _filter_id_field(query_result=activity_sessions_collection_content)
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def get_activity_session_collection_content_without_id() -> Callable[
     [], List[Dict[str, Union[int, datetime, bool]]]
 ]:
@@ -42,7 +42,7 @@ def _clear_storage() -> None:
     storage.get_client().drop_database(settings.MONGO_DATABASE)
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def clear_storage() -> Callable[[], None]:
     """Clears whole activity_sessions collection."""
     return _clear_storage
@@ -56,7 +56,7 @@ def _get_materialized_view_content(
     return list(materialized_view.find())
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def get_materialized_view_content() -> Callable[
     [str], List[storage.MaterializedViewSchema]
 ]:
