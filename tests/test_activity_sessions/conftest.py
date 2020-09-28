@@ -27,7 +27,7 @@ def _get_activity_session_collection_content_without_id() -> List[
     return _filter_id_field(query_result=activity_sessions_collection_content)
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def get_activity_session_collection_content_without_id() -> Callable[
     [], List[Dict[str, Union[int, datetime, bool]]]
 ]:
@@ -41,7 +41,7 @@ def _clear_activity_sessions_collection() -> None:
     chronos.storage.get_activity_sessions_collection().delete_many({})
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def clear_activity_sessions_collection() -> Callable[[], None]:
     """Fixture that clears whole activity_sessions collection."""
     return _clear_activity_sessions_collection
