@@ -9,6 +9,9 @@ from chronos.api.routers import (
     users_learning_time,
 )
 
+from chronos.logger import logger
+
+logger.init_for_api()
 app = FastAPI()
 
 app.include_router(user_break_time_daily.break_daily_router)

@@ -1,18 +1,19 @@
+import logging
 import os
-import pathlib
 
 import dotenv
 
 import chronos
 
-ROOT_DIR = pathlib.Path(__file__).parents[2]
-ENV_PATH = ROOT_DIR / ".env"
 
-dotenv.load_dotenv(dotenv_path=ENV_PATH)
+dotenv.load_dotenv(dotenv.find_dotenv())
 
 BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", "")
 
 _SERVICE_NAME = chronos.__name__.upper()
+
+LOG_LEVEL = os.getenv(f"{_SERVICE_NAME}_LOG_LEVEL", logging.getLevelName(logging.INFO))
+SENTRY_DSN_API = os.getenv(f"{_SERVICE_NAME}_SENTRY_DSN_API")
 
 MONGO_HOST = os.getenv(f"{_SERVICE_NAME}_MONGO_HOST", "")
 MONGO_PORT = int(os.getenv(f"{_SERVICE_NAME}_MONGO_PORT", "0"))
