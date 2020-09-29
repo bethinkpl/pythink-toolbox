@@ -10,7 +10,7 @@ from pymongo.client_session import ClientSession
 from pymongo.collection import Collection
 
 import chronos.activity_sessions
-import chronos.storage.storage
+import chronos.storage
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +20,9 @@ def main(user_id: int, activity_events: pd.Series, reference_time: datetime) -> 
 
     logger.info("Run test_activity_sessions mongo operations for user_id %i", user_id)
 
-    with chronos.storage.storage.mongodb.client.start_session() as session:
+    with chronos.storage.mongodb.client.start_session() as session:
 
-        collection = chronos.storage.storage.mongodb.activity_sessions_collection
+        collection = chronos.storage.mongodb.activity_sessions_collection
 
         try:
             _run_user_crud_operations_transaction(
@@ -31,7 +31,7 @@ def main(user_id: int, activity_events: pd.Series, reference_time: datetime) -> 
                 session=session,
                 collection=collection,
             )
-        except chronos.storage.storage.MongoCommitError:  # pylint: disable=try-except-raise
+        except chronos.storage.MongoCommitError:  # pylint: disable=try-except-raise
             # TODO LACE-471
             raise
 
@@ -85,7 +85,7 @@ def _commit_transaction_with_retry(session: ClientSession) -> None:
                 )
                 continue
 
-            raise chronos.storage.storage.MongoCommitError(
+            raise chronos.storage.MongoCommitError(
                 "Error during test_activity_sessions creation transaction commit."
             ) from err
 
@@ -94,7 +94,7 @@ def _update_materialized_views(
     reference_time: datetime, collection: Collection
 ) -> None:
 
-    for materialized_view in chronos.storage.storage.materialized_views:
+    for materialized_view in chronos.storage.materialized_views:
         materialized_view.update(collection=collection, reference_time=reference_time)
 
 
