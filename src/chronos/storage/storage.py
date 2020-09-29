@@ -8,6 +8,8 @@ from pymongo.database import Database
 
 from chronos import settings
 
+ACTIVITY_SESSIONS_COLLECTION_NAME = "activity_sessions"
+
 
 class StorageError(Exception):
     """Error related to storage."""
@@ -53,7 +55,7 @@ class _MongoDB:
         Returns:
             pymongo.collection.Collection
         """
-        return self.database.activity_sessions
+        return self.database.get_collection(ACTIVITY_SESSIONS_COLLECTION_NAME)
 
 
 mongodb = _MongoDB()
