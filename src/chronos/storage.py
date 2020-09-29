@@ -17,7 +17,7 @@ class MongoCommitError(StorageError):
     """Error that occurred while performing MongoDB commit."""
 
 
-class MongoDB:
+class _MongoDB:
     def __init__(self) -> None:
         self._client: Optional[MongoClient] = None
 
@@ -56,7 +56,7 @@ class MongoDB:
         return self.database.activity_sessions
 
 
-mongodb = MongoDB()
+mongodb = _MongoDB()
 
 
 @dataclass
