@@ -1,6 +1,8 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
 # pylint: disable=protected-access
+# pylint: disable=duplicate-code
+
 from datetime import datetime
 from typing import Optional, Dict
 
@@ -11,6 +13,7 @@ import pandera.errors
 import pytest
 from pythink_toolbox.testing import parametrization
 
+import chronos
 import chronos.activity_sessions.generation_operations as tested_module
 
 
@@ -39,6 +42,7 @@ def test__create_user_activity_sessions() -> None:
             "is_active": True,
             "is_focus": False,
             "is_break": False,
+            "version": chronos.__version__,
         }
     ]
 
@@ -603,6 +607,7 @@ def test__to_dict() -> None:
             "is_active": True,
             "is_focus": False,
             "is_break": False,
+            "version": chronos.__version__,
         },
         {
             "user_id": user_id,
@@ -611,6 +616,7 @@ def test__to_dict() -> None:
             "is_active": False,
             "is_focus": False,
             "is_break": False,
+            "version": chronos.__version__,
         },
         {
             "user_id": user_id,
@@ -619,5 +625,6 @@ def test__to_dict() -> None:
             "is_active": True,
             "is_focus": True,
             "is_break": False,
+            "version": chronos.__version__,
         },
     ]
