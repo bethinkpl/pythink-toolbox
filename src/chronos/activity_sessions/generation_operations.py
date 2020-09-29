@@ -5,6 +5,8 @@ from typing import List, Optional, TypedDict, Union, Dict
 import pandas as pd
 import pandera
 
+import chronos
+
 MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION = pd.Timedelta(minutes=5)
 MIN_FOCUS_DURATION = pd.Timedelta(minutes=15)
 MAX_BREAK_DURATION = pd.Timedelta(minutes=30)
@@ -21,6 +23,7 @@ class ActivitySession(TypedDict):
     is_active: bool
     is_focus: bool
     is_break: bool
+    version: str
 
 
 def generate_user_activity_sessions(
@@ -219,6 +222,7 @@ def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySess
     for record in records:
         record["start_time"] = record["start_time"].to_pydatetime()
         record["end_time"] = record["end_time"].to_pydatetime()
+        record["version"] = chronos.__version__
 
     activity_sessions_records: List[ActivitySession] = records
 
