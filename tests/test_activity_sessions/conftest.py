@@ -4,7 +4,7 @@ from datetime import datetime
 from pymongo.cursor import Cursor
 import pytest
 
-from chronos import storage
+from chronos.storage import storage
 from chronos import settings
 
 
