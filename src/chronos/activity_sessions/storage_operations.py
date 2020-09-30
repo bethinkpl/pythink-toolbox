@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Union
+from typing import Optional, Dict, Union, List
 from datetime import datetime
 
 import bson
@@ -7,45 +7,62 @@ import pandas as pd
 import pymongo
 import pymongo.errors
 from pymongo.client_session import ClientSession
-from pymongo.collection import Collection
 
 import chronos.activity_sessions
-import chronos.storage.storage
+from chronos.storage import mongodb, MongoCommitError
 
 logger = logging.getLogger(__name__)
 
 
-def main(user_id: int, activity_events: pd.Series, reference_time: datetime) -> None:
-    """Perform all operations to create user activity_sessions & save it to storage."""
+def save_new_activity_sessions(
+    user_id: int, activity_events: pd.Series, reference_time: datetime
+) -> None:
+    """Perform all operation to create user activity_sessions & save it to storage."""
 
     logger.info("Run test_activity_sessions mongo operations for user_id %i", user_id)
 
-    with chronos.storage.storage.mongodb.client.start_session() as session:
-
-        collection = chronos.storage.storage.mongodb.activity_sessions_collection
+    with mongodb.client.start_session() as session:
 
         try:
             _run_user_crud_operations_transaction(
                 user_id=user_id,
                 activity_events=activity_events,
                 session=session,
-                collection=collection,
             )
-        except chronos.storage.storage.MongoCommitError:  # pylint: disable=try-except-raise
-            # TODO LACE-471
-            raise
+        except Exception as err:
+            logger.error(
+                f"{_run_user_crud_operations_transaction.__name__} has failed with error:\n{err}"
+            )
 
-        _update_materialized_views(reference_time=reference_time, collection=collection)
+            mongodb.collections.user_generation_failed.insert_one(
+                {"user_id": user_id, "reference_time": reference_time}
+            )
+
+
+def update_materialized_views(reference_time: datetime) -> None:
+
+    for materialized_view in mongodb.materialized_views:
+        materialized_view.update(reference_time=reference_time)
+
+
+def extract_users_in_user_generation_failed_collection() -> List[int]:
+    return [
+        doc["user_id"]
+        for doc in chronos.storage.mongodb.collections.user_generation_failed.find({})
+    ]
 
 
 def _run_user_crud_operations_transaction(
     user_id: int,
     activity_events: pd.Series,
     session: ClientSession,
-    collection: Collection,
 ) -> None:
 
-    with session.start_transaction(write_concern=pymongo.WriteConcern(w="majority")):
+    with session.start_transaction(
+        write_concern=pymongo.WriteConcern(w="majority")
+    ):  # TODO handle read_, write_concerns, and read_preference
+
+        collection = mongodb.collections.activity_sessions
 
         last_active_session: Optional[
             Dict[str, Union[datetime, bson.ObjectId]]
@@ -85,17 +102,9 @@ def _commit_transaction_with_retry(session: ClientSession) -> None:
                 )
                 continue
 
-            raise chronos.storage.storage.MongoCommitError(
+            raise MongoCommitError(
                 "Error during test_activity_sessions creation transaction commit."
             ) from err
-
-
-def _update_materialized_views(
-    reference_time: datetime, collection: Collection
-) -> None:
-
-    for materialized_view in chronos.storage.storage.materialized_views:
-        materialized_view.update(collection=collection, reference_time=reference_time)
 
 
 # TODO example query for daily_learning_time:
