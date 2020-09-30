@@ -34,3 +34,7 @@ def main(start_time: datetime, end_time: datetime) -> None:
         chronos.activity_sessions.storage_operations.save_new_activity_sessions(
             user_id, activity_events, reference_time=start_time
         )
+
+        chronos.activity_sessions.storage_operations.update_materialized_views(
+            reference_time=start_time
+        )
