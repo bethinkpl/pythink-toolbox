@@ -392,7 +392,7 @@ TEST_STEPS = [
 
 
 @pytest.mark.integration  # type: ignore[misc]
-def test_main(
+def test_save_new_activity_sessions(
     get_activity_session_collection_content_without_id: Callable[
         [], List[Dict[str, Union[int, datetime, bool]]]
     ],
@@ -403,7 +403,7 @@ def test_main(
     clear_storage()
     for step in TEST_STEPS:
 
-        tested_module.main(
+        tested_module.save_new_activity_sessions(
             user_id=TEST_USER_ID,
             activity_events=step["activity_events"],
             reference_time=datetime(1970, 1, 1),
