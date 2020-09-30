@@ -1,3 +1,4 @@
+import logging
 import os
 import pathlib
 
@@ -8,8 +9,12 @@ ENV_PATH = ROOT_DIR / ".env"
 
 dotenv.load_dotenv(dotenv_path=ENV_PATH)
 
-MONGO_HOST = os.getenv("MONGO_HOST_CHRONOS")
-MONGO_PORT = int(os.getenv("MONGO_PORT_CHRONOS", "0"))
-MONGO_USERNAME = os.getenv("MONGO_USER_CHRONOS")
-MONGO_PASSWORD = os.getenv("MONGO_PASSWORD_CHRONOS")
-MONGO_DATABASE = os.getenv("MONGO_DATABASE_CHRONOS")
+LOG_LEVEL = os.getenv("CHRONOS_LOG_LEVEL", logging.getLevelName(logging.INFO))
+
+SENTRY_DSN_API = os.getenv("CHRONOS_SENTRY_DSN_API")
+
+MONGO_HOST = os.getenv("CHRONOS_MONGO_HOST")
+MONGO_PORT = int(os.getenv("CHRONOS_MONGO_PORT", "0"))
+MONGO_USERNAME = os.getenv("CHRONOS_MONGO_USER")
+MONGO_PASSWORD = os.getenv("CHRONOS_MONGO_PASSWORD")
+MONGO_DATABASE = os.getenv("CHRONOS_MONGO_DATABASE")
