@@ -67,8 +67,6 @@ def _run_user_crud_operations_transaction(
         collection.insert_many(
             user_activity_sessions, session=session
         )  # TODO LACE-487 add schema version
-        # TODO LACE-488 add schema validation
-        # TODO consider document per user_id with "sessions_array" or "date_array" - the Bucket Pattern
 
         _commit_transaction_with_retry(session=session)
         logger.info("Transaction committed for user %i.", user_id)
