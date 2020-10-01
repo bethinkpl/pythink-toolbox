@@ -13,7 +13,7 @@ from pythink_toolbox.testing.parametrization import Scenario
 from chronos.activity_sessions.generation_operations import ActivitySession
 import chronos.activity_sessions.storage_operations as tested_module
 
-from chronos.storage import MaterializedViewSchema
+from chronos.storage.storage import MaterializedViewSchema
 
 TEST_USER_ID = 108
 
