@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import json
 from typing import Optional, Sequence, Any, Dict, TypedDict
 from datetime import datetime
 
@@ -103,9 +104,14 @@ class _MongoDB:
         Returns:
             NamedTuple of collections.
         """
+        activity_sessions_name = "activity_sessions"
+
+        if activity_sessions_name not in self.database.list_collection_names():
+            self._create_validated_collection(activity_sessions_name)
+
         return self.Collections(
-            activity_sessions=self.database.activity_sessions,
-            user_generation_failed=self.database.user_generation_failed,
+            activity_sessions=self.database.get_collection("activity_sessions"),
+            user_generation_failed=self.database.user_generation_failed,  # TODO add user_generation_failed schema
         )
 
     @property
@@ -130,6 +136,17 @@ class _MongoDB:
                 match_stage_conds={"is_focus": {"$eq": True}},
             ),
         )
+
+    def _create_validated_collection(self, name: str) -> None:
+
+        validator_file_path = (
+            settings.CHRONOS_PACKAGE_DIR / f"storage/schema_validators/{name}.json"
+        )
+
+        with open(validator_file_path, "r") as file:
+            validator = json.loads(file.read())
+
+        self.database.create_collection(name, validator=validator)
 
 
 mongodb = _MongoDB()

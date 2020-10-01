@@ -9,7 +9,7 @@ import pymongo.errors
 from pymongo.client_session import ClientSession
 
 import chronos.activity_sessions
-from chronos.storage import mongodb, MongoCommitError
+from chronos.storage.storage import mongodb, MongoCommitError
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +57,7 @@ def extract_users_in_user_generation_failed_collection() -> List[int]:
         List of user_ids
     """
     return [
-        doc["user_id"]
-        for doc in chronos.storage.mongodb.collections.user_generation_failed.find({})
+        doc["user_id"] for doc in mongodb.collections.user_generation_failed.find({})
     ]
 
 
