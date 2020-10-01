@@ -109,6 +109,10 @@ class _MongoDB:
 
     @property
     def materialized_views(self) -> Sequence[_MaterializedView]:
+        """
+        Returns:
+            Tuple of all MongoDB materialized views.
+        """
         return (
             _MaterializedView(
                 name="learning_time_sessions_duration",
