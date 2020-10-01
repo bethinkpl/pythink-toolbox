@@ -1,28 +1,42 @@
 # pylint: disable=missing-function-docstring
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Callable, List, Dict, Union
 
 import pytest
+from pytest_steps import test_steps
 from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
 import pandas as pd
 
-import chronos.activity_sessions.main
+import chronos.activity_sessions.main as tested_module
 from chronos.activity_sessions.activity_events_source import (
     read_activity_events_between_datetimes,
 )
+import chronos.storage
 
 
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
+@pytest.mark.e2e  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
+@test_steps(
+    "step_test_collection_content",
+    "step_test_learning_time_sessions_duration_mv_content",
+    "step_test_break_sessions_duration_mv_content",
+    "step_test_focus_sessions_duration_mv_content",
+    "clear_storage",
+)
 def test_main(
     mocker: MockerFixture,
     get_activity_session_collection_content_without_id: Callable[
         [], List[Dict[str, Union[int, datetime, bool]]]
     ],
+    get_materialized_view_content: Callable[
+        [str], List[chronos.storage.MaterializedViewSchema]
+    ],
     clear_storage: Callable[[], None],
 ) -> None:
+    """End-to-end overall happy-path activity sessions creation and materialized views updates."""
 
     mocker.patch(
         transform_function_to_target_string(read_activity_events_between_datetimes),
@@ -30,7 +44,20 @@ def test_main(
             columns=["user_id", "client_time"],
             data=[
                 [1, datetime(2000, 1, 1, 0, 1)],
-                [1, datetime(2000, 1, 1, 0, 2)],
+                [1, datetime(2000, 1, 1, 0, 5)],
+                [1, datetime(2000, 1, 1, 0, 10)],
+                [1, datetime(2000, 1, 1, 0, 15)],
+                [1, datetime(2000, 1, 1, 0, 20)],
+                [1, datetime(2000, 1, 1, 0, 25)],
+                [1, datetime(2000, 1, 1, 0, 30)],
+                [1, datetime(2000, 1, 1, 0, 35)],
+                [1, datetime(2000, 1, 1, 1, 1)],
+                [1, datetime(2000, 1, 1, 1, 5)],
+                [1, datetime(2000, 1, 1, 1, 10)],
+                [1, datetime(2000, 1, 1, 1, 15)],
+                [1, datetime(2000, 1, 1, 1, 20)],
+                [1, datetime(2000, 1, 1, 1, 25)],
+                [1, datetime(2000, 1, 1, 1, 30)],
                 [2, datetime(2000, 1, 1, 0, 1)],
             ],
         ),
@@ -38,20 +65,34 @@ def test_main(
 
     clear_storage()
 
-    chronos.activity_sessions.main.main(
-        start_time=datetime(2000, 1, 1), end_time=datetime(2000, 1, 2)
-    )
+    tested_module.main(start_time=datetime(2000, 1, 1), end_time=datetime(2000, 1, 2))
 
-    data = get_activity_session_collection_content_without_id()
+    result_data = get_activity_session_collection_content_without_id()
 
     expected_data = [
         {
             "user_id": 1,
             "start_time": datetime(2000, 1, 1),
-            "end_time": datetime(2000, 1, 1, 0, 2),
+            "end_time": datetime(2000, 1, 1, 0, 35),
             "is_active": True,
             "is_break": False,
+            "is_focus": True,
+        },
+        {
+            "user_id": 1,
+            "start_time": datetime(2000, 1, 1, 0, 35),
+            "end_time": datetime(2000, 1, 1, 1),
+            "is_active": False,
+            "is_break": True,
             "is_focus": False,
+        },
+        {
+            "user_id": 1,
+            "start_time": datetime(2000, 1, 1, 1),
+            "end_time": datetime(2000, 1, 1, 1, 30),
+            "is_active": True,
+            "is_break": False,
+            "is_focus": True,
         },
         {
             "user_id": 2,
@@ -63,6 +104,82 @@ def test_main(
         },
     ]
 
-    assert data == expected_data
+    assert result_data == expected_data
+    yield
 
-    clear_storage()
+    result_data = get_materialized_view_content("learning_time_sessions_duration_mv")
+    expected_data = [
+        {
+            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1)},
+            "end_time": datetime(2000, 1, 1, 0, 35),
+            "duration_ms": int(
+                (datetime(2000, 1, 1, 0, 35) - datetime(2000, 1, 1))
+                / timedelta(milliseconds=1)
+            ),
+        },
+        {
+            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1, 0, 35)},
+            "end_time": datetime(2000, 1, 1, 1),
+            "duration_ms": int(
+                (datetime(2000, 1, 1, 1) - datetime(2000, 1, 1, 0, 35))
+                / timedelta(milliseconds=1)
+            ),
+        },
+        {
+            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1, 1)},
+            "end_time": datetime(2000, 1, 1, 1, 30),
+            "duration_ms": int(
+                (datetime(2000, 1, 1, 1, 30) - datetime(2000, 1, 1, 1))
+                / timedelta(milliseconds=1)
+            ),
+        },
+        {
+            "_id": {"user_id": 2, "start_time": datetime(2000, 1, 1)},
+            "end_time": datetime(2000, 1, 1, 0, 1),
+            "duration_ms": int(
+                (datetime(2000, 1, 1, 0, 1) - datetime(2000, 1, 1))
+                / timedelta(milliseconds=1)
+            ),
+        },
+    ]
+
+    assert result_data == expected_data
+    yield
+
+    result_data = get_materialized_view_content("break_sessions_duration_mv")
+    expected_data = [
+        {
+            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1, 0, 35)},
+            "end_time": datetime(2000, 1, 1, 1),
+            "duration_ms": int(
+                (datetime(2000, 1, 1, 1) - datetime(2000, 1, 1, 0, 35))
+                / timedelta(milliseconds=1)
+            ),
+        }
+    ]
+
+    assert result_data == expected_data
+    yield
+
+    result_data = get_materialized_view_content("focus_sessions_duration_mv")
+    expected_data = [
+        {
+            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1)},
+            "end_time": datetime(2000, 1, 1, 0, 35),
+            "duration_ms": int(
+                (datetime(2000, 1, 1, 0, 35) - datetime(2000, 1, 1))
+                / timedelta(milliseconds=1)
+            ),
+        },
+        {
+            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1, 1)},
+            "end_time": datetime(2000, 1, 1, 1, 30),
+            "duration_ms": int(
+                (datetime(2000, 1, 1, 1, 30) - datetime(2000, 1, 1, 1))
+                / timedelta(milliseconds=1)
+            ),
+        },
+    ]
+
+    assert result_data == expected_data
+    yield

@@ -20,6 +20,7 @@ pymongo = "^3.11.0"
 fastapi = "^0.61.1"
 uvicorn = "^0.11.8"
 sentry-sdk = "^0.17.4"
+pytest-steps = "^1.7.3"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
@@ -39,7 +40,10 @@ cli = 'cli:main'
 [tool.pytest.ini_options]
 minversion = "6.0"
 
-markers = "integration: Mark test as integration"
+markers = [
+    "integration: Mark test as an integration test",
+    "e2e: Mark test as an end-to-end test"
+]
 
 [tool.coverage.paths]
 source = ["src"]
