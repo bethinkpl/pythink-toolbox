@@ -1,4 +1,4 @@
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict
 from datetime import datetime
 
 import datatosk
@@ -18,7 +18,7 @@ def read_activity_events_between_datetimes(
 
     bigquery_source = datatosk.gbq("prod")
 
-    params = {
+    params: Dict[str, Union[datetime, str, List[int]]] = {
         "start_time": start_time,
         "end_time": end_time,
     }
