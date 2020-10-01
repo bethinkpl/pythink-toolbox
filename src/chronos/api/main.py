@@ -1,4 +1,5 @@
 import uvicorn
+from chronos.settings import HOST_API
 from fastapi.applications import FastAPI
 
 from chronos.api.routers import (
@@ -23,5 +24,5 @@ app.include_router(users_learning_time.users_learning_router)
 
 if __name__ == "__main__":
     uvicorn.run(
-        "chronos.api.main:app", host="127.0.0.1", port=5000, debug=True, reload=True
+        "chronos.api.main:app", host=HOST_API, port=5000, debug=True, reload=True
     )
