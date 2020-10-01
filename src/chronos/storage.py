@@ -61,6 +61,11 @@ class MaterializedViewSchema(TypedDict):
 
 
 class _MongoDB:
+    @dataclass
+    class Collections:
+        activity_sessions: Collection
+        user_generation_failed: Collection
+
     def __init__(self) -> None:
         self._client: Optional[MongoClient] = None
 
@@ -91,18 +96,12 @@ class _MongoDB:
         return self._client[settings.MONGO_DATABASE]
 
     @property
-    def collections(self) -> dataclass:
+    def collections(self) -> Collections:
         """
         Returns:
             NamedTuple of collections.
         """
-
-        @dataclass
-        class Collections:
-            activity_sessions: Collection
-            user_generation_failed: Collection
-
-        return Collections(
+        return self.Collections(
             activity_sessions=self.database.activity_sessions,
             user_generation_failed=self.database.user_generation_failed,
         )
