@@ -1,7 +1,4 @@
 import uvicorn
-from chronos.settings import HOST_API
-from fastapi.applications import FastAPI
-
 from chronos.api.routers import (
     user_break_time_daily,
     user_focus_time_daily,
@@ -9,8 +6,9 @@ from chronos.api.routers import (
     user_learning_time_daily,
     users_learning_time,
 )
-
 from chronos.logger import logger
+from chronos.settings import HOST_API
+from fastapi.applications import FastAPI
 
 logger.init_for_api()
 app = FastAPI()
