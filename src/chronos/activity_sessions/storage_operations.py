@@ -29,9 +29,11 @@ def save_new_activity_sessions(
                 activity_events=activity_events,
                 session=session,
             )
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-except
             logger.error(
-                f"{_run_user_crud_operations_transaction.__name__} has failed with error:\n{err}"
+                "%s has failed with error:\n%s",
+                _run_user_crud_operations_transaction.__name__,
+                err,
             )
 
             mongodb.collections.user_generation_failed.insert_one(
@@ -40,12 +42,20 @@ def save_new_activity_sessions(
 
 
 def update_materialized_views(reference_time: datetime) -> None:
+    """Updates all materialized views.
+    Args:
+        reference_time: time from which materialized views takes data to update themselves.
+    """
 
     for materialized_view in mongodb.materialized_views:
         materialized_view.update(reference_time=reference_time)
 
 
 def extract_users_in_user_generation_failed_collection() -> List[int]:
+    """Extracts all user_id in generation_failed collection documents.
+    Returns:
+        List of user_ids
+    """
     return [
         doc["user_id"]
         for doc in chronos.storage.mongodb.collections.user_generation_failed.find({})

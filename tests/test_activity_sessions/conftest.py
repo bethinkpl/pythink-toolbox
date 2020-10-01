@@ -22,7 +22,7 @@ def _get_activity_session_collection_content_without_id() -> List[
 ]:
 
     activity_sessions_collection_content = (
-        storage.mongodb.activity_sessions_collection.find()
+        storage.mongodb.collections.activity_sessions.find()
     )
 
     return _filter_id_field(query_result=activity_sessions_collection_content)
