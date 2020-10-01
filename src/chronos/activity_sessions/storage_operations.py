@@ -9,7 +9,7 @@ import pymongo.errors
 from pymongo.client_session import ClientSession
 
 import chronos.activity_sessions
-from chronos.storage import mongodb, MongoCommitError
+from chronos.storage.storage import mongodb, MongoCommitError
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +57,7 @@ def extract_users_in_user_generation_failed_collection() -> List[int]:
         List of user_ids
     """
     return [
-        doc["user_id"]
-        for doc in chronos.storage.mongodb.collections.user_generation_failed.find({})
+        doc["user_id"] for doc in mongodb.collections.user_generation_failed.find({})
     ]
 
 
@@ -91,11 +90,7 @@ def _run_user_crud_operations_transaction(
             last_active_session=last_active_session,
         )
 
-        collection.insert_many(
-            user_activity_sessions, session=session
-        )  # TODO LACE-487 add schema version
-        # TODO LACE-488 add schema validation
-        # TODO consider document per user_id with "sessions_array" or "date_array" - the Bucket Pattern
+        collection.insert_many(user_activity_sessions, session=session)
 
         _commit_transaction_with_retry(session=session)
         logger.info("Transaction committed for user %i.", user_id)

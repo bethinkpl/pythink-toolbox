@@ -1,7 +1,7 @@
 # pylint: disable=missing-function-docstring
 
 from datetime import datetime, timedelta
-from typing import Callable, List, Dict, Union
+from typing import Callable, List, Dict, Union, Iterator
 
 import pytest
 from pytest_steps import test_steps
@@ -13,13 +13,13 @@ import chronos.activity_sessions.main as tested_module
 from chronos.activity_sessions.activity_events_source import (
     read_activity_events_between_datetimes,
 )
-import chronos.storage
+import chronos.storage.storage
 
 
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
 @pytest.mark.e2e  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
-@test_steps(
+@test_steps(  # type: ignore[misc]
     "step_test_collection_content",
     "step_test_learning_time_sessions_duration_mv_content",
     "step_test_break_sessions_duration_mv_content",
@@ -32,10 +32,10 @@ def test_main(
         [], List[Dict[str, Union[int, datetime, bool]]]
     ],
     get_materialized_view_content: Callable[
-        [str], List[chronos.storage.MaterializedViewSchema]
+        [str], List[chronos.storage.storage.MaterializedViewSchema]
     ],
     clear_storage: Callable[[], None],
-) -> None:
+) -> Iterator[None]:
     """End-to-end overall happy-path activity sessions creation and materialized views updates."""
 
     mocker.patch(
@@ -67,9 +67,9 @@ def test_main(
 
     tested_module.main(start_time=datetime(2000, 1, 1), end_time=datetime(2000, 1, 2))
 
-    result_data = get_activity_session_collection_content_without_id()
+    result_data_1 = get_activity_session_collection_content_without_id()
 
-    expected_data = [
+    expected_data_1 = [
         {
             "user_id": 1,
             "start_time": datetime(2000, 1, 1),
@@ -104,11 +104,11 @@ def test_main(
         },
     ]
 
-    assert result_data == expected_data
+    assert result_data_1 == expected_data_1
     yield
 
-    result_data = get_materialized_view_content("learning_time_sessions_duration_mv")
-    expected_data = [
+    result_data_2 = get_materialized_view_content("learning_time_sessions_duration_mv")
+    expected_data_2 = [
         {
             "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1)},
             "end_time": datetime(2000, 1, 1, 0, 35),
@@ -143,11 +143,11 @@ def test_main(
         },
     ]
 
-    assert result_data == expected_data
+    assert result_data_2 == expected_data_2
     yield
 
-    result_data = get_materialized_view_content("break_sessions_duration_mv")
-    expected_data = [
+    result_data_3 = get_materialized_view_content("break_sessions_duration_mv")
+    expected_data_3 = [
         {
             "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1, 0, 35)},
             "end_time": datetime(2000, 1, 1, 1),
@@ -158,11 +158,11 @@ def test_main(
         }
     ]
 
-    assert result_data == expected_data
+    assert result_data_3 == expected_data_3
     yield
 
-    result_data = get_materialized_view_content("focus_sessions_duration_mv")
-    expected_data = [
+    result_data_4 = get_materialized_view_content("focus_sessions_duration_mv")
+    expected_data_4 = [
         {
             "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1)},
             "end_time": datetime(2000, 1, 1, 0, 35),
@@ -181,5 +181,5 @@ def test_main(
         },
     ]
 
-    assert result_data == expected_data
+    assert result_data_4 == expected_data_4
     yield

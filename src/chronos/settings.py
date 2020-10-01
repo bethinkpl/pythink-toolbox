@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 
 import dotenv
 
@@ -8,7 +9,14 @@ import chronos
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
+# === External services ===
 BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", "")
+
+# === Chronos specific ===
+CHRONOS_PACKAGE_DIR = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
+
+PROJECT_DIR = CHRONOS_PACKAGE_DIR.parents[1]
+
 
 _SERVICE_NAME = chronos.__name__.upper()
 
