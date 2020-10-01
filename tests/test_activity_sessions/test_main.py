@@ -24,7 +24,6 @@ import chronos.storage.storage
     "step_test_learning_time_sessions_duration_mv_content",
     "step_test_break_sessions_duration_mv_content",
     "step_test_focus_sessions_duration_mv_content",
-    "clear_storage",
 )
 def test_main(
     mocker: MockerFixture,
