@@ -4,6 +4,7 @@ from datetime import datetime
 from pymongo.cursor import Cursor
 import pytest
 
+from chronos.activity_sessions.generation_operations import ActivitySessionSchema
 from chronos.storage import storage
 from chronos import settings
 
@@ -63,3 +64,17 @@ def get_materialized_view_content() -> Callable[
     """Returns function that query materialized view and return all its content"""
 
     return _get_materialized_view_content
+
+
+def _insert_data_to_activity_sessions_collection(
+    data: List[ActivitySessionSchema],
+) -> None:
+
+    storage.mongodb.collections.activity_sessions.insert_many(data)
+
+
+@pytest.fixture
+def insert_data_to_activity_sessions_collection() -> Callable[
+    [List[ActivitySessionSchema]], None
+]:
+    return _insert_data_to_activity_sessions_collection

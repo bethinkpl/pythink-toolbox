@@ -14,9 +14,10 @@ MAX_BREAK_DURATION = pd.Timedelta(minutes=30)
 logger = logging.getLogger(__name__)
 
 
-class ActivitySession(TypedDict):
+class ActivitySessionSchema(TypedDict):
     """Activity sessions schema."""
 
+    # TODO think if we need to add "_id" field
     user_id: int
     start_time: datetime
     end_time: datetime
@@ -30,12 +31,12 @@ def generate_user_activity_sessions(
     user_id: int,
     activity_events: pd.Series,
     last_active_session: Optional[Dict[str, datetime]],
-) -> List[ActivitySession]:
+) -> List[ActivitySessionSchema]:
     """Perform all operations to create activity_sessions for user."""
 
     logger.info("Creating activity_sessions for user %i.", user_id)
 
-    activity_sessions: List[ActivitySession] = (
+    activity_sessions: List[ActivitySessionSchema] = (
         activity_events.pipe(_initialize_sessions_creation)
         .pipe(_add_last_active_session, last_active_session=last_active_session)
         .pipe(_create_active_sessions)
@@ -211,7 +212,9 @@ def _sessions_validation(activity_sessions: pd.DataFrame) -> pd.DataFrame:
     return activity_sessions
 
 
-def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySession]:
+def _to_dict(
+    activity_sessions: pd.DataFrame, user_id: int
+) -> List[ActivitySessionSchema]:
 
     assert not activity_sessions.empty
 
@@ -224,7 +227,7 @@ def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySess
         record["end_time"] = record["end_time"].to_pydatetime()
         record["version"] = chronos.__version__
 
-    activity_sessions_records: List[ActivitySession] = records
+    activity_sessions_records: List[ActivitySessionSchema] = records
 
     logger.debug("activity_sessions to insert to mongo db: \n %s", activity_sessions)
 

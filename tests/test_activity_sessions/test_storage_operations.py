@@ -9,10 +9,11 @@ from typing import Dict, List, Union, Callable
 import pandas as pd
 import pytest
 import pytest_steps
+from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
 import chronos
+from chronos.activity_sessions.generation_operations import ActivitySessionSchema
 import chronos.activity_sessions.storage_operations as tested_module
-
 from chronos.storage.storage import MaterializedViewSchema
 
 TEST_USER_ID = 108
@@ -231,425 +232,400 @@ def test_save_new_activity_sessions(
     clear_storage()
     yield
 
-    # expected_materialized_views_content = {
-    #     "actual_learning_time_sessions_duration_mv_content": (
-    #         [
-    #             {
-    #                 "_id": {
-    #                     "user_id": TEST_USER_ID,
-    #                     "start_time": datetime(1999, 12, 31, 23, 59),
-    #                 },
-    #                 "end_time": datetime(2000, 1, 1, 0, 0),
-    #                 "duration_ms": int(
-    #                     (
-    #                         datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
-    #                     ).total_seconds()
-    #                     * 1000
-    #                 ),
-    #             },
-    #             {
-    #                 "_id": {
-    #                     "user_id": TEST_USER_ID,
-    #                     "start_time": datetime(2000, 1, 1, 23, 59),
-    #                 },
-    #                 "end_time": datetime(2000, 1, 2, 0, 0),
-    #                 "duration_ms": int(
-    #                     (
-    #                         datetime(2000, 1, 2, 0, 0) - datetime(2000, 1, 1, 23, 59)
-    #                     ).total_seconds()
-    #                     * 1000
-    #                 ),
-    #             },
-    #         ],
-    #     ),
-    #     "actual_break_sessions_duration_mv_content": [],
-    #     "actual_focus_sessions_duration_mv_content": [],
-    # }
-    #
-    # actual_materialized_views_content = _get_actual_materialized_views_content(
-    #     get_materialized_view_content=get_materialized_view_content
-    # )
-    #
-    # assert actual_materialized_views_content == expected_materialized_views_content
-    #
-    # yield
-    #
-    # clear_storage()
 
-    # step1
-    # expected_collection_content = (
-    #     [
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(1999, 12, 31, 23, 59),
-    #             "end_time": datetime(2000, 1, 1, 0, 0),
-    #             "is_active": True,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 1, 0, 0),
-    #             "end_time": datetime(2000, 1, 1, 23, 59),
-    #             "is_active": False,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 1, 23, 59),
-    #             "end_time": datetime(2000, 1, 2, 0, 0),
-    #             "is_active": True,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #     ],
-    # )
-    # expected_learning_time_sessions_duration_mv_data = (
-    #     [
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(1999, 12, 31, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 1, 0, 0),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 1, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 0),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 0) - datetime(2000, 1, 1, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #     ],
-    # )
-    # expected_break_sessions_duration_mv_data = ([],)
-    # expected_focus_sessions_duration_mv_data = ([],)
-
-    # step 2
-    # expected_collection_content = (
-    #     [
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(1999, 12, 31, 23, 59),
-    #             "end_time": datetime(2000, 1, 1, 0, 0),
-    #             "is_active": True,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 1, 0, 0),
-    #             "end_time": datetime(2000, 1, 1, 23, 59),
-    #             "is_active": False,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 1, 23, 59),
-    #             "end_time": datetime(2000, 1, 2, 0, 5),
-    #             "is_active": True,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #     ],
-    # )
-    # expected_learning_time_sessions_duration_mv_data = (
-    #     [
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(1999, 12, 31, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 1, 0, 0),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 1, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 5),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 5) - datetime(2000, 1, 1, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #     ],
-    # )
-    # expected_break_sessions_duration_mv_data = ([],)
-    # expected_focus_sessions_duration_mv_data = ([],)
-
-    # step 3
-    # expected_collection_content = (
-    #     [
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(1999, 12, 31, 23, 59),
-    #             "end_time": datetime(2000, 1, 1, 0, 0),
-    #             "is_active": True,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 1, 0, 0),
-    #             "end_time": datetime(2000, 1, 1, 23, 59),
-    #             "is_active": False,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 1, 23, 59),
-    #             "end_time": datetime(2000, 1, 2, 0, 15),
-    #             "is_active": True,
-    #             "is_focus": True,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #     ],
-    # )
-    # expected_learning_time_sessions_duration_mv_data = (
-    #     [
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(1999, 12, 31, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 1, 0, 0),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 1, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 15),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #     ],
-    # )
-    # expected_break_sessions_duration_mv_data = ([],)
-    # expected_focus_sessions_duration_mv_data = (
-    #     [
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 1, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 15),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         }
-    #     ],
-    # )
-
-    # last step
-    # expected_collection_content = (
-    #     [
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(1999, 12, 31, 23, 59),
-    #             "end_time": datetime(2000, 1, 1, 0, 0),
-    #             "is_active": True,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 1, 0, 0),
-    #             "end_time": datetime(2000, 1, 1, 23, 59),
-    #             "is_active": False,
-    #             "is_focus": False,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 1, 23, 59),
-    #             "end_time": datetime(2000, 1, 2, 0, 15),
-    #             "is_active": True,
-    #             "is_focus": True,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 2, 0, 15),
-    #             "end_time": datetime(2000, 1, 2, 0, 20, 1),
-    #             "is_active": False,
-    #             "is_focus": False,
-    #             "is_break": True,
-    #             "version": chronos.__version__,
-    #         },
-    #         {
-    #             "user_id": TEST_USER_ID,
-    #             "start_time": datetime(2000, 1, 2, 0, 20, 1),
-    #             "end_time": datetime(2000, 1, 2, 0, 40),
-    #             "is_active": True,
-    #             "is_focus": True,
-    #             "is_break": False,
-    #             "version": chronos.__version__,
-    #         },
-    #     ],
-    # )
-    # expected_learning_time_sessions_duration_mv_data = (
-    #     [
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(1999, 12, 31, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 1, 0, 0),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 1, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 15),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 2, 0, 15),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 20, 1),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 20, 1) - datetime(2000, 1, 2, 0, 15)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 2, 0, 20, 1),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 40),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 40) - datetime(2000, 1, 2, 0, 20, 1)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #     ],
-    # )
-    # expected_break_sessions_duration_mv_data = (
-    #     [
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 2, 0, 15),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 20, 1),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 20, 1) - datetime(2000, 1, 2, 0, 15)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         }
-    #     ],
-    # )
-    # expected_focus_sessions_duration_mv_data = (
-    #     [
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 1, 23, 59),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 15),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #         {
-    #             "_id": {
-    #                 "user_id": TEST_USER_ID,
-    #                 "start_time": datetime(2000, 1, 2, 0, 20, 1),
-    #             },
-    #             "end_time": datetime(2000, 1, 2, 0, 40),
-    #             "duration_ms": int(
-    #                 (
-    #                     datetime(2000, 1, 2, 0, 40) - datetime(2000, 1, 2, 0, 20, 1)
-    #                 ).total_seconds()
-    #                 * 1000
-    #             ),
-    #         },
-    #     ],
-    # )
+# =====================================================================================
 
 
-def _get_actual_materialized_views_content(get_materialized_view_content):
+class UpdateMaterializedViewsScenario(Scenario):
+    activity_sessions_content: List[ActivitySessionSchema]
+    expected_materialized_views_content: Dict[str, List[MaterializedViewSchema]]
+
+
+TEST_DATA = [
+    UpdateMaterializedViewsScenario(
+        desc="",
+        activity_sessions_content=[
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(1999, 12, 31, 23, 59),
+                "end_time": datetime(2000, 1, 1, 0, 0),
+                "is_active": True,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 1, 0, 0),
+                "end_time": datetime(2000, 1, 1, 23, 59),
+                "is_active": False,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 1, 23, 59),
+                "end_time": datetime(2000, 1, 2, 0, 0),
+                "is_active": True,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+        ],
+        expected_materialized_views_content={
+            "learning_time_sessions_duration_mv": [
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(1999, 12, 31, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 1, 0, 0),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 1, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 0),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 0) - datetime(2000, 1, 1, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+            ],
+            "break_sessions_duration_mv": [],
+            "focus_sessions_duration_mv": [],
+        },
+    ),
+    UpdateMaterializedViewsScenario(
+        desc="",
+        activity_sessions_content=[
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(1999, 12, 31, 23, 59),
+                "end_time": datetime(2000, 1, 1, 0, 0),
+                "is_active": True,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 1, 0, 0),
+                "end_time": datetime(2000, 1, 1, 23, 59),
+                "is_active": False,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 1, 23, 59),
+                "end_time": datetime(2000, 1, 2, 0, 5),
+                "is_active": True,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+        ],
+        expected_materialized_views_content={
+            "learning_time_sessions_duration_mv": [
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(1999, 12, 31, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 1, 0, 0),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 1, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 5),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 5) - datetime(2000, 1, 1, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+            ],
+            "break_sessions_duration_mv": [],
+            "focus_sessions_duration_mv": [],
+        },
+    ),
+    UpdateMaterializedViewsScenario(
+        desc="",
+        activity_sessions_content=[
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(1999, 12, 31, 23, 59),
+                "end_time": datetime(2000, 1, 1, 0, 0),
+                "is_active": True,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 1, 0, 0),
+                "end_time": datetime(2000, 1, 1, 23, 59),
+                "is_active": False,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 1, 23, 59),
+                "end_time": datetime(2000, 1, 2, 0, 15),
+                "is_active": True,
+                "is_focus": True,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+        ],
+        expected_materialized_views_content={
+            "learning_time_sessions_duration_mv": [
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(1999, 12, 31, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 1, 0, 0),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 1, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 15),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+            ],
+            "break_sessions_duration_mv": [],
+            "focus_sessions_duration_mv": [
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 1, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 15),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                }
+            ],
+        },
+    ),
+    UpdateMaterializedViewsScenario(
+        desc="",
+        activity_sessions_content=[
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(1999, 12, 31, 23, 59),
+                "end_time": datetime(2000, 1, 1, 0, 0),
+                "is_active": True,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 1, 0, 0),
+                "end_time": datetime(2000, 1, 1, 23, 59),
+                "is_active": False,
+                "is_focus": False,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 1, 23, 59),
+                "end_time": datetime(2000, 1, 2, 0, 15),
+                "is_active": True,
+                "is_focus": True,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 2, 0, 15),
+                "end_time": datetime(2000, 1, 2, 0, 20, 1),
+                "is_active": False,
+                "is_focus": False,
+                "is_break": True,
+                "version": chronos.__version__,
+            },
+            {
+                "user_id": TEST_USER_ID,
+                "start_time": datetime(2000, 1, 2, 0, 20, 1),
+                "end_time": datetime(2000, 1, 2, 0, 40),
+                "is_active": True,
+                "is_focus": True,
+                "is_break": False,
+                "version": chronos.__version__,
+            },
+        ],
+        expected_materialized_views_content={
+            "learning_time_sessions_duration_mv": [
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(1999, 12, 31, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 1, 0, 0),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 1, 0, 0) - datetime(1999, 12, 31, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 1, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 15),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 2, 0, 15),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 20, 1),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 20, 1) - datetime(2000, 1, 2, 0, 15)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 2, 0, 20, 1),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 40),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 40) - datetime(2000, 1, 2, 0, 20, 1)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+            ],
+            "break_sessions_duration_mv": [
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 2, 0, 15),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 20, 1),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 20, 1) - datetime(2000, 1, 2, 0, 15)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                }
+            ],
+            "focus_sessions_duration_mv": [
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 1, 23, 59),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 15),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 15) - datetime(2000, 1, 1, 23, 59)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+                {
+                    "_id": {
+                        "user_id": TEST_USER_ID,
+                        "start_time": datetime(2000, 1, 2, 0, 20, 1),
+                    },
+                    "end_time": datetime(2000, 1, 2, 0, 40),
+                    "duration_ms": int(
+                        (
+                            datetime(2000, 1, 2, 0, 40) - datetime(2000, 1, 2, 0, 20, 1)
+                        ).total_seconds()
+                        * 1000
+                    ),
+                },
+            ],
+        },
+    ),
+]
+
+
+@parametrize(TEST_DATA)
+def test_update_materialized_views(
+    activity_sessions_content: List[ActivitySessionSchema],
+    expected_materialized_views_content: Dict[str, List[MaterializedViewSchema]],
+    clear_storage,
+    get_materialized_view_content,
+    insert_data_to_activity_sessions_collection,
+) -> None:
+
+    clear_storage()
+
+    insert_data_to_activity_sessions_collection(activity_sessions_content)
+
+    tested_module.update_materialized_views(reference_time=datetime(1970, 1, 1))
+
     materialized_view_names = [
         "learning_time_sessions_duration_mv",
         "break_sessions_duration_mv",
         "focus_sessions_duration_mv",
     ]
 
-    return {
-        f"actual_{mv_name}_content": get_materialized_view_content(mv_name)
+    actual_materialized_views_content = {
+        mv_name: get_materialized_view_content(mv_name)
         for mv_name in materialized_view_names
     }
+
+    assert expected_materialized_views_content == actual_materialized_views_content
+
+    clear_storage()
