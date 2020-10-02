@@ -34,6 +34,10 @@
       "is_break": {
         "bsonType": "bool",
         "description": "must be `bool` & is required"
+      },
+      "version": {
+        "bsonType": "string",
+        "description": "must be `string` & is required"
       }
     }
   }

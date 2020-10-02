@@ -8,7 +8,7 @@ disable=
 notes=FIXME
 
 [SIMILARITIES]
-min-similarity-lines=5
+min-similarity-lines=6
 ignore-imports=yes
 
 [FORMAT]

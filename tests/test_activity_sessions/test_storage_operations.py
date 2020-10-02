@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 from pythink_toolbox.testing.parametrization import Scenario
 
-from chronos.activity_sessions.generation_operations import ActivitySession
+import chronos
 import chronos.activity_sessions.storage_operations as tested_module
 
 from chronos.storage.storage import MaterializedViewSchema
@@ -20,7 +20,7 @@ TEST_USER_ID = 108
 
 class MainScenario(Scenario):
     activity_events: pd.Series
-    expected_collection_data: List[ActivitySession]
+    expected_collection_data: List[Dict[str, Union[int, datetime, bool, str]]]
     expected_learning_time_sessions_duration_mv_data: List[MaterializedViewSchema]
     expected_break_sessions_duration_mv_data: List[MaterializedViewSchema]
     expected_focus_sessions_duration_mv_data: List[MaterializedViewSchema]
@@ -38,6 +38,7 @@ TEST_STEPS = [
                 "is_active": True,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -46,6 +47,7 @@ TEST_STEPS = [
                 "is_active": False,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -54,6 +56,7 @@ TEST_STEPS = [
                 "is_active": True,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
         ],
         expected_learning_time_sessions_duration_mv_data=[
@@ -98,6 +101,7 @@ TEST_STEPS = [
                 "is_active": True,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -106,6 +110,7 @@ TEST_STEPS = [
                 "is_active": False,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -114,6 +119,7 @@ TEST_STEPS = [
                 "is_active": True,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
         ],
         expected_learning_time_sessions_duration_mv_data=[
@@ -160,6 +166,7 @@ TEST_STEPS = [
                 "is_active": True,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -168,6 +175,7 @@ TEST_STEPS = [
                 "is_active": False,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -176,6 +184,7 @@ TEST_STEPS = [
                 "is_active": True,
                 "is_focus": True,
                 "is_break": False,
+                "version": chronos.__version__,
             },
         ],
         expected_learning_time_sessions_duration_mv_data=[
@@ -242,6 +251,7 @@ TEST_STEPS = [
                 "is_active": True,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -250,6 +260,7 @@ TEST_STEPS = [
                 "is_active": False,
                 "is_focus": False,
                 "is_break": False,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -258,6 +269,7 @@ TEST_STEPS = [
                 "is_active": True,
                 "is_focus": True,
                 "is_break": False,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -266,6 +278,7 @@ TEST_STEPS = [
                 "is_active": False,
                 "is_focus": False,
                 "is_break": True,
+                "version": chronos.__version__,
             },
             {
                 "user_id": TEST_USER_ID,
@@ -274,6 +287,7 @@ TEST_STEPS = [
                 "is_active": True,
                 "is_focus": True,
                 "is_break": False,
+                "version": chronos.__version__,
             },
         ],
         expected_learning_time_sessions_duration_mv_data=[
