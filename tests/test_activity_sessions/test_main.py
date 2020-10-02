@@ -76,6 +76,7 @@ def test_main(
             "is_active": True,
             "is_break": False,
             "is_focus": True,
+            "version": chronos.__version__,
         },
         {
             "user_id": 1,
@@ -84,6 +85,7 @@ def test_main(
             "is_active": False,
             "is_break": True,
             "is_focus": False,
+            "version": chronos.__version__,
         },
         {
             "user_id": 1,
@@ -92,6 +94,7 @@ def test_main(
             "is_active": True,
             "is_break": False,
             "is_focus": True,
+            "version": chronos.__version__,
         },
         {
             "user_id": 2,
@@ -100,6 +103,7 @@ def test_main(
             "is_active": True,
             "is_break": False,
             "is_focus": False,
+            "version": chronos.__version__,
         },
     ]
 
