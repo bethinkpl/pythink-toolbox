@@ -4,7 +4,7 @@
 # pylint: disable=duplicate-code
 
 from datetime import datetime
-from typing import Dict, List, Union, Callable
+from typing import Dict, List, Union, Callable, Iterator
 
 import pandas as pd
 import pytest
@@ -20,7 +20,7 @@ TEST_USER_ID = 108
 
 
 @pytest.mark.integration  # type: ignore[misc]
-@pytest_steps.test_steps(
+@pytest_steps.test_steps(  # type: ignore[misc]
     [
         "Initial input - creates two separate active sessions and inactive in the middle",
         "Takes last active session & extends its duration.",
@@ -32,10 +32,12 @@ def test_save_new_activity_sessions(
     get_activity_session_collection_content_without_id: Callable[
         [], List[Dict[str, Union[int, datetime, bool]]]
     ],
-    get_materialized_view_content: Callable[[str], List[MaterializedViewSchema]],
     clear_storage: Callable[[], None],
-) -> None:
-    def _save_new_activity_sessions_and_get_its_content(_activity_events: pd.Series):
+) -> Iterator[None]:
+    def _save_new_activity_sessions_and_get_its_content(
+        _activity_events: pd.Series,
+    ) -> List[Dict[str, Union[int, datetime, bool]]]:
+
         tested_module.save_new_activity_sessions(
             user_id=TEST_USER_ID,
             activity_events=_activity_events,
@@ -600,13 +602,15 @@ TEST_DATA = [
 ]
 
 
-@parametrize(TEST_DATA)
+@parametrize(TEST_DATA)  # type: ignore[misc]
 def test_update_materialized_views(
     activity_sessions_content: List[ActivitySessionSchema],
     expected_materialized_views_content: Dict[str, List[MaterializedViewSchema]],
-    clear_storage,
-    get_materialized_view_content,
-    insert_data_to_activity_sessions_collection,
+    clear_storage: Callable[[], None],
+    get_materialized_view_content: Callable[[str], List[MaterializedViewSchema]],
+    insert_data_to_activity_sessions_collection: Callable[
+        [List[ActivitySessionSchema]], None
+    ],
 ) -> None:
 
     clear_storage()

@@ -77,4 +77,5 @@ def _insert_data_to_activity_sessions_collection(
 def insert_data_to_activity_sessions_collection() -> Callable[
     [List[ActivitySessionSchema]], None
 ]:
+    """Inserts data to activity_sessions collection."""
     return _insert_data_to_activity_sessions_collection
