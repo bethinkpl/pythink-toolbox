@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Callable, List, Dict, Union, Iterator
 
 import pytest
-from pytest_steps import test_steps
+import pytest_steps
 from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
 import pandas as pd
@@ -19,7 +19,7 @@ import chronos.storage.storage
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
 @pytest.mark.e2e  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
-@test_steps(  # type: ignore[misc]
+@pytest_steps.test_steps(  # type: ignore[misc]
     "step_test_collection_content",
     "step_test_learning_time_sessions_duration_mv_content",
     "step_test_break_sessions_duration_mv_content",
@@ -185,4 +185,5 @@ def test_main(
     ]
 
     assert result_data_4 == expected_data_4
+    clear_storage()
     yield
