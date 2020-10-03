@@ -602,6 +602,7 @@ TEST_DATA = [
 ]
 
 
+@pytest.mark.integration  # type: ignore[misc]
 @parametrize(TEST_DATA)  # type: ignore[misc]
 def test_update_materialized_views(
     activity_sessions_content: List[ActivitySessionSchema],
