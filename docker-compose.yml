@@ -24,7 +24,12 @@ services:
 
   api:
     container_name: chronos_api
+    command: python /chronos/src/chronos/api/main.py
     restart: always
+    ports:
+      - 6000:5000
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/api/Dockerfile
+    volumes:
+      - "./chronos:/chronos"
