@@ -1,18 +1,15 @@
-import logging
 from datetime import datetime
-from typing import List, Optional, TypedDict
-import itertools
+import logging
+from typing import List, Optional, TypedDict, Union, Dict
 
-import pandas as pd  # type: ignore[import]
-import pandera  # type: ignore[import]
-
-import chronos.activity_events
+import pandas as pd
+import pandera
 
 MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION = pd.Timedelta(minutes=5)
 MIN_FOCUS_DURATION = pd.Timedelta(minutes=15)
 MAX_BREAK_DURATION = pd.Timedelta(minutes=30)
 
-logger = logging.getLogger("Create Activity Sessions")
+logger = logging.getLogger(__name__)
 
 
 class ActivitySession(TypedDict):
@@ -26,37 +23,12 @@ class ActivitySession(TypedDict):
     is_break: bool
 
 
-def main(start_time: datetime, end_time: datetime) -> List[ActivitySession]:
-    """Create activity_sessions for all users
-    who had activity_events between given timestamps."""
-
-    users_activity_events = chronos.activity_events.read(
-        start_time=start_time, end_time=end_time
-    )
-
-    users_activity_events_groups = users_activity_events.groupby("user_id").client_time
-
-    logger.info(
-        "Creating activity_sessions for %i users.", len(users_activity_events_groups)
-    )
-
-    users_activity_sessions = (
-        _create_user_activity_sessions(
-            user_id=user_id,
-            activity_events=activity_events,
-            last_active_session=_read_last_active_session_for_user(user_id),
-        )
-        for user_id, activity_events in users_activity_events_groups
-    )
-
-    return list(itertools.chain.from_iterable(users_activity_sessions))
-
-
-def _create_user_activity_sessions(
+def generate_user_activity_sessions(
     user_id: int,
     activity_events: pd.Series,
-    last_active_session: Optional[pd.DataFrame],
+    last_active_session: Optional[Dict[str, datetime]],
 ) -> List[ActivitySession]:
+    """Perform all operations to create activity_sessions for user."""
 
     logger.info("Creating activity_sessions for user %i.", user_id)
 
@@ -75,9 +47,8 @@ def _create_user_activity_sessions(
 
 
 def _initialize_sessions_creation(activity_events: pd.Series) -> pd.DataFrame:
-    logger.debug(  # pylint: disable=logging-too-many-args
-        "activity_events: \n", activity_events.to_string()
-    )
+    _log_pandas_object("activity_events", activity_events)
+
     assert not activity_events.empty
 
     return (
@@ -89,30 +60,28 @@ def _initialize_sessions_creation(activity_events: pd.Series) -> pd.DataFrame:
 
 
 def _add_last_active_session(
-    initialized_sessions: pd.DataFrame, last_active_session: Optional[pd.DataFrame]
+    initialized_sessions: pd.DataFrame,
+    last_active_session: Optional[Dict[str, datetime]],
 ) -> pd.DataFrame:
-    logger.debug(  # pylint: disable=logging-too-many-args
-        "initialized_sessions: \n", initialized_sessions.to_string()
-    )
-    last_active_session_to_log = (
-        last_active_session.to_string() if last_active_session is not None else None
-    )
-    logger.debug(  # pylint: disable=logging-too-many-args
-        "last_active_session: \n", last_active_session_to_log
-    )
+
+    _log_pandas_object("initialized_sessions", initialized_sessions)
 
     assert not initialized_sessions.empty
 
     if last_active_session is not None:
-        return pd.concat([last_active_session, initialized_sessions], ignore_index=True)
+        return pd.concat(
+            [
+                pd.DataFrame.from_dict(last_active_session, orient="index").T,
+                initialized_sessions,
+            ],
+            ignore_index=True,
+        )
 
     return initialized_sessions
 
 
 def _create_active_sessions(sessions_with_last_active: pd.DataFrame) -> pd.DataFrame:
-    logger.debug(  # pylint: disable=logging-too-many-args
-        "sessions_with_last_active: \n", sessions_with_last_active.to_string()
-    )
+    _log_pandas_object("sessions_with_last_active", sessions_with_last_active)
 
     assert not sessions_with_last_active.empty
 
@@ -132,9 +101,7 @@ def _create_active_sessions(sessions_with_last_active: pd.DataFrame) -> pd.DataF
 
 
 def _fill_with_inactive_sessions(active_sessions: pd.DataFrame) -> pd.DataFrame:
-    logger.debug(  # pylint: disable=logging-too-many-args
-        "active_sessions: \n", active_sessions.to_string()
-    )
+    _log_pandas_object("active_sessions", active_sessions)
 
     assert not active_sessions.empty
 
@@ -155,9 +122,7 @@ def _fill_with_inactive_sessions(active_sessions: pd.DataFrame) -> pd.DataFrame:
 
 
 def _determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> pd.DataFrame:
-    logger.debug(  # pylint: disable=logging-too-many-args
-        "active_and_inactive_sessions: \n", active_and_inactive_sessions.to_string()
-    )
+    _log_pandas_object("active_and_inactive_sessions", active_and_inactive_sessions)
 
     assert not active_and_inactive_sessions.empty
 
@@ -168,9 +133,7 @@ def _determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> pd.DataFr
 
 
 def _determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> pd.DataFrame:
-    logger.debug(  # pylint: disable=logging-too-many-args
-        "activity_sessions_with_focus: \n", activity_sessions_with_focus.to_string()
-    )
+    _log_pandas_object("activity_sessions_with_focus", activity_sessions_with_focus)
 
     assert not activity_sessions_with_focus.empty
 
@@ -240,6 +203,8 @@ def _sessions_validation(activity_sessions: pd.DataFrame) -> pd.DataFrame:
 
     schema.validate(activity_sessions)
 
+    logger.debug("activity_sessions validated 😎")
+
     return activity_sessions
 
 
@@ -257,17 +222,16 @@ def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySess
 
     activity_sessions_records: List[ActivitySession] = records
 
+    logger.debug("activity_sessions to insert to mongo db: \n %s", activity_sessions)
+
     return activity_sessions_records
 
 
-def _read_last_active_session_for_user(
-    user_id: int,  # pylint: disable=unused-argument
-) -> Optional[pd.DataFrame]:
-    # FIXME move to different place? pylint: disable=fixme
-    # FIXME pop last active session from mongo pylint: disable=fixme
-    return pd.DataFrame(
-        {
-            "start_time": [pd.Timestamp("2018-12-14T10:40:19.691Z")],
-            "end_time": [pd.Timestamp("2018-12-14T10:45:28.421Z")],
-        }
-    )
+def _log_pandas_object(
+    identifier: str, data: Union[pd.Series, pd.DataFrame], level: str = "debug"
+) -> None:
+    msg = f"{identifier}: \n %s"
+    if level == "debug":  # pragma: no cover
+        logger.debug(msg, data.to_string())
+    else:
+        raise NotImplementedError  # add other ifs when other levels are needed

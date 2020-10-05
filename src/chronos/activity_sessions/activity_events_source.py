@@ -1,19 +1,13 @@
-import os
-from datetime import datetime
-from pathlib import Path
 from typing import Union
+from datetime import datetime
 
 import datatosk
-import dotenv
-import pandas as pd  # type: ignore[import]
+import pandas as pd
 
-ENV_PATH = Path("..") / ".env"
-dotenv.load_dotenv(dotenv_path=ENV_PATH)
-
-BIGQUERY_PLATFORM_DATASET_ID: str = os.getenv("BIGQUERY_PLATFORM_DATASET_ID", "")
+from chronos.settings import BIGQUERY_PLATFORM_DATASET_ID
 
 
-def read(
+def read_activity_events_between_datetimes(
     start_time: Union[datetime, str], end_time: Union[datetime, str]
 ) -> pd.DataFrame:
     """

@@ -2,21 +2,16 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=protected-access
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict
 
 import hypothesis
 from hypothesis.extra.pandas import series, indexes, data_frames, column
-import pandas as pd  # type: ignore[import]
-import pandera.errors  # type: ignore[import]
+import pandas as pd
+import pandera.errors
 import pytest
 from pythink_toolbox.testing import parametrization
 
-import chronos.create_activity_sessions as tested_module
-
-
-@pytest.mark.skip(reason="implement when MongoDB I/O operations done")  # type: ignore[misc]
-def test_main() -> None:
-    assert False
+import chronos.activity_sessions.generation_operations as tested_module
 
 
 def test__create_user_activity_sessions() -> None:
@@ -25,11 +20,12 @@ def test__create_user_activity_sessions() -> None:
 
     user_id = 1
     activity_events = pd.Series([datetime(2000, 1, 1, 0, 2)], name="client_time")
-    last_active_session = pd.DataFrame(
-        {"start_time": [datetime(2000, 1, 1)], "end_time": [datetime(2000, 1, 1, 0, 1)]}
-    )
+    last_active_session = {
+        "start_time": datetime(2000, 1, 1),
+        "end_time": datetime(2000, 1, 1, 0, 1),
+    }
 
-    output = tested_module._create_user_activity_sessions(
+    output = tested_module.generate_user_activity_sessions(
         user_id=user_id,
         activity_events=activity_events,
         last_active_session=last_active_session,
@@ -83,7 +79,7 @@ def test__initialize_sessions_creation(activity_events: pd.Series) -> None:
 
 class AddLastActiveSessionScenario(parametrization.Scenario):
     initialized_sessions: pd.DataFrame
-    last_active_session: Optional[pd.DataFrame]
+    last_active_session: Optional[Dict[str, datetime]]
     raise_assertion_error: bool
     expected_output: pd.DataFrame
 
@@ -115,10 +111,10 @@ TEST_SCENARIOS = [
             columns=["start_time", "end_time"],
             data=[[datetime(2000, 2, 1), datetime(2000, 2, 12)]],
         ),
-        last_active_session=pd.DataFrame(
-            columns=["start_time", "end_time"],
-            data=[[datetime(2000, 1, 1), datetime(2000, 1, 1)]],
-        ),
+        last_active_session={
+            "start_time": datetime(2000, 1, 1),
+            "end_time": datetime(2000, 1, 1),
+        },
         raise_assertion_error=False,
         expected_output=pd.DataFrame(
             columns=["start_time", "end_time"],
@@ -280,6 +276,11 @@ TEST_SCENARIOS = [
     ),
 ]
 
+TIMESTAMP_STRATEGY = hypothesis.strategies.datetimes(
+    min_value=pd.Timestamp(0).to_pydatetime(),
+    max_value=datetime(2100, 1, 1),
+)
+
 
 @parametrization.parametrize(TEST_SCENARIOS)  # type: ignore[misc]
 def test__fill_with_inactive_sessions(
@@ -302,8 +303,8 @@ def test__fill_with_inactive_sessions(
 @hypothesis.given(
     active_and_inactive_sessions=data_frames(
         [
-            column("start_time", dtype="datetime64[ns]"),
-            column("end_time", dtype="datetime64[ns]"),
+            column("start_time", TIMESTAMP_STRATEGY),
+            column("end_time", TIMESTAMP_STRATEGY),
             column("is_active", dtype=bool),
         ]
     )
@@ -324,14 +325,6 @@ def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None
             active_and_inactive_sessions.start_time
             > active_and_inactive_sessions.end_time
         )
-    )
-    hypothesis.assume(
-        not any(pd.Timestamp(0) > active_and_inactive_sessions.end_time)
-        and not any(active_and_inactive_sessions.end_time > datetime(2200, 1, 1))
-    )
-    hypothesis.assume(
-        not any(pd.Timestamp(0) > active_and_inactive_sessions.start_time)
-        and not any(active_and_inactive_sessions.start_time > datetime(2200, 1, 1))
     )
 
     output = tested_module._determine_if_focus(
@@ -374,8 +367,8 @@ def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None
 @hypothesis.given(
     activity_sessions_with_focus=data_frames(
         [
-            column("start_time", dtype="datetime64[ns]"),
-            column("end_time", dtype="datetime64[ns]"),
+            column("start_time", TIMESTAMP_STRATEGY),
+            column("end_time", TIMESTAMP_STRATEGY),
             column("is_active", dtype=bool),
         ]
     )
@@ -396,14 +389,6 @@ def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None
             activity_sessions_with_focus.start_time
             > activity_sessions_with_focus.end_time
         )
-    )
-    hypothesis.assume(
-        not any(pd.Timestamp(0) > activity_sessions_with_focus.end_time)
-        and not any(activity_sessions_with_focus.end_time > datetime(2100, 1, 1))
-    )
-    hypothesis.assume(
-        not any(pd.Timestamp(0) > activity_sessions_with_focus.start_time)
-        and not any(activity_sessions_with_focus.start_time > datetime(2100, 1, 1))
     )
 
     activity_sessions_with_focus = activity_sessions_with_focus.assign(
@@ -492,13 +477,7 @@ TEST_SCENARIOS = [
     SessionsValidationScenario(  # type: ignore[list-item]
         desc="Empty DataFrame",
         activity_sessions=pd.DataFrame(
-            columns=[
-                "start_time",
-                "end_time",
-                "is_active",
-                "is_focus",
-                "is_break",
-            ]
+            columns=["start_time", "end_time", "is_active", "is_focus", "is_break"]
         ),
         should_pass=False,
     ),
