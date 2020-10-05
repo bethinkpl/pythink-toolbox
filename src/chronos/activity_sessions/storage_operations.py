@@ -19,7 +19,7 @@ class MongoCommitError(Exception):
 
 
 def main(user_id: int, activity_events: pd.Series, reference_time: datetime) -> None:
-    """Perform all operation to create user activity_sessions & save it to storage."""
+    """Perform all operations to create user activity_sessions & save it to storage."""
 
     logger.info("Run test_activity_sessions mongo operations for user_id %i", user_id)
 
