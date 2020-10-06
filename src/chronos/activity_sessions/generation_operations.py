@@ -222,11 +222,6 @@ def _to_dict(
     return activity_sessions_records
 
 
-def _log_pandas_object(
-    identifier: str, data: Union[pd.Series, pd.DataFrame], level: str = "debug"
-) -> None:
+def _log_pandas_object(identifier: str, data: Union[pd.Series, pd.DataFrame]) -> None:
     msg = f"{identifier}: \n %s"
-    if level == "debug":  # pragma: no cover
-        logger.debug(msg, data.to_string())
-    else:
-        raise NotImplementedError  # add other ifs when other levels are needed
+    logger.debug(msg, data.to_string())
