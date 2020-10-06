@@ -99,7 +99,9 @@ def _run_user_crud_operations_transaction(
         logger.info("Transaction committed for user %i.", user_id)
 
 
-def _commit_transaction_with_retry(session: ClientSession) -> None:
+def _commit_transaction_with_retry(
+    session: ClientSession,
+) -> None:  # TODO test this function
     while True:
         try:
             session.commit_transaction()
