@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import json
-from typing import Optional, Sequence, Any, Dict, TypedDict
+from typing import Optional, Sequence, Any, Dict
 from datetime import datetime
 
 from pymongo import MongoClient
@@ -10,14 +10,6 @@ from pymongo.database import Database
 from chronos import settings
 
 ACTIVITY_SESSIONS_COLLECTION_NAME = "activity_sessions"
-
-
-class StorageError(Exception):
-    """Error related to storage."""
-
-
-class MongoCommitError(StorageError):
-    """Error that occurred while performing MongoDB commit."""
 
 
 @dataclass
@@ -52,17 +44,6 @@ class _MaterializedView:
         )
 
 
-class _MaterializedViewIDSchema(TypedDict):
-    user_id: int
-    start_time: datetime
-
-
-class MaterializedViewSchema(TypedDict):
-    _id: _MaterializedViewIDSchema
-    end_time: datetime
-    duration_ms: int
-
-
 class _MongoDB:
     @dataclass
     class Collections:
@@ -95,7 +76,7 @@ class _MongoDB:
             pymongo.database.Database
         """
         if self._client is None:
-            raise StorageError("Client is not initialized.")
+            raise AttributeError("Client is not initialized.")
         return self._client[settings.MONGO_DATABASE]
 
     @property
@@ -111,7 +92,7 @@ class _MongoDB:
 
         return self.Collections(
             activity_sessions=self.database.get_collection("activity_sessions"),
-            user_generation_failed=self.database.user_generation_failed,  # TODO add user_generation_failed schema
+            user_generation_failed=self.database.user_generation_failed,  # TODO add user_generation_failed schema validation
         )
 
     @property

@@ -1,30 +1,18 @@
 from datetime import datetime
 import logging
-from typing import List, Optional, TypedDict, Union, Dict
+from typing import List, Optional, Union, Dict
 
 import pandas as pd
 import pandera
 
 import chronos
+from chronos.storage.schemas import ActivitySessionSchema
 
 MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION = pd.Timedelta(minutes=5)
 MIN_FOCUS_DURATION = pd.Timedelta(minutes=15)
 MAX_BREAK_DURATION = pd.Timedelta(minutes=30)
 
 logger = logging.getLogger(__name__)
-
-
-class ActivitySessionSchema(TypedDict):
-    """Activity sessions schema."""
-
-    # TODO think if we need to add "_id" field
-    user_id: int
-    start_time: datetime
-    end_time: datetime
-    is_active: bool
-    is_focus: bool
-    is_break: bool
-    version: str
 
 
 def generate_user_activity_sessions(
