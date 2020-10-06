@@ -26,9 +26,7 @@ def save_new_activity_sessions(
 
         try:
             _run_user_crud_operations_transaction(
-                user_id=user_id,
-                activity_events=activity_events,
-                session=session,
+                user_id=user_id, activity_events=activity_events, session=session
             )
         except Exception as err:  # pylint: disable=broad-except
             logger.error(
@@ -65,9 +63,7 @@ def extract_users_in_user_generation_failed_collection() -> List[int]:
 
 
 def _run_user_crud_operations_transaction(
-    user_id: int,
-    activity_events: pd.Series,
-    session: ClientSession,
+    user_id: int, activity_events: pd.Series, session: ClientSession
 ) -> None:
 
     with session.start_transaction(
@@ -119,37 +115,3 @@ def _commit_transaction_with_retry(
             raise RuntimeError(
                 "Error during test_activity_sessions creation transaction commit."
             ) from err
-
-
-# TODO example query for daily_learning_time:
-#  [
-#  {
-#      $match:
-#          {
-#              "_id.user_id": 2,
-#              "_id.end_time": {$gt: ISODate("2019-01-01")}}
-#  },
-#  {
-#     $group:
-#         {
-#             _id: {
-#                 "user_id": "$_id.user_id",
-#                 "date": {
-#                     "$dateToString": {"format": "%Y-%m-%d", "date": "$_id.start_time"}
-#                 }
-#             },
-#             duration_ms: {$sum: "$duration_ms"}
-#         }
-#   },
-#  {
-#      $project: {
-#          _id: 0,
-#          user_id: "$_id.user_id",
-#          date: "$_id.date",
-#          duration_ms: 1
-#      }
-#  },
-#  {
-#      $sort: {date: 1}
-#  }
-#      ]
