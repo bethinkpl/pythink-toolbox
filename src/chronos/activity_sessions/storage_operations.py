@@ -8,8 +8,9 @@ import pymongo
 import pymongo.errors
 from pymongo.client_session import ClientSession
 
-import chronos.activity_sessions
-from chronos.storage.storage import mongodb, MongoCommitError
+import chronos.activity_sessions.generation_operations
+from chronos.storage.specs import mongodb
+from chronos.storage.schemas import UserGenerationFailedSchema
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,9 @@ def save_new_activity_sessions(
             )
 
             mongodb.collections.user_generation_failed.insert_one(
-                {"user_id": user_id, "reference_time": reference_time}
+                UserGenerationFailedSchema(
+                    user_id=user_id, reference_time=reference_time
+                )
             )
 
 
@@ -111,7 +114,7 @@ def _commit_transaction_with_retry(session: ClientSession) -> None:
                 )
                 continue
 
-            raise MongoCommitError(
+            raise RuntimeError(
                 "Error during test_activity_sessions creation transaction commit."
             ) from err
 
