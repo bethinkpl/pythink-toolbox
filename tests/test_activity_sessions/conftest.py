@@ -4,8 +4,12 @@ from datetime import datetime
 from pymongo.cursor import Cursor
 import pytest
 
-from chronos.activity_sessions.generation_operations import ActivitySessionSchema
-from chronos.storage import storage
+from chronos.storage.specs import mongodb
+from chronos.storage.schemas import (
+    ActivitySessionSchema,
+    MaterializedViewSchema,
+    UserGenerationFailedSchema,
+)
 from chronos import settings
 
 
@@ -22,9 +26,7 @@ def _get_activity_session_collection_content_without_id() -> List[
     Dict[str, Union[int, datetime, bool]]
 ]:
 
-    activity_sessions_collection_content = (
-        storage.mongodb.collections.activity_sessions.find()
-    )
+    activity_sessions_collection_content = mongodb.collections.activity_sessions.find()
 
     return _filter_id_field(query_result=activity_sessions_collection_content)
 
@@ -40,7 +42,7 @@ def get_activity_session_collection_content_without_id() -> Callable[
 
 
 def _clear_storage() -> None:
-    storage.mongodb.client.drop_database(settings.MONGO_DATABASE)
+    mongodb.client.drop_database(settings.MONGO_DATABASE)
 
 
 @pytest.fixture
@@ -51,16 +53,14 @@ def clear_storage() -> Callable[[], None]:
 
 def _get_materialized_view_content(
     materialized_view_name: str,
-) -> List[storage.MaterializedViewSchema]:
+) -> List[MaterializedViewSchema]:
 
-    materialized_view = storage.mongodb.database[materialized_view_name]
+    materialized_view = mongodb.database[materialized_view_name]
     return list(materialized_view.find())
 
 
 @pytest.fixture
-def get_materialized_view_content() -> Callable[
-    [str], List[storage.MaterializedViewSchema]
-]:
+def get_materialized_view_content() -> Callable[[str], List[MaterializedViewSchema]]:
     """Returns function that query materialized view and return all its content"""
 
     return _get_materialized_view_content
@@ -70,7 +70,7 @@ def _insert_data_to_activity_sessions_collection(
     data: List[ActivitySessionSchema],
 ) -> None:
 
-    storage.mongodb.collections.activity_sessions.insert_many(data)
+    mongodb.collections.activity_sessions.insert_many(data)
 
 
 @pytest.fixture
@@ -79,3 +79,16 @@ def insert_data_to_activity_sessions_collection() -> Callable[
 ]:
     """Inserts data to activity_sessions collection."""
     return _insert_data_to_activity_sessions_collection
+
+
+def _read_failed_generation_collection_content() -> List[UserGenerationFailedSchema]:
+
+    return list(mongodb.collections.user_generation_failed.find({}))
+
+
+@pytest.fixture
+def read_failed_generation_collection_content() -> Callable[
+    [], List[UserGenerationFailedSchema]
+]:
+    """Returns content of user_generation_failed collection."""
+    return _read_failed_generation_collection_content

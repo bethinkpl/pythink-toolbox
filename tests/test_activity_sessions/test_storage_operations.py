@@ -8,31 +8,40 @@ from typing import Dict, List, Union, Callable, Iterator
 
 import pandas as pd
 import pytest
+import pytest_mock
 import pytest_steps
+from pythink_toolbox.testing import mocking
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
-import chronos
-from chronos.activity_sessions.generation_operations import ActivitySessionSchema
 import chronos.activity_sessions.storage_operations as tested_module
-from chronos.storage.storage import MaterializedViewSchema
+import chronos
+import chronos.activity_sessions.generation_operations
+from chronos.storage.schemas import (
+    ActivitySessionSchema,
+    MaterializedViewSchema,
+    UserGenerationFailedSchema,
+)
 
 TEST_USER_ID = 108
 
 
 @pytest.mark.integration  # type: ignore[misc]
 @pytest_steps.test_steps(  # type: ignore[misc]
-    [
-        "Initial input - creates two separate active sessions and inactive in the middle",
-        "Takes last active session & extends its duration.",
-        "Takes last active session & extends its duration, so it changes to focus session.",
-        "Add new sessions one focused in the end and on that is 'break' before.",
-    ]
+    "Initial input - creates two separate active sessions and inactive in the middle",
+    "Takes last active session & extends its duration.",
+    "Takes last active session & extends its duration, so it changes to focus session.",
+    "Add new sessions one focused in the end and on that is 'break' before.",
+    "Exception raised - check data in failed_generation is correct.",
 )
 def test_save_new_activity_sessions(
     get_activity_session_collection_content_without_id: Callable[
         [], List[Dict[str, Union[int, datetime, bool]]]
     ],
     clear_storage: Callable[[], None],
+    read_failed_generation_collection_content: Callable[
+        [], List[UserGenerationFailedSchema]
+    ],
+    mocker: pytest_mock.MockerFixture,
 ) -> Iterator[None]:
     def _save_new_activity_sessions_and_get_its_content(
         _activity_events: pd.Series,
@@ -80,11 +89,12 @@ def test_save_new_activity_sessions(
         },
     ]
 
-    actual_collection_content = _save_new_activity_sessions_and_get_its_content(
-        _activity_events=activity_events_1
+    actual_activity_sessions_collection_content = (
+        _save_new_activity_sessions_and_get_its_content(
+            _activity_events=activity_events_1
+        )
     )
-
-    assert actual_collection_content == expected_collection_content_1
+    assert actual_activity_sessions_collection_content == expected_collection_content_1
     yield
 
     # Takes last active session & extends its duration.
@@ -119,11 +129,13 @@ def test_save_new_activity_sessions(
         },
     ]
 
-    actual_collection_content = _save_new_activity_sessions_and_get_its_content(
-        _activity_events=activity_events_2
+    actual_activity_sessions_collection_content = (
+        _save_new_activity_sessions_and_get_its_content(
+            _activity_events=activity_events_2
+        )
     )
 
-    assert actual_collection_content == expected_collection_content_2
+    assert actual_activity_sessions_collection_content == expected_collection_content_2
     yield
 
     # Takes last active session & extends its duration, so it changes to focus session.
@@ -160,11 +172,13 @@ def test_save_new_activity_sessions(
         },
     ]
 
-    actual_collection_content = _save_new_activity_sessions_and_get_its_content(
-        _activity_events=activity_events_3
+    actual_activity_sessions_collection_content = (
+        _save_new_activity_sessions_and_get_its_content(
+            _activity_events=activity_events_3
+        )
     )
 
-    assert actual_collection_content == expected_collection_content_3
+    assert actual_activity_sessions_collection_content == expected_collection_content_3
     yield
 
     # Add new sessions one focused in the end and on that is 'break' before.
@@ -225,11 +239,40 @@ def test_save_new_activity_sessions(
         },
     ]
 
-    actual_collection_content = _save_new_activity_sessions_and_get_its_content(
-        _activity_events=activity_events_4
+    actual_activity_sessions_collection_content = (
+        _save_new_activity_sessions_and_get_its_content(
+            _activity_events=activity_events_4
+        )
     )
 
-    assert actual_collection_content == expected_collection_content_4
+    assert actual_activity_sessions_collection_content == expected_collection_content_4
+    yield
+
+    # Exception raised - check data in failed_generation is correct.
+
+    generate_user_activity_sessions_mock = mocker.patch(
+        mocking.transform_function_to_target_string(
+            chronos.activity_sessions.generation_operations.generate_user_activity_sessions
+        )
+    )
+
+    generate_user_activity_sessions_mock.side_effect = Exception("mocked error")
+
+    with pytest.raises(Exception):
+        tested_module.save_new_activity_sessions(
+            user_id=TEST_USER_ID,
+            activity_events=mocker.ANY,
+            reference_time=datetime(2013, 1, 1),
+        )
+
+        assert read_failed_generation_collection_content() == [
+            {"user_id": TEST_USER_ID, "reference_time": datetime(2013, 1, 1)}
+        ]
+
+        assert (
+            get_activity_session_collection_content_without_id()
+            == expected_collection_content_4
+        )
 
     clear_storage()
     yield

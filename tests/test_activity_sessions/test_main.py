@@ -9,11 +9,12 @@ from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
 import pandas as pd
 
+import chronos
 import chronos.activity_sessions.main as tested_module
 from chronos.activity_sessions.activity_events_source import (
     read_activity_events_between_datetimes,
 )
-import chronos.storage.storage
+from chronos.storage.schemas import MaterializedViewSchema
 
 
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
@@ -30,9 +31,7 @@ def test_main(
     get_activity_session_collection_content_without_id: Callable[
         [], List[Dict[str, Union[int, datetime, bool]]]
     ],
-    get_materialized_view_content: Callable[
-        [str], List[chronos.storage.storage.MaterializedViewSchema]
-    ],
+    get_materialized_view_content: Callable[[str], List[MaterializedViewSchema]],
     clear_storage: Callable[[], None],
 ) -> Iterator[None]:
     """End-to-end overall happy-path activity sessions creation and materialized views updates."""
