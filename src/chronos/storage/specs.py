@@ -91,7 +91,7 @@ class _MongoDB:
             self._create_validated_collection(activity_sessions_name)
 
         return self.Collections(
-            activity_sessions=self.database.get_collection("activity_sessions"),
+            activity_sessions=self.database.get_collection(activity_sessions_name),
             user_generation_failed=self.database.user_generation_failed,  # TODO add user_generation_failed schema validation
         )
 
