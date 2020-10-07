@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import json
-from typing import Optional, Sequence, Any, Dict
+from typing import Optional, Any, Dict
 from datetime import datetime
 
 from pymongo import MongoClient
@@ -10,15 +10,12 @@ from pymongo.database import Database
 from chronos import settings
 
 
-@dataclass
-class _MaterializedView:
-    name: str
-    match_stage_conds: Dict[str, Any]
+class _MaterializedView(Collection):
+    def __init__(self, name: str, match_stage_conds: Dict[str, Any]) -> None:
+        super(_MaterializedView, self).__init__(database=mongodb.database, name=name)
+        self.match_stage_conds = match_stage_conds
 
-    def __post_init__(self) -> None:
-        self.name = self.name + "_mv"
-
-    def update(self, reference_time: datetime) -> None:
+    def run_aggregation(self, reference_time: datetime) -> None:
         """Updates materialized view content based on `reference time`."""
         match_stage = {
             **self.match_stage_conds,
@@ -44,9 +41,15 @@ class _MaterializedView:
 
 class _MongoDB:
     @dataclass
-    class Collections:
+    class _Collections:
         activity_sessions: Collection
         user_generation_failed: Collection
+
+    @dataclass
+    class _MaterializedViews:
+        learning_time_sessions_duration: _MaterializedView
+        break_sessions_duration: _MaterializedView
+        focus_sessions_duration: _MaterializedView
 
     def __init__(self) -> None:
         self._client: Optional[MongoClient] = None
@@ -78,40 +81,40 @@ class _MongoDB:
         return self._client[settings.MONGO_DATABASE]
 
     @property
-    def collections(self) -> Collections:
+    def collections(self) -> _Collections:
         """
         Returns:
-            NamedTuple of collections.
+            MongoDB collections.
         """
         activity_sessions_name = "activity_sessions"
 
         if activity_sessions_name not in self.database.list_collection_names():
             self._create_validated_collection(activity_sessions_name)
 
-        return self.Collections(
+        return self._Collections(
             activity_sessions=self.database.get_collection(activity_sessions_name),
             user_generation_failed=self.database.user_generation_failed,  # TODO add user_generation_failed schema validation
         )
 
     @property
-    def materialized_views(self) -> Sequence[_MaterializedView]:
+    def materialized_views(self) -> _MaterializedViews:
         """
         Returns:
-            Tuple of all MongoDB materialized views.
+            All MongoDB materialized views.
         """
-        return (
-            _MaterializedView(
-                name="learning_time_sessions_duration",
+        return self._MaterializedViews(
+            learning_time_sessions_duration=_MaterializedView(
+                name="learning_time_sessions_duration_mv",
                 match_stage_conds={
                     "$or": [{"is_active": {"$eq": True}}, {"is_break": {"$eq": True}}]
                 },
             ),
-            _MaterializedView(
-                name="break_sessions_duration",
+            break_sessions_duration=_MaterializedView(
+                name="break_sessions_duration_mv",
                 match_stage_conds={"is_break": {"$eq": True}},
             ),
-            _MaterializedView(
-                name="focus_sessions_duration",
+            focus_sessions_duration=_MaterializedView(
+                name="focus_sessions_duration_mv",
                 match_stage_conds={"is_focus": {"$eq": True}},
             ),
         )

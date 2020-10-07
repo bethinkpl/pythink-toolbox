@@ -48,8 +48,12 @@ def update_materialized_views(reference_time: datetime) -> None:
         reference_time: time from which materialized views takes data to update themselves.
     """
 
-    for materialized_view in mongodb.materialized_views:
-        materialized_view.update(reference_time=reference_time)
+    for materialized_view in [
+        mongodb.materialized_views.learning_time_sessions_duration,
+        mongodb.materialized_views.break_sessions_duration,
+        mongodb.materialized_views.focus_sessions_duration,
+    ]:
+        materialized_view.run_aggregation(reference_time=reference_time)
 
 
 def extract_users_in_user_generation_failed_collection() -> List[int]:
