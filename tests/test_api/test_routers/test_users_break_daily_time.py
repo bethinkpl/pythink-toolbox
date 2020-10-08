@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring
 from datetime import datetime
 
 import pytest
@@ -14,8 +15,8 @@ TEST_DATA = {
 USER_ID = 299
 
 
-@pytest.mark.e2e
-@pytest.mark.integration
+@pytest.mark.e2e  # type: ignore[misc]
+@pytest.mark.integration  # type: ignore[misc]
 @pytest.mark.skip(reason="https://bethink.atlassian.net/browse/LACE-465")  # type: ignore
 def test_get_users_break_daily_time() -> None:
     response = requests.get(
