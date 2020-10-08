@@ -54,7 +54,7 @@ class _MongoDB:
     def __init__(self) -> None:
         self._client: Optional[MongoClient] = None
 
-    def init_client(self):
+    def init_client(self) -> None:
         """Initializes MongoDB Client"""
         if self._client is None:
             self._client = MongoClient(
