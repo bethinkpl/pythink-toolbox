@@ -12,9 +12,9 @@ USER_ID = 299
 
 
 @pytest.mark.skip(reason="https://bethink.atlassian.net/browse/LACE-465")  # type: ignore
-def test_get_user_learning_time_daily() -> None:
+def test_get_users_learning_daily_time() -> None:
     """
-    Covers src.test_api.user_learning_time_daily.get_user_learning_time_daily()
+    Covers src.test_api.users_learning_daily_time.get_users_learning_daily_time()
     """
     response = requests.post(
         get_url(f"learning_time_daily/{USER_ID}"),

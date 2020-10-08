@@ -1,15 +1,15 @@
 from datetime import datetime
 
 from fastapi.routing import APIRouter
-from fastapi import Query
+from fastapi.param_functions import Query
 
 from chronos.api.storage_operations import read_cumulative_learning_time
 
-user_cumulative_learning_time_router = APIRouter()
+users_cumulative_learning_time_router = APIRouter()
 
 
-@user_cumulative_learning_time_router.get("/user_cumulative_learning_time/{user_id}")
-def get_user_cumulative_learning_time(
+@users_cumulative_learning_time_router.get("/users_cumulative_learning_time/{user_id}")
+def get_users_cumulative_learning_time(
     user_id: int,
     start_time: datetime = Query(
         ..., alias="start-time", title="", description=""

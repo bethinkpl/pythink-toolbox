@@ -2,15 +2,15 @@ from datetime import datetime
 from typing import List
 
 from fastapi.routing import APIRouter
-from fastapi import Query
+from fastapi.param_functions import Query
 
 from chronos.api.storage_operations import UserDailyTime, read_daily_focus_time
 
-user_focus_time_daily_router = APIRouter()
+users_focus_daily_time_router = APIRouter()
 
 
-@user_focus_time_daily_router.get("/user_focus_daily_router/{user_id}")
-def get_user_focus_time_daily(
+@users_focus_daily_time_router.get("/users_focus_daily_time/{user_id}")
+def get_users_focus_daily_time(
     user_id: int,
     start_time: datetime = Query(
         ..., alias="start-time", title="", description=""
