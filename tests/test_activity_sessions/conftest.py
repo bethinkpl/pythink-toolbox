@@ -4,7 +4,8 @@ from datetime import datetime
 from pymongo.cursor import Cursor
 import pytest
 
-import chronos.storage
+from chronos import storage
+from chronos import settings
 
 
 def _filter_id_field(
@@ -21,7 +22,7 @@ def _get_activity_session_collection_content_without_id() -> List[
 ]:
 
     activity_sessions_collection_content = (
-        chronos.storage.get_client().activity_sessions_collection.find()
+        storage.mongodb.activity_sessions_collection.find()
     )
 
     return _filter_id_field(query_result=activity_sessions_collection_content)
@@ -31,17 +32,34 @@ def _get_activity_session_collection_content_without_id() -> List[
 def get_activity_session_collection_content_without_id() -> Callable[
     [], List[Dict[str, Union[int, datetime, bool]]]
 ]:
-    """Fixture that returns function that query Mongo activity_sessions collection
+    """Returns function that query Mongo activity_sessions collection
     and return all its content"""
 
     return _get_activity_session_collection_content_without_id
 
 
-def _clear_activity_sessions_collection() -> None:
-    chronos.storage.get_activity_sessions_collection().delete_many({})
+def _clear_storage() -> None:
+    storage.mongodb.client.drop_database(settings.MONGO_DATABASE)
 
 
 @pytest.fixture
-def clear_activity_sessions_collection() -> Callable[[], None]:
-    """Fixture that clears whole activity_sessions collection."""
-    return _clear_activity_sessions_collection
+def clear_storage() -> Callable[[], None]:
+    """Clears whole activity_sessions collection."""
+    return _clear_storage
+
+
+def _get_materialized_view_content(
+    materialized_view_name: str,
+) -> List[storage.MaterializedViewSchema]:
+
+    materialized_view = storage.mongodb.database[materialized_view_name]
+    return list(materialized_view.find())
+
+
+@pytest.fixture
+def get_materialized_view_content() -> Callable[
+    [str], List[storage.MaterializedViewSchema]
+]:
+    """Returns function that query materialized view and return all its content"""
+
+    return _get_materialized_view_content

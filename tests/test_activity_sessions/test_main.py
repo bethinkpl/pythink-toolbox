@@ -21,7 +21,7 @@ def test_main(
     get_activity_session_collection_content_without_id: Callable[
         [], List[Dict[str, Union[int, datetime, bool]]]
     ],
-    clear_activity_sessions_collection: Callable[[], None],
+    clear_storage: Callable[[], None],
 ) -> None:
 
     mocker.patch(
@@ -36,9 +36,11 @@ def test_main(
         ),
     )
 
-    clear_activity_sessions_collection()
+    clear_storage()
 
-    chronos.activity_sessions.main.main(start_time=mocker.ANY, end_time=mocker.ANY)
+    chronos.activity_sessions.main.main(
+        start_time=datetime(2000, 1, 1), end_time=datetime(2000, 1, 2)
+    )
 
     data = get_activity_session_collection_content_without_id()
 
@@ -63,4 +65,4 @@ def test_main(
 
     assert data == expected_data
 
-    clear_activity_sessions_collection()
+    clear_storage()
