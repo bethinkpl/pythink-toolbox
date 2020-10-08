@@ -61,6 +61,8 @@ mongodb = _MongoDB()
 
 @dataclass
 class MaterializedView:
+    """Creates specification of Materialized View."""
+
     name: str
     match_stage_conds: Dict[str, Any]
 
