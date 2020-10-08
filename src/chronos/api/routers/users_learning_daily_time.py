@@ -1,16 +1,16 @@
 from typing import List
 from datetime import datetime
 
-from fastapi import Query
+from fastapi.param_functions import Query
 from fastapi.routing import APIRouter
 
 from chronos.api.storage_operations import UserDailyTime, read_daily_learning_time
 
-user_learning_time_daily_router = APIRouter()
+users_learning_daily_time_router = APIRouter()
 
 
-@user_learning_time_daily_router.get("/user_learning_time_daily/{user_id}")
-def get_user_learning_time_daily(
+@users_learning_daily_time_router.get("/users_learning_daily_time/{user_id}")
+def get_users_learning_daily_time(
     user_id: int,
     start_time: datetime = Query(
         ..., alias="start-time", title="", description=""

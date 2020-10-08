@@ -10,9 +10,9 @@ from pymongo.database import Database
 from chronos import settings
 
 
-class _MaterializedView(Collection):
+class _MaterializedView(Collection):  # type: ignore[misc]
     def __init__(self, name: str, match_stage_conds: Dict[str, Any]) -> None:
-        super(_MaterializedView, self).__init__(database=mongodb.database, name=name)
+        super().__init__(database=mongodb.database, name=name)
         self.match_stage_conds = match_stage_conds
 
     def run_aggregation(self, reference_time: datetime) -> None:

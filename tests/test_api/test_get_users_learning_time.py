@@ -17,7 +17,7 @@ TEST_DATA = {
 @pytest.mark.skip(reason="https://bethink.atlassian.net/browse/LACE-465")  # type: ignore
 def test_get_users_learning_time() -> None:
     """
-    Covers src.test_api.users_learning_time_daily.get_users_learning_time()
+    Covers src.test_api.users_learning_daily_time.get_users_learning_time()
     """
     response = requests.post(
         get_url("learning_time"), headers=HEADERS, data=json.dumps(TEST_DATA)

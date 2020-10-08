@@ -38,22 +38,21 @@ pre-commit = "^2.6.0"
 cli = 'cli:main'
 
 [tool.pylint.'MESSAGES CONTROL']
-disable= [ "format", "missing-module-docstring" ]
+disable = [ "format", "missing-module-docstring" ]
 
 [tool.pylint.'BASIC']
-good-names=["df", "x", "y", "i", "ci"]
-docstring-min-length="4"
+good-names = ["df", "x", "y", "i", "ci"]
+docstring-min-length = 4
 
 [tool.pylint.'MISCELLANEOUS']
 notes="FIXME"
 
 [tool.pylint.'SIMILARITIES']
-min-similarity-lines="5"
+min-similarity-lines = 8 # TODO decrease when LACE-469
 ignore-imports="yes"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-
 markers = [
     "integration: Mark test as an integration test",
     "e2e: Mark test as an end-to-end test"
