@@ -7,8 +7,8 @@ from chronos.api.routers.user_learning_time_daily import user_learning_time_dail
 from chronos.api.routers.user_cumulative_learning_time import (
     user_cumulative_learning_time_router,
 )
-
 from chronos.logger import logger
+from chronos.settings import HOST_API
 
 logger.init_for_api()
 app = FastAPI()
@@ -21,5 +21,5 @@ app.include_router(user_cumulative_learning_time_router)
 
 if __name__ == "__main__":
     uvicorn.run(
-        "chronos.api.main:app", host="127.0.0.1", port=5000, debug=True, reload=True
+        "chronos.api.main:app", host=HOST_API, port=5000, debug=True, reload=True
     )
