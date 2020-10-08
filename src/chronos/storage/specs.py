@@ -54,12 +54,8 @@ class _MongoDB:
     def __init__(self) -> None:
         self._client: Optional[MongoClient] = None
 
-    @property
-    def client(self) -> MongoClient:
-        """
-        Returns:
-            pymongo.MongoClient
-        """
+    def init_client(self):
+        """Initializes MongoDB Client"""
         if self._client is None:
             self._client = MongoClient(
                 host=settings.MONGO_HOST,
@@ -68,6 +64,14 @@ class _MongoDB:
                 password=settings.MONGO_PASSWORD,
             )
 
+    @property
+    def client(self) -> MongoClient:
+        """
+        Returns:
+            pymongo.MongoClient
+        """
+        if self._client is None:
+            self.init_client()
         return self._client
 
     @property

@@ -43,6 +43,7 @@ def ci(session: str, session_args: Sequence[str]) -> None:
 
 @click.command()
 def run_api() -> None:
+    """Starts API server."""
     run_args = [
         "uvicorn",
         "chronos.api.main:app",

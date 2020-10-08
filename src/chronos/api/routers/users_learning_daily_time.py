@@ -12,11 +12,11 @@ users_learning_daily_time_router = APIRouter()
 @users_learning_daily_time_router.get("/users_learning_daily_time/{user_id}")
 def get_users_learning_daily_time(
     user_id: int,
-    start_time: datetime = Query(
-        ..., alias="start-time", title="", description=""
+    range_start: datetime = Query(
+        ..., alias="range-start", title="", description=""
     ),  # TODO LACE-469 fill when documenting
-    end_time: datetime = Query(
-        ..., alias="end-time", title="", description=""
+    range_end: datetime = Query(
+        ..., alias="range-end", title="", description=""
     ),  # TODO LACE-469 fill when documenting
 ) -> List[UserDailyTime]:
     """
@@ -24,7 +24,5 @@ def get_users_learning_daily_time(
     """
 
     return read_daily_learning_time(
-        user_id=user_id,
-        start_time=start_time,
-        end_time=end_time,
+        user_id=user_id, time_range=(range_start, range_end)
     )
