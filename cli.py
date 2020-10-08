@@ -4,6 +4,7 @@ from typing import Sequence
 import click
 
 from chronos import __version__
+import chronos.settings
 
 
 @click.group()
@@ -37,7 +38,24 @@ def ci(session: str, session_args: Sequence[str]) -> None:
     if session_args:
         run_args += ["--", *session_args]
 
-    subprocess.run(run_args)  # pylint: disable=subprocess-run-check
+    subprocess.run(run_args, check=True)
+
+
+@click.command()
+def run_api() -> None:
+    run_args = [
+        "uvicorn",
+        "chronos.api.main:app",
+        "--host",
+        f"{chronos.settings.HOST_API}",
+        "--port",
+        "5000",
+        "--debug",
+        "--reload",
+    ]
+
+    subprocess.run(run_args, check=True)
 
 
 main.add_command(ci)
+main.add_command(run_api)
