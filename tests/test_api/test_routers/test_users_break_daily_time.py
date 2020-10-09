@@ -5,7 +5,7 @@ import pytest
 import requests
 
 from tests.consts import HEADERS, STATUS_OK
-from tests.test_api.url_helpers import get_url
+from tests.test_api.test_routers.url_helpers import get_url
 
 TEST_DATA = {
     "range-start": datetime(2000, 1, 1).isoformat(),
