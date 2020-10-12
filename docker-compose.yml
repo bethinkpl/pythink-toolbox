@@ -30,6 +30,7 @@ services:
     build:
       context: .
       dockerfile: docker/api/Dockerfile
+    command: /start-reload.sh
     environment:
       MODULE_NAME: src.chronos.api.main
     volumes:
