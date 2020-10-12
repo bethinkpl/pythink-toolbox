@@ -1,5 +1,8 @@
+# pylint: disable=missing-function-docstring
+# pylint: disable=duplicate-code
+
 from datetime import datetime, timedelta
-from typing import Tuple, List
+from typing import Tuple, List, Iterator
 
 import pytest
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
@@ -14,14 +17,14 @@ TEST_USER_ID = 1
 
 
 @pytest.fixture(scope="module")
-def clear_storage():
+def clear_storage() -> Iterator[None]:
     mongodb.client.drop_database(chronos.settings.MONGO_DATABASE)
     yield
     mongodb.client.drop_database(chronos.settings.MONGO_DATABASE)
 
 
 @pytest.fixture(scope="module")
-def populate_materialized_views_with_test_data():
+def populate_materialized_views_with_test_data() -> None:
 
     activity_sessions = [
         {
@@ -83,9 +86,9 @@ class ReadTimeScenario(Scenario):
     expected_output: List[tested_module.UserDailyTime]
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")
-@parametrize(
+@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")  # type: ignore[misc]
+@parametrize(  # type: ignore[misc]
     [
         ReadTimeScenario(
             desc="all data",
@@ -93,15 +96,21 @@ class ReadTimeScenario(Scenario):
             expected_output=[
                 {
                     "date": "1999-12-31",
-                    "duration_ms": timedelta(minutes=1) / timedelta(milliseconds=1),
+                    "duration_ms": int(
+                        timedelta(minutes=1) / timedelta(milliseconds=1)
+                    ),
                 },
                 {
                     "date": "2000-01-01",
-                    "duration_ms": timedelta(minutes=16) / timedelta(milliseconds=1),
+                    "duration_ms": int(
+                        timedelta(minutes=16) / timedelta(milliseconds=1)
+                    ),
                 },
                 {
                     "date": "2000-01-02",
-                    "duration_ms": timedelta(minutes=25) / timedelta(milliseconds=1),
+                    "duration_ms": int(
+                        timedelta(minutes=25) / timedelta(milliseconds=1)
+                    ),
                 },
             ],
         ),
@@ -116,11 +125,15 @@ class ReadTimeScenario(Scenario):
             expected_output=[
                 {
                     "date": "2000-01-01",
-                    "duration_ms": timedelta(minutes=16) / timedelta(milliseconds=1),
+                    "duration_ms": int(
+                        timedelta(minutes=16) / timedelta(milliseconds=1)
+                    ),
                 },
                 {
                     "date": "2000-01-02",
-                    "duration_ms": timedelta(minutes=25) / timedelta(milliseconds=1),
+                    "duration_ms": int(
+                        timedelta(minutes=25) / timedelta(milliseconds=1)
+                    ),
                 },
             ],
         ),
@@ -137,9 +150,9 @@ def test_read_daily_learning_time(
     assert expected_output == actual_output
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")
-@parametrize(
+@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")  # type: ignore[misc]
+@parametrize(  # type: ignore[misc]
     [
         ReadTimeScenario(
             desc="all data",
@@ -184,9 +197,9 @@ def test_read_daily_break_time(
     assert expected_output == actual_output
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")
-@parametrize(
+@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")  # type: ignore[misc]
+@parametrize(  # type: ignore[misc]
     [
         ReadTimeScenario(
             desc="all data",
@@ -243,13 +256,14 @@ def test_read_daily_focus_time(
     assert expected_output == actual_output
 
 
-class CumulativeReadTimeScenario(ReadTimeScenario):
+class CumulativeReadTimeScenario(Scenario):
+    time_range: Tuple[datetime, datetime]
     expected_output: int
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")
-@parametrize(
+@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")  # type: ignore[misc]
+@parametrize(  # type: ignore[misc]
     [
         CumulativeReadTimeScenario(
             desc="all data",
@@ -276,7 +290,7 @@ class CumulativeReadTimeScenario(ReadTimeScenario):
 )
 def test_read_cumulative_learning_time(
     time_range: Tuple[datetime, datetime],
-    expected_output: List[tested_module.UserDailyTime],
+    expected_output: int,
 ) -> None:
     actual_output = tested_module.read_cumulative_learning_time(
         user_id=TEST_USER_ID, time_range=time_range

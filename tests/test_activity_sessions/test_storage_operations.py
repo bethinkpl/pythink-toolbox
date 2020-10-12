@@ -31,8 +31,8 @@ def _read_failed_generation_collection_content() -> List[UserGenerationFailedSch
     return list(mongodb.collections.user_generation_failed.find({}))
 
 
-@pytest.fixture
-def read_failed_generation_collection_content() -> Callable[
+@pytest.fixture(name="read_failed_generation_collection_content")
+def read_failed_generation_collection() -> Callable[
     [], List[UserGenerationFailedSchema]
 ]:
     """Returns content of user_generation_failed collection."""
@@ -659,13 +659,12 @@ TEST_DATA = [
 ]
 
 
-@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
 @parametrize(TEST_DATA)  # type: ignore[misc]
 def test_update_materialized_views(
     activity_sessions_content: List[ActivitySessionSchema],
     expected_materialized_views_content: Dict[str, List[MaterializedViewSchema]],
-    clear_storage: Callable[[], None],
     get_materialized_view_content: Callable[[str], List[MaterializedViewSchema]],
     insert_data_to_activity_sessions_collection: Callable[
         [List[ActivitySessionSchema]], None
