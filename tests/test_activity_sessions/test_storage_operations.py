@@ -54,7 +54,7 @@ def test_save_new_activity_sessions(
     read_failed_generation_collection_content: Callable[
         [], List[UserGenerationFailedSchema]
     ],
-    clear_storage_func: Callable[[], None],
+    clear_storage_factory: Callable[[], None],
     mocker: pytest_mock.MockerFixture,
 ) -> Iterator[None]:
     def _save_new_activity_sessions_and_get_its_content(
@@ -69,7 +69,7 @@ def test_save_new_activity_sessions(
 
         return get_activity_session_collection_content_without_id()
 
-    clear_storage_func()
+    clear_storage_factory()
 
     # Initial input - creates two separate active sessions and inactive in the middle
     activity_events_1 = pd.Series([datetime(2000, 1, 1), datetime(2000, 1, 2)])
@@ -288,7 +288,7 @@ def test_save_new_activity_sessions(
             == expected_collection_content_4
         )
 
-    clear_storage_func()
+    clear_storage_factory()
     yield
 
 
