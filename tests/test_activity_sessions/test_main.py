@@ -1,10 +1,9 @@
 # pylint: disable=missing-function-docstring
 
 from datetime import datetime, timedelta
-from typing import Callable, List, Dict, Union, Iterator
+from typing import Callable, List, Dict, Union
 
 import pytest
-import pytest_steps
 from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
 import pandas as pd
@@ -18,7 +17,7 @@ from chronos.storage.schemas import MaterializedViewSchema
 
 
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
-@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
 @pytest.mark.e2e  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
 def test_main(

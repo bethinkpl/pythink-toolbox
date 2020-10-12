@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Callable
+from typing import List, Dict, Union, Callable, Iterator
 from datetime import datetime
 
 from pymongo.cursor import Cursor
@@ -40,18 +40,21 @@ def get_activity_session_collection_content_without_id() -> Callable[
     return _get_activity_session_collection_content_without_id
 
 
-@pytest.fixture
-def clear_storage_func() -> Callable[[], None]:
+# FIXME -> factory?
+
+
+@pytest.fixture(name="clear_storage_func")
+def clear_storage_function() -> Callable[[], None]:
     """Clears whole db."""
 
     def _clear_storage() -> None:
-        return mongodb.client.drop_database(settings.MONGO_DATABASE)
+        mongodb.client.drop_database(settings.MONGO_DATABASE)
 
     return _clear_storage
 
 
 @pytest.fixture
-def clear_storage(clear_storage_func: Callable[[], None]) -> None:
+def clear_storage(clear_storage_func: Callable[[], None]) -> Iterator[None]:
     """Clears whole db before and test call."""
     clear_storage_func()
     yield
