@@ -1,8 +1,11 @@
+# pylint: disable=import-outside-toplevel
+
 from typing import List, Dict, Union, Callable, Iterator
 from datetime import datetime
 
 from pymongo.cursor import Cursor
 import pytest
+from starlette.testclient import TestClient
 
 from chronos.storage.schemas import (
     ActivitySessionSchema,
@@ -90,8 +93,8 @@ def insert_data_to_activity_sessions_collection() -> Callable[
 
 
 @pytest.fixture(scope="session")
-def api_client():
-    from fastapi.testclient import TestClient
+def api_client() -> TestClient:
+    """Get TestClient to test API."""
     from chronos.api.main import app
 
     return TestClient(app)
