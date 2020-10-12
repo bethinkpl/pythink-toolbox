@@ -40,12 +40,10 @@ def get_activity_session_collection_content_without_id() -> Callable[
     return _get_activity_session_collection_content_without_id
 
 
-# FIXME -> factory?
-
-
-@pytest.fixture(name="clear_storage_func")
-def clear_storage_function() -> Callable[[], None]:
-    """Clears whole db."""
+@pytest.fixture(name="clear_storage_factory")
+def clear_storage_factory_as_fixture() -> Callable[[], None]:
+    """Clears whole db.
+    https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures"""
 
     def _clear_storage() -> None:
         mongodb.client.drop_database(settings.MONGO_DATABASE)
@@ -54,11 +52,11 @@ def clear_storage_function() -> Callable[[], None]:
 
 
 @pytest.fixture
-def clear_storage(clear_storage_func: Callable[[], None]) -> Iterator[None]:
+def clear_storage(clear_storage_factory: Callable[[], None]) -> Iterator[None]:
     """Clears whole db before and test call."""
-    clear_storage_func()
+    clear_storage_factory()
     yield
-    clear_storage_func()
+    clear_storage_factory()
 
 
 @pytest.fixture
