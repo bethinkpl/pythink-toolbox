@@ -2,6 +2,7 @@ import subprocess
 from typing import Sequence
 
 import click
+import uvicorn
 
 from chronos import __version__
 import chronos.settings
@@ -44,18 +45,13 @@ def ci(session: str, session_args: Sequence[str]) -> None:
 @click.command()
 def run_api() -> None:
     """Starts API server."""
-    run_args = [
-        "uvicorn",
+    uvicorn.run(
         "chronos.api.main:app",
-        "--host",
-        f"{chronos.settings.HOST_API}",
-        "--port",
-        "5000",
-        "--debug",
-        "--reload",
-    ]
-
-    subprocess.run(run_args, check=True)
+        host=chronos.settings.HOST_API,
+        port=5000,
+        debug=True,
+        reload=True,
+    )
 
 
 main.add_command(ci)
