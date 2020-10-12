@@ -4,12 +4,10 @@ from datetime import datetime
 from pymongo.cursor import Cursor
 import pytest
 
-from chronos.storage.specs import mongodb
 from chronos.storage.schemas import (
     ActivitySessionSchema,
     MaterializedViewSchema,
 )
-from chronos import settings
 
 
 def _filter_id_field(
@@ -27,6 +25,7 @@ def get_activity_session_collection_content_without_id() -> Callable[
 ]:
     """Returns function that query Mongo activity_sessions collection
     and return all its content"""
+    from chronos.storage.specs import mongodb
 
     def _get_activity_session_collection_content_without_id() -> List[
         Dict[str, Union[int, datetime, bool]]
@@ -44,6 +43,8 @@ def get_activity_session_collection_content_without_id() -> Callable[
 def clear_storage_factory_as_fixture() -> Callable[[], None]:
     """Clears whole db.
     https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures"""
+    from chronos.storage.specs import mongodb
+    from chronos import settings
 
     def _clear_storage() -> None:
         mongodb.client.drop_database(settings.MONGO_DATABASE)
@@ -62,6 +63,7 @@ def clear_storage(clear_storage_factory: Callable[[], None]) -> Iterator[None]:
 @pytest.fixture
 def get_materialized_view_content() -> Callable[[str], List[MaterializedViewSchema]]:
     """Returns function that query materialized view and return all its content"""
+    from chronos.storage.specs import mongodb
 
     def _get_materialized_view_content(
         materialized_view_name: str,
@@ -77,6 +79,7 @@ def insert_data_to_activity_sessions_collection() -> Callable[
     [List[ActivitySessionSchema]], None
 ]:
     """Inserts data to activity_sessions collection."""
+    from chronos.storage.specs import mongodb
 
     def _insert_data_to_activity_sessions_collection(
         data: List[ActivitySessionSchema],
@@ -84,3 +87,11 @@ def insert_data_to_activity_sessions_collection() -> Callable[
         mongodb.collections.activity_sessions.insert_many(data)
 
     return _insert_data_to_activity_sessions_collection
+
+
+@pytest.fixture(scope="session")
+def api_client():
+    from fastapi.testclient import TestClient
+    from chronos.api.main import app
+
+    return TestClient(app)
