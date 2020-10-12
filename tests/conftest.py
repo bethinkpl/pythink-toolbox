@@ -42,7 +42,7 @@ def get_activity_session_collection_content_without_id() -> Callable[
 
 @pytest.fixture
 def clear_storage_func() -> Callable[[], None]:
-    """Clears whole activity_sessions collection."""
+    """Clears whole db."""
 
     def _clear_storage() -> None:
         return mongodb.client.drop_database(settings.MONGO_DATABASE)
@@ -51,11 +51,11 @@ def clear_storage_func() -> Callable[[], None]:
 
 
 @pytest.fixture
-def clear_storage() -> None:
-    """Clears whole activity_sessions collection before and test call."""
-    mongodb.client.drop_database(settings.MONGO_DATABASE)
+def clear_storage(clear_storage_func: Callable[[], None]) -> None:
+    """Clears whole db before and test call."""
+    clear_storage_func()
     yield
-    mongodb.client.drop_database(settings.MONGO_DATABASE)
+    clear_storage_func()
 
 
 @pytest.fixture
