@@ -1,8 +1,7 @@
 # pylint: disable=missing-function-docstring
 from datetime import datetime
 
-import pytest
-from fastapi.testclient import TestClient
+from starlette.testclient import TestClient
 
 from tests.consts import HEADERS, STATUS_OK
 
@@ -14,8 +13,6 @@ TEST_DATA = {
 USER_ID = 299
 
 
-@pytest.mark.e2e  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
 def test_get_users_cumulative_learning_time(api_client: TestClient) -> None:
     response = api_client.get(
         f"users_cumulative_learning_time/{USER_ID}",
