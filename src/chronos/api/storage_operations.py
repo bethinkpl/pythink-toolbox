@@ -9,7 +9,7 @@ class UserDailyTime(TypedDict):
     Data model for daily time records.
     """
 
-    date: int
+    date: str
     duration_ms: int
 
 
