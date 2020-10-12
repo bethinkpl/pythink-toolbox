@@ -24,7 +24,7 @@ services:
 
   api:
     container_name: chronos_api
-    command: python /chronos/src/chronos/api/main.py
+    command: poetry run cli run-api
     restart: always
     ports:
       - 6000:5000
@@ -32,4 +32,4 @@ services:
       context: .
       dockerfile: docker/api/Dockerfile
     volumes:
-      - "./chronos:/chronos"
+      - ".:/chronos"
