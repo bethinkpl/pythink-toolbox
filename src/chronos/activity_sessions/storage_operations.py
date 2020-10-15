@@ -61,6 +61,9 @@ def extract_users_in_user_generation_failed_collection() -> List[int]:
     Returns:
         List of user_ids
     """
+
+    mongodb.init_client()
+
     return [
         doc["user_id"] for doc in mongodb.collections.user_generation_failed.find({})
     ]

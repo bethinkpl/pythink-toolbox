@@ -1,4 +1,3 @@
-# TODO notes: handle how to constrain dates of new queries to read_activity_events and materialized_views
 from datetime import datetime
 import logging
 

@@ -35,7 +35,7 @@ nox = "^2020.5.24"
 pre-commit = "^2.6.0"
 
 [tool.poetry.scripts]
-cli = 'cli:main'
+cli = 'cli:cli_main'
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = [
