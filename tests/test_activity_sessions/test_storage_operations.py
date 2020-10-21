@@ -21,14 +21,14 @@ from chronos.storage.schemas import (
     MaterializedViewSchema,
     UserGenerationFailedSchema,
 )
-from chronos.storage.specs import mongodb
+from chronos.storage import mongo_specs
 
 TEST_USER_ID = 108
 
 
 def _read_failed_generation_collection_content() -> List[UserGenerationFailedSchema]:
 
-    return list(mongodb.collections.user_generation_failed.find({}))
+    return list(mongo_specs.collections["user_generation_failed"].find({}))
 
 
 @pytest.fixture(name="read_failed_generation_collection_content")

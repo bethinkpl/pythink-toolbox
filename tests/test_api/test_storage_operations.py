@@ -11,16 +11,16 @@ import chronos.api.storage_operations as tested_module
 import chronos
 import chronos.activity_sessions.storage_operations
 import chronos.settings
-from chronos.storage.specs import mongodb
+from chronos.storage import mongo_specs
 
 TEST_USER_ID = 1
 
 
 @pytest.fixture(scope="module")
 def clear_storage() -> Iterator[None]:
-    mongodb.client.drop_database(chronos.settings.MONGO_DATABASE)
+    mongo_specs.client.drop_database(chronos.settings.MONGO_DATABASE)
     yield
-    mongodb.client.drop_database(chronos.settings.MONGO_DATABASE)
+    mongo_specs.client.drop_database(chronos.settings.MONGO_DATABASE)
 
 
 @pytest.fixture(scope="module")
@@ -74,7 +74,7 @@ def populate_materialized_views_with_test_data() -> None:
         },
     ]
 
-    mongodb.collections.activity_sessions.insert_many(activity_sessions)
+    mongo_specs.collections["activity_sessions"].insert_many(activity_sessions)
 
     chronos.activity_sessions.storage_operations.update_materialized_views(
         reference_time=datetime(1970, 1, 1)
