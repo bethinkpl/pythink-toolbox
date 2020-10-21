@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TypedDict
+from typing import TypedDict, Optional
 
 
 class ActivitySessionSchema(TypedDict):
@@ -28,3 +28,14 @@ class MaterializedViewSchema(TypedDict):
 class UserGenerationFailedSchema(TypedDict):
     user_id: int
     reference_time: datetime
+
+
+class _GenerationsTimeRangeSchema(TypedDict):
+    start: datetime
+    end: datetime
+
+
+class GenerationsSchema(TypedDict, total=False):
+    time_range: _GenerationsTimeRangeSchema
+    start_time: datetime
+    end_time: datetime
