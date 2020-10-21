@@ -164,7 +164,8 @@ def update_generation_end_time(
 
 
 def read_last_generation_time_range_end() -> Any:
-    """Returns:
+    """
+    Returns:
         Document from generation collection
     with newest `time_range.end` time.
     """
