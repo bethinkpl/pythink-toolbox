@@ -1,16 +1,12 @@
 # pylint: disable=import-outside-toplevel
 
-from typing import List, Dict, Union, Callable, Iterator
+from typing import List, Dict, Union, Callable, Iterator, Any
 from datetime import datetime
 
 from pymongo.cursor import Cursor
 import pytest
-from starlette.testclient import TestClient
 
-from chronos.storage.schemas import (
-    ActivitySessionSchema,
-    MaterializedViewSchema,
-)
+from chronos.storage import schemas
 
 
 def _filter_id_field(
@@ -22,22 +18,20 @@ def _filter_id_field(
     ]
 
 
-@pytest.fixture
-def get_activity_session_collection_content_without_id() -> Callable[
-    [], List[Dict[str, Union[int, datetime, bool]]]
+@pytest.fixture(name="get_collection_content_without_id_factory")
+def get_collection_content_without_id_factory_as_fixture() -> Callable[
+    [str], List[Dict[str, Any]]
 ]:
     """Returns function that query Mongo activity_sessions collection
     and return all its content"""
     from chronos.storage.mongo_specs import collections
 
-    def _get_activity_session_collection_content_without_id() -> List[
-        Dict[str, Union[int, datetime, bool]]
-    ]:
-        activity_sessions_collection_content = collections["activity_sessions"].find()
+    def _get_collection_content_without_id(
+        collection_name: str,
+    ) -> List[Dict[str, Union[int, datetime, bool]]]:
+        return _filter_id_field(query_result=collections[collection_name].find())
 
-        return _filter_id_field(query_result=activity_sessions_collection_content)
-
-    return _get_activity_session_collection_content_without_id
+    return _get_collection_content_without_id
 
 
 @pytest.fixture(name="clear_storage_factory")
@@ -61,38 +55,32 @@ def clear_storage(clear_storage_factory: Callable[[], None]) -> Iterator[None]:
     clear_storage_factory()
 
 
-@pytest.fixture
-def get_materialized_view_content() -> Callable[[str], List[MaterializedViewSchema]]:
-    """Returns function that query materialized view and return all its content"""
+@pytest.fixture(name="get_materialized_view_content_factory")
+def get_materialized_view_content_factory_as_fixture() -> Callable[
+    [str], List[schemas.MaterializedViewSchema]
+]:
+    """Returns function that query materialized view and return all its content."""
     from chronos.storage.mongo_specs import database
 
     def _get_materialized_view_content(
         materialized_view_name: str,
-    ) -> List[MaterializedViewSchema]:
+    ) -> List[schemas.MaterializedViewSchema]:
         materialized_view = database[materialized_view_name]
         return list(materialized_view.find())
 
     return _get_materialized_view_content
 
 
-@pytest.fixture
-def insert_data_to_activity_sessions_collection() -> Callable[
-    [List[ActivitySessionSchema]], None
+@pytest.fixture(name="insert_data_to_activity_sessions_collection_factory")
+def insert_data_to_activity_sessions_collection_factory_as_fixture() -> Callable[
+    [List[schemas.ActivitySessionSchema]], None
 ]:
     """Inserts data to activity_sessions collection."""
     from chronos.storage.mongo_specs import collections
 
     def _insert_data_to_activity_sessions_collection(
-        data: List[ActivitySessionSchema],
+        data: List[schemas.ActivitySessionSchema],
     ) -> None:
         collections["activity_sessions"].insert_many(data)
 
     return _insert_data_to_activity_sessions_collection
-
-
-@pytest.fixture(scope="session")
-def api_client() -> TestClient:
-    """Get TestClient to test API."""
-    from chronos.api.main import app
-
-    return TestClient(app)
