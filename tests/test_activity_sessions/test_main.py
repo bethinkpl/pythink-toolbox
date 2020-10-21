@@ -1,7 +1,7 @@
 # pylint: disable=missing-function-docstring
 
 from datetime import datetime, timedelta
-from typing import Callable, List, Dict, Union
+from typing import List, Dict, Union, Callable
 
 import pytest
 from pytest_mock import MockerFixture
@@ -14,7 +14,7 @@ from chronos.activity_sessions.storage_operations import TimeRange
 from chronos.activity_sessions.activity_events_source import (
     read_activity_events_between_datetimes,
 )
-from chronos.storage.schemas import MaterializedViewSchema
+from chronos.storage import schemas
 
 
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
@@ -23,10 +23,12 @@ from chronos.storage.schemas import MaterializedViewSchema
 @pytest.mark.integration  # type: ignore[misc]
 def test_main(
     mocker: MockerFixture,
-    get_activity_session_collection_content_without_id: Callable[
-        [], List[Dict[str, Union[int, datetime, bool]]]
+    get_collection_content_without_id_factory: Callable[
+        [str], List[Dict[str, Union[int, datetime, bool]]]
     ],
-    get_materialized_view_content: Callable[[str], List[MaterializedViewSchema]],
+    get_materialized_view_content_factory: Callable[
+        [str], List[chronos.storage.schemas.MaterializedViewSchema]
+    ],
 ) -> None:
     """End-to-end overall happy-path activity sessions creation and materialized views updates."""
 
@@ -95,7 +97,9 @@ def test_main(
             "version": chronos.__version__,
         },
     ]
-    actual_activity_sessions_data = get_activity_session_collection_content_without_id()
+    actual_activity_sessions_data = get_collection_content_without_id_factory(
+        "activity_sessions"
+    )
 
     assert actual_activity_sessions_data == expected_activity_sessions_data
 
@@ -133,8 +137,8 @@ def test_main(
             ),
         },
     ]
-    actual_learning_time_sessions_duration_mv_data = get_materialized_view_content(
-        "learning_time_sessions_duration_mv"
+    actual_learning_time_sessions_duration_mv_data = (
+        get_materialized_view_content_factory("learning_time_sessions_duration_mv")
     )
 
     assert (
@@ -152,7 +156,7 @@ def test_main(
             ),
         }
     ]
-    actual_break_sessions_duration_mv_data = get_materialized_view_content(
+    actual_break_sessions_duration_mv_data = get_materialized_view_content_factory(
         "break_sessions_duration_mv"
     )
 
@@ -179,7 +183,7 @@ def test_main(
             ),
         },
     ]
-    actual_focus_sessions_duration_mv_data = get_materialized_view_content(
+    actual_focus_sessions_duration_mv_data = get_materialized_view_content_factory(
         "focus_sessions_duration_mv"
     )
 
@@ -187,3 +191,6 @@ def test_main(
         actual_focus_sessions_duration_mv_data
         == expected_focus_sessions_duration_mv_data
     )
+
+
+# FIXME add test of generations

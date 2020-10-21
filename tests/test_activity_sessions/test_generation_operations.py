@@ -346,7 +346,7 @@ def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None
     )
 
     pd.testing.assert_series_equal(
-        ((output.duration > pd.Timedelta(minutes=15)) & output.is_active),
+        ((output.duration >= pd.Timedelta(minutes=15)) & output.is_active),
         output.is_focus,
         check_names=False,
     )
