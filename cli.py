@@ -1,7 +1,7 @@
 # pylint: disable=import-outside-toplevel
 import subprocess
 from typing import Sequence
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import click
 
@@ -44,13 +44,18 @@ def ci(session: str, session_args: Sequence[str]) -> None:
 
 
 @click.command()
-@click.option("--reference-time", required=True, type=click.DateTime())
-def run_activity_sessions(reference_time: datetime) -> None:
-    """Runs activity_sessions generation within
-    time range (reference-time - 1H, reference-time)."""
-    from chronos.activity_sessions.main import main
+def generate_activity_sessions() -> None:
+    """Generates activity_sessions from time of last generation to now
+    and updates materialized views."""
 
-    main(start_time=reference_time - timedelta(hours=1), end_time=reference_time)
+    from chronos.activity_sessions.main import main
+    from chronos.activity_sessions.storage_operations import (
+        read_last_generation_time_range_end,
+    )
+
+    last_generation_time = read_last_generation_time_range_end() or datetime(1970, 1, 1)
+
+    main(time_range=(last_generation_time, datetime.now()))
 
 
 @click.command()
@@ -70,5 +75,5 @@ def run_api() -> None:
 
 
 cli_main.add_command(ci)
-cli_main.add_command(run_activity_sessions)
+cli_main.add_command(generate_activity_sessions)
 cli_main.add_command(run_api)
