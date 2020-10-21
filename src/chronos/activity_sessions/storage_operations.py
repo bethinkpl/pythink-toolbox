@@ -1,3 +1,4 @@
+from collections import namedtuple
 import logging
 from typing import Optional, Dict, Union, List
 from datetime import datetime
@@ -9,8 +10,8 @@ import pymongo.errors
 from pymongo.client_session import ClientSession
 
 import chronos.activity_sessions.generation_operations
-from chronos.storage.specs import mongodb
-from chronos.storage.schemas import UserGenerationFailedSchema
+from chronos.storage import mongo_specs
+from chronos.storage.schemas import UserGenerationFailedSchema, GenerationsSchema
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ def save_new_activity_sessions(
 
     logger.info("Run test_activity_sessions mongo operations for user_id %i", user_id)
 
-    with mongodb.client.start_session() as session:
+    with mongo_specs.client.start_session() as session:
 
         try:
             _run_user_crud_operations_transaction(
@@ -35,38 +36,11 @@ def save_new_activity_sessions(
                 err,
             )
 
-            mongodb.collections.user_generation_failed.insert_one(
+            mongo_specs.collections["user_generation_failed"].insert_one(
                 UserGenerationFailedSchema(
                     user_id=user_id, reference_time=reference_time
                 )
             )
-
-
-def update_materialized_views(reference_time: datetime) -> None:
-    """Updates all materialized views.
-    Args:
-        reference_time: time from which materialized views takes data to update themselves.
-    """
-
-    for materialized_view in [
-        mongodb.materialized_views.learning_time_sessions_duration,
-        mongodb.materialized_views.break_sessions_duration,
-        mongodb.materialized_views.focus_sessions_duration,
-    ]:
-        materialized_view.run_aggregation(reference_time=reference_time)
-
-
-def extract_users_in_user_generation_failed_collection() -> List[int]:
-    """Extracts all user_id in generation_failed collection documents.
-    Returns:
-        List of user_ids
-    """
-
-    mongodb.init_client()
-
-    return [
-        doc["user_id"] for doc in mongodb.collections.user_generation_failed.find({})
-    ]
 
 
 def _run_user_crud_operations_transaction(
@@ -77,7 +51,7 @@ def _run_user_crud_operations_transaction(
         write_concern=pymongo.WriteConcern(w="majority")
     ):  # TODO handle read_, write_concerns, and read_preference
 
-        collection = mongodb.collections.activity_sessions
+        collection = mongo_specs.collections["activity_sessions"]
 
         last_active_session: Optional[
             Dict[str, Union[datetime, bson.ObjectId]]
@@ -122,3 +96,61 @@ def _commit_transaction_with_retry(
             raise RuntimeError(
                 "Error during test_activity_sessions creation transaction commit."
             ) from err
+
+
+def update_materialized_views(reference_time: datetime) -> None:
+    """Updates all materialized views.
+    Args:
+        reference_time: time from which materialized views takes data to update themselves.
+    """
+
+    for materialized_view in mongo_specs.materialized_views.values():
+        materialized_view.run_aggregation(
+            collection=mongo_specs.collections["activity_sessions"],
+            reference_time=reference_time,
+        )
+
+
+def extract_users_in_user_generation_failed_collection() -> List[int]:
+    """Extracts all user_id in generation_failed collection documents.
+    Returns:
+        List of user_ids
+    """
+
+    return [
+        doc["user_id"]
+        for doc in mongo_specs.collections["user_generation_failed"].find({})
+    ]
+
+
+TimeRange = namedtuple("TimeRange", ["start", "end"])
+
+
+def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.ObjectId:
+
+    document: GenerationsSchema = {
+        "time_range": {"start": time_range.start, "end": time_range.end},
+        "start_time": start_time,
+    }
+
+    result = mongo_specs.collections["generations"].insert_one(document=document)
+
+    return result.inserted_id
+
+
+def update_generation_end_time(
+    generation_id: bson.ObjectId, end_time: datetime
+) -> None:
+
+    mongo_specs.collections["generations"].update_one(
+        filter={"_id": generation_id}, update={"end_time": end_time}
+    )
+
+
+def read_last_generation_time_range_end():
+
+    field = "time_range.end"
+    return mongo_specs.collections["generations"].find_one(
+        projection={"_id": False, field: True},
+        sort=[(field, pymongo.DESCENDING)],
+    )
