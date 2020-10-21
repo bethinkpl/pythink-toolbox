@@ -1,6 +1,6 @@
 from collections import namedtuple
 import logging
-from typing import Optional, Dict, Union, List
+from typing import Optional, Dict, Union, List, Any
 from datetime import datetime
 
 import bson
@@ -127,6 +127,15 @@ TimeRange = namedtuple("TimeRange", ["start", "end"])
 
 
 def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.ObjectId:
+    """Insert new document to `generation` collection.
+
+    Args:
+        time_range: time range which generation takes into account
+        start_time: start time of generation procedure
+
+    Returns:
+        ID of inserted document
+    """
 
     document: GenerationsSchema = {
         "time_range": {"start": time_range.start, "end": time_range.end},
@@ -141,16 +150,26 @@ def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.O
 def update_generation_end_time(
     generation_id: bson.ObjectId, end_time: datetime
 ) -> None:
+    """Updates `end_time` field in specified document
+     in `generations` collection.
+
+    Args:
+        generation_id: to specify document
+        end_time: value of update
+    """
 
     mongo_specs.collections["generations"].update_one(
         filter={"_id": generation_id}, update={"end_time": end_time}
     )
 
 
-def read_last_generation_time_range_end():
+def read_last_generation_time_range_end() -> Any:
+    """Returns:
+        Document from generation collection
+    with newest `time_range.end` time.
+    """
 
-    field = "time_range.end"
     return mongo_specs.collections["generations"].find_one(
-        projection={"_id": False, field: True},
-        sort=[(field, pymongo.DESCENDING)],
+        projection={"_id": False, "time_range.end": True},
+        sort=[("time_range.end", pymongo.DESCENDING)],
     )

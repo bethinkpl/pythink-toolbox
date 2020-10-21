@@ -21,12 +21,14 @@ class _MaterializedView(Collection):  # type: ignore[misc]
         name: str,
         match_stage_conds: Dict[str, Any],
         database_: Database,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
+
         super().__init__(database=database_, name=name, **kwargs)
+
         self.match_stage_conds = match_stage_conds
 
-    def run_aggregation(self, collection: Collection, reference_time: datetime):
+    def run_aggregation(self, collection: Collection, reference_time: datetime) -> None:
         """Updates materialized view content based on `reference time`."""
         match_stage = {
             **self.match_stage_conds,
@@ -74,7 +76,8 @@ def _initialize_collections(
 
 def _initialize_materialized_views(
     materialized_views_confs: Sequence[_MaterializedViewConf], database_: Database
-):
+) -> Dict[str, _MaterializedView]:
+
     return {
         materialized_view_conf.name: _MaterializedView(
             name=materialized_view_conf.name,

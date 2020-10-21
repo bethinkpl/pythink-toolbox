@@ -5,7 +5,6 @@ from datetime import datetime
 
 import click
 
-
 from chronos import __version__
 
 
@@ -51,11 +50,12 @@ def generate_activity_sessions() -> None:
     from chronos.activity_sessions.main import main
     from chronos.activity_sessions.storage_operations import (
         read_last_generation_time_range_end,
+        TimeRange,
     )
 
     last_generation_time = read_last_generation_time_range_end() or datetime(1970, 1, 1)
 
-    main(time_range=(last_generation_time, datetime.now()))
+    main(time_range=TimeRange(start=last_generation_time, end=datetime.now()))
 
 
 @click.command()

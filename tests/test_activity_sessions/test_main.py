@@ -10,6 +10,7 @@ import pandas as pd
 
 import chronos
 import chronos.activity_sessions.main as tested_module
+from chronos.activity_sessions.storage_operations import TimeRange
 from chronos.activity_sessions.activity_events_source import (
     read_activity_events_between_datetimes,
 )
@@ -54,7 +55,7 @@ def test_main(
         ),
     )
 
-    tested_module.main(start_time=datetime(2000, 1, 1), end_time=datetime(2000, 1, 2))
+    tested_module.main(time_range=TimeRange(datetime(2000, 1, 1), datetime(2000, 1, 2)))
 
     expected_activity_sessions_data = [
         {
