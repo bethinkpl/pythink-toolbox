@@ -159,7 +159,7 @@ def update_generation_end_time(
     """
 
     mongo_specs.collections["generations"].update_one(
-        filter={"_id": generation_id}, update={"end_time": end_time}
+        filter={"_id": generation_id}, update={"$set": {"end_time": end_time}}
     )
 
 

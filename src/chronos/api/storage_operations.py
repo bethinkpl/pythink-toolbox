@@ -20,7 +20,7 @@ def read_daily_learning_time(
     Read daily user learning time from storage.
     """
     query_results = mongo_specs.materialized_views[
-        "learning_time_sessions_duration"
+        "learning_time_sessions_duration_mv"
     ].aggregate(
         pipeline=_get_daily_time_pipeline_query(user_id=user_id, time_range=time_range)
     )
@@ -47,7 +47,9 @@ def read_daily_break_time(
     """
     Read daily user break time from storage.
     """
-    query_results = mongo_specs.materialized_views["break_sessions_duration"].aggregate(
+    query_results = mongo_specs.materialized_views[
+        "break_sessions_duration_mv"
+    ].aggregate(
         pipeline=_get_daily_time_pipeline_query(user_id=user_id, time_range=time_range)
     )
 
@@ -60,7 +62,9 @@ def read_daily_focus_time(
     """
     Read daily user focus time from storage.
     """
-    query_results = mongo_specs.materialized_views["focus_sessions_duration"].aggregate(
+    query_results = mongo_specs.materialized_views[
+        "focus_sessions_duration_mv"
+    ].aggregate(
         pipeline=_get_daily_time_pipeline_query(user_id=user_id, time_range=time_range)
     )
 
