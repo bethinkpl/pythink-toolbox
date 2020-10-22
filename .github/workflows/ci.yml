@@ -23,12 +23,6 @@ jobs:
     - name: Set up storage
       run: docker-compose -f .github/workflows/docker-compose-tests.yml up -d test-mongo
 
-    - name: Wait for MongoDB
-      run: until  [[ "$( docker container inspect -f '{{.State.Status}}' test_mongo )" == "running" ]]; do echo "Waiting for MongoDB"; sleep 2; done
-
-    - name: Initiate Mongo replica sets
-      run: docker exec test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
-
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
@@ -43,5 +37,17 @@ jobs:
     - name: Install dependiencies
       run: poetry install
 
+    - name: Wait for MongoDB
+      run: until  [[ "$( docker container inspect -f '{{.State.Status}}' test_mongo )" == "running" ]]; do echo "Waiting for MongoDB"; sleep 2; done
+
+    - name: Initiate Mongo replica sets
+      run: docker exec test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
+
     - name: Run Nox-based CI
       run: poetry run nox
+      env:
+        CHRONOS_MONGO_HOST: localhost
+        CHRONOS_MONGO_PORT: 27018
+        CHRONOS_MONGO_DATABASE: test_db
+        CHRONOS_MONGO_USER: test_user
+        CHRONOS_MONGO_PASSWORD: test_pass
