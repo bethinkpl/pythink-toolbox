@@ -6,7 +6,7 @@ services:
     image: mongo:4.4.1-bionic
     restart: always
     ports:
-      - 27018:27018
+      - 27017:27017
     command: --replSet replica_set0
     environment:
       MONGO_INITDB_ROOT_USERNAME: test_user
