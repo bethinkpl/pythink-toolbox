@@ -1,5 +1,5 @@
 # pylint: disable=import-outside-toplevel
-
+import os
 from typing import List, Dict, Union, Callable, Iterator, Any
 from datetime import datetime
 
@@ -7,6 +7,9 @@ from pymongo.cursor import Cursor
 import pytest
 
 from chronos.storage import schemas
+
+
+os.environ["CHRONOS_MONGO_DATABASE"] = "test_db"
 
 
 def _filter_id_field(
@@ -38,11 +41,11 @@ def get_collection_content_without_id_factory_as_fixture() -> Callable[
 def clear_storage_factory_as_fixture() -> Callable[[], None]:
     """Clears whole db.
     https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures"""
-    from chronos.storage.mongo_specs import client
-    from chronos import settings
+    from chronos.storage.mongo_specs import collections, materialized_views
 
     def _clear_storage() -> None:
-        client.drop_database(settings.MONGO_DATABASE)
+        for collection in {**collections, **materialized_views}.values():
+            collection.delete_many({})
 
     return _clear_storage
 
