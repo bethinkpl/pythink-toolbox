@@ -23,6 +23,9 @@ jobs:
     - name: Set up storage
       run: docker-compose -f .github/workflows/docker-compose-tests.yml up -d test-mongo
 
+    - name: Initiate Mongo replica sets
+      run: docker-compose -f .github/workflows/docker-compose-tests.yml run test_mongo bash -c 'mongo -utest_user -ptest_pass --eval "rs.initiate()"'
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
@@ -37,8 +40,6 @@ jobs:
     - name: Install dependiencies
       run: poetry install
 
-    - name: Initiate Mongo replica sets
-      run: docker exec -it test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
 
     - name: Run Nox-based CI
       run: poetry run nox
