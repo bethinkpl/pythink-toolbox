@@ -28,15 +28,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install poetry
-      uses: dschep/install-poetry-action@v1.3
-      with:
-        version: 1.0.9
-        create_virtualenvs: install
-
-    - name: Install dependiencies
-      run: poetry install
-
     - name: Wait for MongoDB
       run: until  [[ "$( docker container inspect -f '{{.State.Status}}' test_mongo )" == "running" ]]; do echo "Waiting for MongoDB"; sleep 2; done
 
