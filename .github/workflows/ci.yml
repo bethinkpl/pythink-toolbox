@@ -23,13 +23,8 @@ jobs:
     - name: Docker Compose
       run: docker-compose -f docker-compose-tests.yml up -d
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-
     - name: Wait for MongoDB
-      run: until  [[ "$( docker container inspect -f '{{.State.Status}}' test_mongo )" == "running" ]]; do echo "Waiting for MongoDB"; sleep 2; done
+      run: until docker exec test_mongo mongo -utest_user -ptest_pass --eval "print(\"Don't want to wait no longer!\")"; do sleep 1; done
 
     - name: Initiate Mongo replica sets
       run: docker exec test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
