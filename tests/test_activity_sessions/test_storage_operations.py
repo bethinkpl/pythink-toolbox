@@ -16,7 +16,7 @@ from pythink_toolbox.testing.parametrization import parametrize, Scenario
 import chronos.activity_sessions.storage_operations as tested_module
 import chronos
 import chronos.activity_sessions.generation_operations
-from chronos.storage import mongo_specs, schemas
+from chronos.storage import schemas
 
 TEST_USER_ID = 108
 
@@ -733,9 +733,7 @@ def test_update_generation_end_time(
 
 @pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
-def test_read_last_generation_time_range_end(
-    get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
-) -> None:
+def test_read_last_generation_time_range_end() -> None:
 
     for i in range(1, 4):
         tested_module.insert_new_generation(

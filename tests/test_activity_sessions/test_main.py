@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 from typing import List, Dict, Union, Callable
 
+import freezegun
 import pytest
 from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
@@ -18,6 +19,7 @@ from chronos.storage import schemas
 
 
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
+@freezegun.freeze_time("2000-1-2")
 @pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
 @pytest.mark.e2e  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
@@ -27,7 +29,7 @@ def test_main(
         [str], List[Dict[str, Union[int, datetime, bool]]]
     ],
     get_materialized_view_content_factory: Callable[
-        [str], List[chronos.storage.schemas.MaterializedViewSchema]
+        [str], List[schemas.MaterializedViewSchema]
     ],
 ) -> None:
     """End-to-end overall happy-path activity sessions creation and materialized views updates."""
@@ -192,5 +194,14 @@ def test_main(
         == expected_focus_sessions_duration_mv_data
     )
 
+    expected_generations_data = [
+        {
+            "time_range": {"start": datetime(2000, 1, 1), "end": datetime(2000, 1, 2)},
+            "start_time": datetime(2000, 1, 2),
+            "end_time": datetime(2000, 1, 2),
+        }
+    ]
 
-# FIXME add test of generations
+    assert expected_generations_data == get_collection_content_without_id_factory(
+        "generations"
+    )

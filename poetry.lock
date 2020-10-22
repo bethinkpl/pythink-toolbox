@@ -215,6 +215,17 @@ version = "3.0.12"
 
 [[package]]
 category = "main"
+description = "Let your Python tests travel through time"
+name = "freezegun"
+optional = false
+python-versions = ">=3.5"
+version = "1.0.0"
+
+[package.dependencies]
+python-dateutil = ">=2.7"
+
+[[package]]
+category = "main"
 description = "Google API client core library"
 name = "google-api-core"
 optional = false
@@ -1137,7 +1148,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "52edb7cfa5458b9099f3bfa9b821d799a3aad700d167f706eff503137ed7deb2"
+content-hash = "42d4cb895674155bc54518005cfe4e502ea62cbfc125aefc30714af11b036f37"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -1281,6 +1292,10 @@ fastapi = [
 filelock = [
     {file = "filelock-3.0.12-py3-none-any.whl", hash = "sha256:929b7d63ec5b7d6b71b0fa5ac14e030b3f70b75747cef1b10da9b879fef15836"},
     {file = "filelock-3.0.12.tar.gz", hash = "sha256:18d82244ee114f543149c66a6e0c14e9c4f8a1044b5cdaadd0f82159d6a6ff59"},
+]
+freezegun = [
+    {file = "freezegun-1.0.0-py2.py3-none-any.whl", hash = "sha256:02b35de52f4699a78f6ac4518e4cd3390dddc43b0aeb978335a8f270a2d9668b"},
+    {file = "freezegun-1.0.0.tar.gz", hash = "sha256:1cf08e441f913ff5e59b19cc065a8faa9dd1ddc442eaf0375294f344581a0643"},
 ]
 google-api-core = [
     {file = "google-api-core-1.22.4.tar.gz", hash = "sha256:4a9d7ac2527a9e298eebb580a5e24e7e41d6afd97010848dd0f306cae198ec1a"},

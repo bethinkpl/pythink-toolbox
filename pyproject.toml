@@ -33,6 +33,7 @@ hypothesis = { version = "^5.30.0",  extras = ["numpy", "pandas"] }
 mypy = "^0.782"
 nox = "^2020.5.24"
 pre-commit = "^2.6.0"
+freezegun = "^1.0.0"
 
 [tool.poetry.scripts]
 cli = 'cli:cli_main'
