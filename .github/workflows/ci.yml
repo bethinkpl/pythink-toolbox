@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up storage
+    - name: Docker Compose
       run: docker-compose -f docker-compose-tests.yml up -d test-mongo
 
     - name: Set up Python ${{ matrix.python-version }}
@@ -41,7 +41,7 @@ jobs:
       run: until  [[ "$( docker container inspect -f '{{.State.Status}}' test_mongo )" == "running" ]]; do echo "Waiting for MongoDB"; sleep 2; done
 
     - name: Initiate Mongo replica sets
-      run: docker exec -it test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
+      run: docker exec test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
 
     - name: Run Nox-based CI
-      run: docker exec -it chronos_tests poetry run cli ci
+      run: docker exec chronos_tests poetry run cli ci
