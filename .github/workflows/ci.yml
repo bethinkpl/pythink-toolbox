@@ -23,13 +23,8 @@ jobs:
     - name: Set up storage
       run: docker-compose -f .github/workflows/docker-compose-tests.yml up -d test-mongo
 
-    - name: Sleep
-      uses: jakejarvis/wait-action@master
-      with:
-        time: '60s'
-
-    - name: Check running containers
-      run: docker ps
+    - name: Wait for MongoDB
+      run: until  [[ "$( docker container inspect -f '{{.State.Status}}' test_mongo )" == "running" ]]; do echo "Waiting for MongoDB"; sleep 2; done
 
     - name: Initiate Mongo replica sets
       run: docker exec test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
