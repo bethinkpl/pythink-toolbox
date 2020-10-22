@@ -34,11 +34,11 @@ jobs:
         version: 1.0.9
         create_virtualenvs: install
 
-    - name: Initiate Mongo replica sets
-      run: docker exec -it test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
-
     - name: Install dependiencies
       run: poetry install
+
+    - name: Initiate Mongo replica sets
+      run: docker exec -it test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
 
     - name: Run Nox-based CI
       run: poetry run nox
