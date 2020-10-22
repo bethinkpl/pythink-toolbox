@@ -274,7 +274,7 @@ def test_save_new_activity_sessions(
 
 
 class UpdateMaterializedViewsScenario(Scenario):
-    activity_sessions_content: List[schemas.UserGenerationFailedSchema]
+    activity_sessions_content: List[schemas.ActivitySessionSchema]
     expected_materialized_views_content: Dict[str, List[schemas.MaterializedViewSchema]]
 
 
@@ -641,12 +641,16 @@ TEST_DATA = [
 @pytest.mark.integration  # type: ignore[misc]
 @parametrize(TEST_DATA)  # type: ignore[misc]
 def test_update_materialized_views(
-    activity_sessions_content: List[schemas.UserGenerationFailedSchema],
+    activity_sessions_content: List[schemas.ActivitySessionSchema],
     expected_materialized_views_content: Dict[
         str, List[schemas.MaterializedViewSchema]
     ],
-    get_materialized_view_content_factory,
-    insert_data_to_activity_sessions_collection_factory,
+    get_materialized_view_content_factory: Callable[
+        [str], List[schemas.MaterializedViewSchema]
+    ],
+    insert_data_to_activity_sessions_collection_factory: Callable[
+        [List[schemas.ActivitySessionSchema]], None
+    ],
 ) -> None:
 
     insert_data_to_activity_sessions_collection_factory(activity_sessions_content)
