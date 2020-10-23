@@ -8,9 +8,8 @@ CHRONOS_PACKAGE_DIR = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 
 PROJECT_DIR = CHRONOS_PACKAGE_DIR.parents[1]
 
-dot_env_file_path = PROJECT_DIR / ".env"
-if dot_env_file_path.is_file():
-    dotenv.load_dotenv(dot_env_file_path)
+dotenv.load_dotenv(PROJECT_DIR / ".env")
+
 
 # === CHRONOS SPECIFIC ===
 
