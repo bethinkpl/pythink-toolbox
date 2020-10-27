@@ -1,14 +1,15 @@
-from fastapi.applications import FastAPI
-
+from chronos import __version__
 from chronos.api.routers.users_break_daily_time import users_break_daily_time_router
+from chronos.api.routers.users_cumulative_learning_time import (
+    users_cumulative_learning_time_router,
+)
 from chronos.api.routers.users_focus_daily_time import users_focus_daily_time_router
 from chronos.api.routers.users_learning_daily_time import (
     users_learning_daily_time_router,
 )
-from chronos.api.routers.users_cumulative_learning_time import (
-    users_cumulative_learning_time_router,
-)
 from chronos.logger import logger
+from fastapi.applications import FastAPI
+from fastapi.openapi.utils import get_openapi
 
 logger.init_for_api()
 app = FastAPI()
