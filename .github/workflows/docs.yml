@@ -12,6 +12,7 @@ jobs:
   upload-openapi-spec:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Upload openapi.json
         uses: actions/upload-artifact@v2
         with:
@@ -31,7 +32,7 @@ jobs:
       uses: Legion2/swagger-ui-action@v1
       with:
         output: swagger-ui
-        spec-file: docs/openapi.json
+        spec-file: openapi.json
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
