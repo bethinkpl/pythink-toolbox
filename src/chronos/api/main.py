@@ -18,3 +18,22 @@ app.include_router(users_break_daily_time_router)
 app.include_router(users_focus_daily_time_router)
 app.include_router(users_learning_daily_time_router)
 app.include_router(users_cumulative_learning_time_router)
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Chronos API",
+        version=__version__,
+        description="Chronos FastAPI schema",
+        routes=app.routes,
+    )
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
+
+with open("docs/openapi.json", "w") as file:
+    file.write(str(app.openapi()))
