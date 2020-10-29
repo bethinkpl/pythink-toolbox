@@ -13,3 +13,10 @@ repos:
     hooks:
     -   id: black
         language_version: python
+-   repo: local
+    hooks:
+    -   id: generate-API-documenation
+        name: generate-API-documenation
+        entry: docs/generate_API_doc.sh
+        language: script
+        pass_filenames: false
