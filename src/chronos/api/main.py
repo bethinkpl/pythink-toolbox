@@ -34,6 +34,3 @@ def custom_openapi():
 
 
 app.openapi = custom_openapi
-
-with open("docs/openapi.json", "w") as file:
-    file.write(str(app.openapi()))
