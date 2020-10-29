@@ -60,7 +60,7 @@ def get_swagger_ui_html(
     html += """
     </script>
     </body>
-    </html>\n
+    </html>
     """.strip()
     return html
 
@@ -69,12 +69,9 @@ with open("docs/spec.js", "w") as file:
     file.write(f"var spec = {json.dumps(app.openapi()).strip()}\n")
 
 with open("docs/index.html", "w") as file:
-    file.write(
-        str(
-            get_swagger_ui_html(
-                spec_url="./spec.js",
-                title=app.title + " - Swagger UI",
-                oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
-            )
-        )
+    html = get_swagger_ui_html(
+        spec_url="./spec.js",
+        title=app.title + " - Swagger UI",
+        oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
     )
+    file.write(f"{html}\n")
