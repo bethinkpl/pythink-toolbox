@@ -199,6 +199,7 @@ def test_main(
             "time_range": {"start": datetime(2000, 1, 1), "end": datetime(2000, 1, 2)},
             "start_time": datetime(2000, 1, 2),
             "end_time": datetime(2000, 1, 2),
+            "version": chronos.__version__,
         }
     ]
 
