@@ -4,7 +4,7 @@ import nox
 
 LOCATIONS = ["src", "tests", "noxfile.py", "cli.py"]
 
-nox.options.sessions = ["pre_commit", "unit_tests", "pylint", "mypy"]
+nox.options.sessions = ["pre_commit", "all_tests", "pylint", "mypy"]
 
 
 @nox.session(python=False)
@@ -34,6 +34,22 @@ def pre_commit(session: Any) -> None:
 
 
 @nox.session(python=False)
+def all_tests(session: Any) -> None:
+    """Test src & output coverage report.
+    Report generation configuration in pyproject.toml & pytest.ini files.
+    Usage:
+        `poetry run nox -s tests [-- path]`
+    """
+    args = session.posargs or [
+        "--cov=src",
+        "--cov-report",
+        "html",
+        ".",
+    ]
+    session.run("poetry", "run", "pytest", "-v", *args, external=True)
+
+
+@nox.session(python=False)
 def unit_tests(session: Any) -> None:
     """Test src & output coverage report.
     Report generation configuration in pyproject.toml & pytest.ini files.
@@ -52,7 +68,7 @@ def unit_tests(session: Any) -> None:
 
 
 @nox.session(python=False)
-def integration_tests(session: Any) -> None:  # TODO LACE-465
+def integration_tests(session: Any) -> None:
     """Test src & output coverage report.
     Report generation configuration in pyproject.toml & pytest.ini files.
     Usage:

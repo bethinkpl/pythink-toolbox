@@ -346,7 +346,7 @@ def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None
     )
 
     pd.testing.assert_series_equal(
-        ((output.duration > pd.Timedelta(minutes=15)) & output.is_active),
+        ((output.duration >= pd.Timedelta(minutes=15)) & output.is_active),
         output.is_focus,
         check_names=False,
     )
@@ -385,7 +385,6 @@ def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None
                 activity_sessions_with_focus=activity_sessions_with_focus
             )
         except AssertionError:
-            assert True
             return
 
     hypothesis.assume(
@@ -406,7 +405,7 @@ def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None
     assert isinstance(output, pd.DataFrame)
 
     for row in output.itertuples():
-        if not row.Index:
+        if row.Index == 0:
             prev_row = output.iloc[row.Index - 1]
         else:
             prev_row = pd.Series({"is_focus": False})

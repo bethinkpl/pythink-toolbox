@@ -4,7 +4,7 @@
 # pylint: disable=duplicate-code
 
 from datetime import datetime
-from typing import Dict, List, Union, Callable, Iterator
+from typing import Dict, List, Union, Callable, Iterator, Any
 
 import pandas as pd
 import pytest
@@ -16,11 +16,7 @@ from pythink_toolbox.testing.parametrization import parametrize, Scenario
 import chronos.activity_sessions.storage_operations as tested_module
 import chronos
 import chronos.activity_sessions.generation_operations
-from chronos.storage.schemas import (
-    ActivitySessionSchema,
-    MaterializedViewSchema,
-    UserGenerationFailedSchema,
-)
+from chronos.storage import schemas
 
 TEST_USER_ID = 108
 
@@ -34,28 +30,24 @@ TEST_USER_ID = 108
     "Exception raised - check data in failed_generation is correct.",
 )
 def test_save_new_activity_sessions(
-    get_activity_session_collection_content_without_id: Callable[
-        [], List[Dict[str, Union[int, datetime, bool]]]
+    get_collection_content_without_id_factory: Callable[
+        [str], List[Dict[str, Union[int, datetime, bool]]]
     ],
-    clear_storage: Callable[[], None],
-    read_failed_generation_collection_content: Callable[
-        [], List[UserGenerationFailedSchema]
-    ],
+    clear_storage_factory: Callable[[], None],
     mocker: pytest_mock.MockerFixture,
 ) -> Iterator[None]:
     def _save_new_activity_sessions_and_get_its_content(
         _activity_events: pd.Series,
     ) -> List[Dict[str, Union[int, datetime, bool]]]:
-
         tested_module.save_new_activity_sessions(
             user_id=TEST_USER_ID,
             activity_events=_activity_events,
             reference_time=datetime(1970, 1, 1),
         )
 
-        return get_activity_session_collection_content_without_id()
+        return get_collection_content_without_id_factory("activity_sessions")
 
-    clear_storage()
+    clear_storage_factory()
 
     # Initial input - creates two separate active sessions and inactive in the middle
     activity_events_1 = pd.Series([datetime(2000, 1, 1), datetime(2000, 1, 2)])
@@ -265,16 +257,16 @@ def test_save_new_activity_sessions(
             reference_time=datetime(2013, 1, 1),
         )
 
-        assert read_failed_generation_collection_content() == [
-            {"user_id": TEST_USER_ID, "reference_time": datetime(2013, 1, 1)}
-        ]
+        assert get_collection_content_without_id_factory(
+            "failed_generation_collection"
+        ) == [{"user_id": TEST_USER_ID, "reference_time": datetime(2013, 1, 1)}]
 
         assert (
-            get_activity_session_collection_content_without_id()
+            get_collection_content_without_id_factory("activity_sessions")
             == expected_collection_content_4
         )
 
-    clear_storage()
+    clear_storage_factory()
     yield
 
 
@@ -282,8 +274,8 @@ def test_save_new_activity_sessions(
 
 
 class UpdateMaterializedViewsScenario(Scenario):
-    activity_sessions_content: List[ActivitySessionSchema]
-    expected_materialized_views_content: Dict[str, List[MaterializedViewSchema]]
+    activity_sessions_content: List[schemas.ActivitySessionSchema]
+    expected_materialized_views_content: Dict[str, List[schemas.MaterializedViewSchema]]
 
 
 TEST_DATA = [
@@ -645,21 +637,23 @@ TEST_DATA = [
 ]
 
 
+@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
 @parametrize(TEST_DATA)  # type: ignore[misc]
 def test_update_materialized_views(
-    activity_sessions_content: List[ActivitySessionSchema],
-    expected_materialized_views_content: Dict[str, List[MaterializedViewSchema]],
-    clear_storage: Callable[[], None],
-    get_materialized_view_content: Callable[[str], List[MaterializedViewSchema]],
-    insert_data_to_activity_sessions_collection: Callable[
-        [List[ActivitySessionSchema]], None
+    activity_sessions_content: List[schemas.ActivitySessionSchema],
+    expected_materialized_views_content: Dict[
+        str, List[schemas.MaterializedViewSchema]
+    ],
+    get_materialized_view_content_factory: Callable[
+        [str], List[schemas.MaterializedViewSchema]
+    ],
+    insert_data_to_activity_sessions_collection_factory: Callable[
+        [List[schemas.ActivitySessionSchema]], None
     ],
 ) -> None:
 
-    clear_storage()
-
-    insert_data_to_activity_sessions_collection(activity_sessions_content)
+    insert_data_to_activity_sessions_collection_factory(activity_sessions_content)
 
     tested_module.update_materialized_views(reference_time=datetime(1970, 1, 1))
 
@@ -670,10 +664,97 @@ def test_update_materialized_views(
     ]
 
     actual_materialized_views_content = {
-        mv_name: get_materialized_view_content(mv_name)
+        mv_name: get_materialized_view_content_factory(mv_name)
         for mv_name in materialized_view_names
     }
 
     assert expected_materialized_views_content == actual_materialized_views_content
 
-    clear_storage()
+
+@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
+@pytest.mark.integration  # type: ignore[misc]
+def test_insert_new_generation(
+    get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
+) -> None:
+
+    tested_module.insert_new_generation(
+        time_range=tested_module.TimeRange(
+            start=datetime(2000, 1, 1), end=datetime(2000, 1, 1, 1)
+        ),
+        start_time=datetime(2000, 1, 1, 1, 1),
+    )
+    expected_generations_collection_content = [
+        {
+            "time_range": {
+                "start": datetime(2000, 1, 1),
+                "end": datetime(2000, 1, 1, 1),
+            },
+            "start_time": datetime(2000, 1, 1, 1, 1),
+        },
+    ]
+    actual_generations_collection_content = get_collection_content_without_id_factory(
+        "generations"
+    )
+
+    assert (
+        actual_generations_collection_content == expected_generations_collection_content
+    )
+
+
+@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
+@pytest.mark.integration  # type: ignore[misc]
+def test_update_generation_end_time(
+    get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
+) -> None:
+
+    generation_id = tested_module.insert_new_generation(
+        time_range=tested_module.TimeRange(
+            start=datetime(2000, 1, 1), end=datetime(2000, 1, 1, 1)
+        ),
+        start_time=datetime(2000, 1, 1, 1, 1),
+    )
+    tested_module.update_generation_end_time(
+        generation_id=generation_id, end_time=datetime(2000, 1, 1, 1, 2)
+    )
+    expected_generations_collection_content = [
+        {
+            "time_range": {
+                "start": datetime(2000, 1, 1),
+                "end": datetime(2000, 1, 1, 1),
+            },
+            "start_time": datetime(2000, 1, 1, 1, 1),
+            "end_time": datetime(2000, 1, 1, 1, 2),
+        },
+    ]
+    actual_generations_collection_content = get_collection_content_without_id_factory(
+        "generations"
+    )
+
+    assert (
+        actual_generations_collection_content == expected_generations_collection_content
+    )
+
+
+@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
+@pytest.mark.integration  # type: ignore[misc]
+def test_read_last_generation_time_range_end() -> None:
+
+    for i in range(1, 4):
+        tested_module.insert_new_generation(
+            time_range=tested_module.TimeRange(
+                start=datetime(2000, i, i), end=datetime(2000, i, i, i)
+            ),
+            start_time=datetime(2000, i, i, i, i),
+        )
+
+    expected_generations_collection_content = {
+        "time_range": {"end": datetime(2000, 3, 3, 3)}
+    }
+
+    actual_generations_collection_content = (
+        tested_module.read_last_generation_time_range_end()
+    )
+
+    assert (
+        actual_generations_collection_content == expected_generations_collection_content
+    )

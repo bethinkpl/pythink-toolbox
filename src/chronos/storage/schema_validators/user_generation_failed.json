@@ -1,0 +1,20 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": [
+      "user_id",
+      "reference_time"
+    ],
+    "properties": {
+      "user_id": {
+        "bsonType": "int",
+        "minimum": 0,
+        "description": "must be `int` & is required"
+      },
+      "reference_time": {
+        "bsonType": "date",
+        "description": "must be `date` & is required"
+      }
+    }
+  }
+}

@@ -33,31 +33,30 @@ hypothesis = { version = "^5.30.0",  extras = ["numpy", "pandas"] }
 mypy = "^0.782"
 nox = "^2020.5.24"
 pre-commit = "^2.6.0"
+freezegun = "^1.0.0"
 
 [tool.poetry.scripts]
-cli = 'cli:main'
+cli = 'cli:cli_main'
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = [
      "format",
      "missing-module-docstring",
      "duplicate-code" # https://github.com/PyCQA/pylint/issues/214
- ]
+]
 
 [tool.pylint.'BASIC']
-good-names=["df", "x", "y", "i", "ci"]
-docstring-min-length="4"
+good-names = [ "df", "x", "y", "i", "ci" ]
+docstring-min-length = 4
 
 [tool.pylint.'MISCELLANEOUS']
-notes="FIXME"
+notes = "FIXME"
 
 [tool.pylint.'SIMILARITIES']
-min-similarity-lines="5"
-ignore-imports="yes"
+ignore-imports = "yes"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-
 markers = [
     "integration: Mark test as an integration test",
     "e2e: Mark test as an end-to-end test"
@@ -73,7 +72,7 @@ source = ["src"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 40 #TODO cover more code
+fail_under = 94 #TODO cover more code
 
 [tool.coverage.html]
 directory = "coverage/html_report"
