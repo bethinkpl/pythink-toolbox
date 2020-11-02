@@ -1,6 +1,9 @@
 from datetime import datetime
 from typing import List
 
+from fastapi.param_functions import Query
+from fastapi.routing import APIRouter
+
 from chronos.api.routers.description import (
     START_ALIAS,
     START_TITLE,
@@ -13,8 +16,6 @@ from chronos.api.routers.description import (
 )
 from chronos.api.routers.models import UserDailyModel
 from chronos.api.storage_operations import UserDailyTime, read_daily_break_time
-from fastapi.param_functions import Query
-from fastapi.routing import APIRouter
 
 users_break_daily_time_router = APIRouter()
 

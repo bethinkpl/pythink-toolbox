@@ -1,5 +1,8 @@
 from datetime import datetime
 
+from fastapi.param_functions import Query
+from fastapi.routing import APIRouter
+
 from chronos.api.routers.description import (
     START_ALIAS,
     START_TITLE,
@@ -12,8 +15,6 @@ from chronos.api.routers.description import (
 )
 from chronos.api.routers.models import ResponseCumulative
 from chronos.api.storage_operations import read_cumulative_learning_time
-from fastapi.param_functions import Query
-from fastapi.routing import APIRouter
 
 users_cumulative_learning_time_router = APIRouter()
 
