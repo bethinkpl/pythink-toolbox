@@ -9,8 +9,6 @@ from pymongo.database import Database
 
 from chronos import settings
 
-ACTIVITY_SESSIONS_COLLECTION_NAME = "activity_sessions"
-
 
 @dataclass
 class _MaterializedView:
