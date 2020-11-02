@@ -1,6 +1,7 @@
+from typing import Dict, Any
+
 from fastapi.applications import FastAPI
 from fastapi.openapi.utils import get_openapi
-from starlette.responses import JSONResponse
 
 from chronos import __version__
 from chronos.api.routers.users_break_daily_time import users_break_daily_time_router
@@ -22,7 +23,7 @@ app.include_router(users_learning_daily_time_router)
 app.include_router(users_cumulative_learning_time_router)
 
 
-def custom_openapi() -> JSONResponse:
+def custom_openapi() -> Dict[str, Any]:
     """
     Add custom description to openapi schema.
     """

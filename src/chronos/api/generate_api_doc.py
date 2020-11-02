@@ -1,9 +1,9 @@
 import json
-from typing import Optional, Dict
+from typing import Optional
+
+from fastapi.encoders import jsonable_encoder
 
 from chronos.api.main import app
-from fastapi.encoders import jsonable_encoder
-from starlette.responses import HTMLResponse
 
 
 def get_swagger_ui_html(
@@ -14,7 +14,7 @@ def get_swagger_ui_html(
     swagger_css_url: str = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.30.0/swagger-ui.css",
     swagger_favicon_url: str = "https://fastapi.tiangolo.com/img/favicon.png",
     oauth2_redirect_url: Optional[str] = None,
-    init_oauth: Optional[Dict] = None,
+    init_oauth: Optional[dict] = None,
 ) -> str:
     """
     Get swagger documentation from json.
@@ -69,15 +69,9 @@ def get_swagger_ui_html(
 
 
 with open("docs/spec.js", "w") as file:
-    """
-    Save API documentation in json format.
-    """
     file.write(f"var spec = {json.dumps(app.openapi()).strip()}\n")
 
 with open("docs/index.html", "w") as file:
-    """
-    Save API documentation in html format.
-    """
     index = get_swagger_ui_html(
         spec_url="./spec.js",
         title=app.title + " - Swagger UI",
