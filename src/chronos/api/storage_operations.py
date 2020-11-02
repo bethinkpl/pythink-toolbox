@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, TypedDict, Any, Dict, Tuple
 
-from chronos.storage.specs import mongodb
+from chronos.storage import mongo_specs
 
 
 class UserDailyTime(TypedDict):
@@ -19,13 +19,10 @@ def read_daily_learning_time(
     """
     Read daily user learning time from storage.
     """
-    mongodb.init_client()
-    query_results = (
-        mongodb.materialized_views.learning_time_sessions_duration.aggregate(
-            pipeline=_get_daily_time_pipeline_query(
-                user_id=user_id, time_range=time_range
-            )
-        )
+    query_results = mongo_specs.materialized_views[
+        "learning_time_sessions_duration_mv"
+    ].aggregate(
+        pipeline=_get_daily_time_pipeline_query(user_id=user_id, time_range=time_range)
     )
 
     return list(query_results)
@@ -50,8 +47,9 @@ def read_daily_break_time(
     """
     Read daily user break time from storage.
     """
-    mongodb.init_client()
-    query_results = mongodb.materialized_views.break_sessions_duration.aggregate(
+    query_results = mongo_specs.materialized_views[
+        "break_sessions_duration_mv"
+    ].aggregate(
         pipeline=_get_daily_time_pipeline_query(user_id=user_id, time_range=time_range)
     )
 
@@ -64,8 +62,9 @@ def read_daily_focus_time(
     """
     Read daily user focus time from storage.
     """
-    mongodb.init_client()
-    query_results = mongodb.materialized_views.focus_sessions_duration.aggregate(
+    query_results = mongo_specs.materialized_views[
+        "focus_sessions_duration_mv"
+    ].aggregate(
         pipeline=_get_daily_time_pipeline_query(user_id=user_id, time_range=time_range)
     )
 
