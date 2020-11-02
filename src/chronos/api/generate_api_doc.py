@@ -16,6 +16,9 @@ def get_swagger_ui_html(
     oauth2_redirect_url: Optional[str] = None,
     init_oauth: Optional[dict] = None,
 ) -> HTMLResponse:
+    """
+    Get swagger documentation from json.
+    """
 
     html = f"""
     <!DOCTYPE html>
@@ -66,9 +69,15 @@ def get_swagger_ui_html(
 
 
 with open("docs/spec.js", "w") as file:
+    """
+    Save API documentation in json format.
+    """
     file.write(f"var spec = {json.dumps(app.openapi()).strip()}\n")
 
 with open("docs/index.html", "w") as file:
+    """
+    Save API documentation in html format.
+    """
     index = get_swagger_ui_html(
         spec_url="./spec.js",
         title=app.title + " - Swagger UI",
