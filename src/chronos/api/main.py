@@ -22,6 +22,9 @@ app.include_router(users_cumulative_learning_time_router)
 
 
 def custom_openapi():
+    """
+    Add custom description to openapi schema.
+    """
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
