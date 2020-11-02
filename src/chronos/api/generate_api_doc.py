@@ -1,7 +1,4 @@
 import json
-from typing import Optional
-
-from fastapi.encoders import jsonable_encoder
 
 from chronos.api.main import app
 
@@ -13,8 +10,6 @@ def get_swagger_ui_html(
     swagger_js_url: str = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.30.0/swagger-ui-bundle.js",
     swagger_css_url: str = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.30.0/swagger-ui.css",
     swagger_favicon_url: str = "https://fastapi.tiangolo.com/img/favicon.png",
-    oauth2_redirect_url: Optional[str] = None,
-    init_oauth: Optional[dict] = None,
 ) -> str:
     """
     Get swagger documentation from json.
@@ -40,9 +35,6 @@ def get_swagger_ui_html(
         spec: spec,
     """
 
-    if oauth2_redirect_url:
-        html += f"oauth2RedirectUrl: window.location.origin + '{oauth2_redirect_url}',"
-
     html += """
         dom_id: '#swagger-ui',
         presets: [
@@ -54,11 +46,6 @@ def get_swagger_ui_html(
         showExtensions: true,
         showCommonExtensions: true
     })"""
-
-    if init_oauth:
-        html += f"""
-        ui.initOAuth({json.dumps(jsonable_encoder(init_oauth))})
-        """
 
     html += """
     </script>
@@ -75,6 +62,5 @@ with open("docs/index.html", "w") as file:
     index = get_swagger_ui_html(
         spec_url="./spec.js",
         title=app.title + " - Swagger UI",
-        oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
     )
     file.write(f"{index}\n")
