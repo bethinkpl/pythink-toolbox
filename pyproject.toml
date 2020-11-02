@@ -39,9 +39,9 @@ cli = 'cli:main'
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = [
-    "format",
-    "missing-module-docstring",
-    "duplicate-code" # https://github.com/PyCQA/pylint/issues/214
+     "format",
+     "missing-module-docstring",
+     "duplicate-code" # https://github.com/PyCQA/pylint/issues/214
 ]
 
 [tool.pylint.'BASIC']
