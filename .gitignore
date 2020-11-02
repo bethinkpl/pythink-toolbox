@@ -131,3 +131,6 @@ dmypy.json
 
 # PyCharm project files
 .idea/
+
+# Google Cloud credentials files
+gcloud-credentials*
