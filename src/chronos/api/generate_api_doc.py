@@ -69,9 +69,9 @@ with open("docs/spec.js", "w") as file:
     file.write(f"var spec = {json.dumps(app.openapi()).strip()}\n")
 
 with open("docs/index.html", "w") as file:
-    html = get_swagger_ui_html(
+    index = get_swagger_ui_html(
         spec_url="./spec.js",
         title=app.title + " - Swagger UI",
         oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
     )
-    file.write(f"{html}\n")
+    file.write(f"{index}\n")
