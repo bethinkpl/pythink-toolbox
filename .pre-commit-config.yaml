@@ -3,7 +3,7 @@ repos:
     hooks:
     -   id: generate-API-documenation
         name: generate-API-documenation
-        entry: docs/generate_API_doc.sh
+        entry: docs/generate_api_doc.sh
         language: script
         types: [python]
         pass_filenames: false
