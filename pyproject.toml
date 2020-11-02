@@ -38,7 +38,11 @@ pre-commit = "^2.6.0"
 cli = 'cli:main'
 
 [tool.pylint.'MESSAGES CONTROL']
-disable= [ "format", "missing-module-docstring" ]
+disable = [
+     "format",
+     "missing-module-docstring",
+     "duplicate-code" # https://github.com/PyCQA/pylint/issues/214
+ ]
 
 [tool.pylint.'BASIC']
 good-names=["df", "x", "y", "i", "ci"]
