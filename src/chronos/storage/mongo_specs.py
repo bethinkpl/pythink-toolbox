@@ -57,16 +57,16 @@ def _initialize_collections(
 ) -> Dict[str, Collection]:
 
     for collection_name in collections_names:
-        if collection_name not in database_.list_collection_names():
-            validator_file_path = (
-                settings.CHRONOS_PACKAGE_DIR
-                / f"storage/schema_validators/{collection_name}.json"
-            )
 
-            with open(validator_file_path, "r") as file:
-                validator = json.loads(file.read())
+        validator_file_path = (
+            settings.CHRONOS_PACKAGE_DIR
+            / f"storage/schema_validators/{collection_name}.json"
+        )
 
-            database_.create_collection(collection_name, validator=validator)
+        with open(validator_file_path, "r") as file:
+            validator = json.loads(file.read())
+
+        database_.create_collection(collection_name, validator=validator)
 
     return {
         collection_name: database_.get_collection(name=collection_name)
