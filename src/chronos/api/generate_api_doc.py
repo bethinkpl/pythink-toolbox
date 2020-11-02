@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+from typing import Optional, Dict
 
 from chronos.api.main import app
 from fastapi.encoders import jsonable_encoder
@@ -14,8 +14,8 @@ def get_swagger_ui_html(
     swagger_css_url: str = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.30.0/swagger-ui.css",
     swagger_favicon_url: str = "https://fastapi.tiangolo.com/img/favicon.png",
     oauth2_redirect_url: Optional[str] = None,
-    init_oauth: Optional[dict] = None,
-) -> HTMLResponse:
+    init_oauth: Optional[Dict] = None,
+) -> str:
     """
     Get swagger documentation from json.
     """
