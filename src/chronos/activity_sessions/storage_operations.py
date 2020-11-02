@@ -170,7 +170,12 @@ def read_last_generation_time_range_end() -> Any:
     with newest `time_range.end` time.
     """
 
-    return mongo_specs.collections["generations"].find_one(
+    time_range_end = mongo_specs.collections["generations"].find_one(
         projection={"_id": False, "time_range.end": True},
         sort=[("time_range.end", pymongo.DESCENDING)],
     )
+
+    if not time_range_end:
+        return
+
+    return time_range_end["time_range"]["end"]
