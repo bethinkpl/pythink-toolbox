@@ -176,6 +176,6 @@ def read_last_generation_time_range_end() -> Any:
     )
 
     if not time_range_end:
-        return
+        return None
 
     return time_range_end["time_range"]["end"]

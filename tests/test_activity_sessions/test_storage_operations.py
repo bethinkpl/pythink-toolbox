@@ -747,9 +747,7 @@ def test_read_last_generation_time_range_end() -> None:
             start_time=datetime(2000, i, i, i, i),
         )
 
-    expected_generations_collection_content = {
-        "time_range": {"end": datetime(2000, 3, 3, 3)}
-    }
+    expected_generations_collection_content = datetime(2000, 3, 3, 3)
 
     actual_generations_collection_content = (
         tested_module.read_last_generation_time_range_end()
