@@ -3,7 +3,8 @@
     "bsonType": "object",
     "required": [
       "user_id",
-      "reference_time"
+      "reference_time",
+      "version"
     ],
     "properties": {
       "user_id": {
@@ -14,6 +15,10 @@
       "reference_time": {
         "bsonType": "date",
         "description": "must be `date` & is required"
+      },
+      "version": {
+        "bsonType": "string",
+        "description": "must be `string` & is required"
       }
     }
   }

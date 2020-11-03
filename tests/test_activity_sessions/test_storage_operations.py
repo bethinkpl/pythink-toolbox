@@ -690,6 +690,7 @@ def test_insert_new_generation(
                 "end": datetime(2000, 1, 1, 1),
             },
             "start_time": datetime(2000, 1, 1, 1, 1),
+            "version": chronos.__version__,
         },
     ]
     actual_generations_collection_content = get_collection_content_without_id_factory(
