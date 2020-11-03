@@ -405,7 +405,7 @@ def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None
     assert isinstance(output, pd.DataFrame)
 
     for row in output.itertuples():
-        if row.Index == 0:
+        if row.Index != 0:
             prev_row = output.iloc[row.Index - 1]
         else:
             prev_row = pd.Series({"is_focus": False})
