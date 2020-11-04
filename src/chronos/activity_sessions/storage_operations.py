@@ -1,4 +1,3 @@
-from collections import namedtuple
 import logging
 from typing import Optional, Dict, Union, List, Any
 from datetime import datetime
@@ -10,6 +9,7 @@ import pymongo.errors
 from pymongo.client_session import ClientSession
 
 from chronos.activity_sessions import generation_operations
+from chronos.custom_types import TimeRange
 from chronos.storage import mongo_specs
 from chronos.storage.schemas import UserGenerationFailedSchema, GenerationsSchema
 
@@ -121,9 +121,6 @@ def extract_users_in_user_generation_failed_collection() -> List[int]:
         doc["user_id"]
         for doc in mongo_specs.collections["user_generation_failed"].find({})
     ]
-
-
-TimeRange = namedtuple("TimeRange", ["start", "end"])
 
 
 def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.ObjectId:

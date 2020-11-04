@@ -4,11 +4,12 @@ import logging
 from tqdm import tqdm
 
 from chronos.activity_sessions import storage_operations, activity_events_source
+from chronos import custom_types
 
 logger = logging.getLogger(__name__)
 
 
-def main(time_range: storage_operations.TimeRange) -> None:
+def main(time_range: custom_types.TimeRange) -> None:
     """Create activity_sessions for all the users
     who had activity_events in a given time range
     and update the materialized views."""

@@ -52,8 +52,8 @@ def generate_activity_sessions() -> None:
     from chronos.activity_sessions.main import main
     from chronos.activity_sessions.storage_operations import (
         read_last_generation_time_range_end,
-        TimeRange,
     )
+    from chronos.custom_types import TimeRange
 
     def _generate_from_scratch() -> None:
         logging.info("Generating activity sessions from scratch")

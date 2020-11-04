@@ -11,7 +11,7 @@ import pandas as pd
 
 import chronos
 import chronos.activity_sessions.main as tested_module
-from chronos.activity_sessions.storage_operations import TimeRange
+from chronos.custom_types import TimeRange
 from chronos.activity_sessions.activity_events_source import (
     read_activity_events_between_datetimes,
 )

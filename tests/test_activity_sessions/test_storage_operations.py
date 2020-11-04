@@ -16,6 +16,7 @@ from pythink_toolbox.testing.parametrization import parametrize, Scenario
 import chronos.activity_sessions.storage_operations as tested_module
 import chronos
 import chronos.activity_sessions.generation_operations
+from chronos import custom_types
 from chronos.storage import schemas
 
 TEST_USER_ID = 108
@@ -678,7 +679,7 @@ def test_insert_new_generation(
 ) -> None:
 
     tested_module.insert_new_generation(
-        time_range=tested_module.TimeRange(
+        time_range=custom_types.TimeRange(
             start=datetime(2000, 1, 1), end=datetime(2000, 1, 1, 1)
         ),
         start_time=datetime(2000, 1, 1, 1, 1),
@@ -708,7 +709,7 @@ def test_update_generation_end_time(
 ) -> None:
 
     generation_id = tested_module.insert_new_generation(
-        time_range=tested_module.TimeRange(
+        time_range=custom_types.TimeRange(
             start=datetime(2000, 1, 1), end=datetime(2000, 1, 1, 1)
         ),
         start_time=datetime(2000, 1, 1, 1, 1),
@@ -741,7 +742,7 @@ def test_read_last_generation_time_range_end() -> None:
 
     for i in range(1, 4):
         tested_module.insert_new_generation(
-            time_range=tested_module.TimeRange(
+            time_range=custom_types.TimeRange(
                 start=datetime(2000, i, i), end=datetime(2000, i, i, i)
             ),
             start_time=datetime(2000, i, i, i, i),
