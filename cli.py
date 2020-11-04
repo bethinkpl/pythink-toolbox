@@ -79,22 +79,5 @@ def generate_activity_sessions() -> None:
         main(time_range=TimeRange(start=last_generation_time, end=datetime.now()))
 
 
-@click.command()
-def run_api() -> None:
-    """Starts API server."""
-    from uvicorn import run
-
-    import chronos.settings
-
-    run(
-        "chronos.api.main:app",
-        host=chronos.settings.HOST_API,
-        port=5000,
-        debug=True,
-        reload=True,
-    )
-
-
 cli_main.add_command(ci)
 cli_main.add_command(generate_activity_sessions)
-cli_main.add_command(run_api)
