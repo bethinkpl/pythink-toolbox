@@ -1,7 +1,7 @@
 # pylint: disable=import-outside-toplevel
 import subprocess
 from typing import Sequence
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import click
 
@@ -47,15 +47,36 @@ def generate_activity_sessions() -> None:
     """Generates activity_sessions from time of last generation to now
     and updates materialized views."""
 
+    import logging
+
     from chronos.activity_sessions.main import main
     from chronos.activity_sessions.storage_operations import (
         read_last_generation_time_range_end,
         TimeRange,
     )
 
-    last_generation_time = read_last_generation_time_range_end() or datetime(1970, 1, 1)
+    def _generate_from_scratch() -> None:
+        logging.info("Generating activity sessions from scratch")
 
-    main(time_range=TimeRange(start=last_generation_time, end=datetime.now()))
+        start_date = datetime(2019, 8, 11)  # 13 Aug 2019 - date of table creation
+        chunk_size = timedelta(days=100)
+
+        time_range = TimeRange(start=start_date, end=start_date + chunk_size)
+
+        while time_range.end < datetime.now():
+
+            main(time_range=time_range)
+
+            time_range = TimeRange(
+                start=time_range.end, end=time_range.end + chunk_size
+            )
+
+    last_generation_time = read_last_generation_time_range_end()
+
+    if last_generation_time is None:
+        _generate_from_scratch()
+    else:
+        main(time_range=TimeRange(start=last_generation_time, end=datetime.now()))
 
 
 @click.command()

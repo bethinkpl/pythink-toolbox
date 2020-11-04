@@ -13,6 +13,12 @@ def main(time_range: storage_operations.TimeRange) -> None:
     who had activity_events in a given time range
     and update the materialized views."""
 
+    logger.info(
+        "Generating activity sessions from range between %s & %s",
+        time_range.start,
+        time_range.end,
+    )
+
     generation_start_time = datetime.now()
 
     generation_id = storage_operations.insert_new_generation(
