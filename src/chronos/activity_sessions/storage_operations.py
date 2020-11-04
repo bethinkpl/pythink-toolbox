@@ -9,7 +9,7 @@ import pymongo
 import pymongo.errors
 from pymongo.client_session import ClientSession
 
-import chronos.activity_sessions.generation_operations
+from chronos.activity_sessions import generation_operations
 from chronos.storage import mongo_specs
 from chronos.storage.schemas import UserGenerationFailedSchema, GenerationsSchema
 
@@ -64,7 +64,7 @@ def _run_user_crud_operations_transaction(
 
         logger.debug("last_active_session from mongo: \n%s", last_active_session)
 
-        user_activity_sessions = chronos.activity_sessions.generation_operations.generate_user_activity_sessions(
+        user_activity_sessions = generation_operations.generate_user_activity_sessions(
             user_id=user_id,
             activity_events=activity_events,
             last_active_session=last_active_session,
