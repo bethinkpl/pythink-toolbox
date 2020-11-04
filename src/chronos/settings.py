@@ -20,9 +20,6 @@ MONGO_USERNAME = os.getenv("CHRONOS_MONGO_USER", "")
 MONGO_PASSWORD = os.getenv("CHRONOS_MONGO_PASSWORD", "")
 MONGO_DATABASE = os.getenv("CHRONOS_MONGO_DATABASE", "")
 
-# --- API ---
-HOST_API = os.getenv("CHRONOS_HOST_API", "localhost")
-
 # --- Sentry ---
 LOG_LEVEL = os.getenv("CHRONOS_LOG_LEVEL", logging.getLevelName(logging.INFO))
 SENTRY_DSN_API = os.getenv("CHRONOS_SENTRY_DSN_API")
