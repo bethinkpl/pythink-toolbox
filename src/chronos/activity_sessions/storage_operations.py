@@ -49,9 +49,7 @@ def _run_user_crud_operations_transaction(
     user_id: int, activity_events: pd.Series, session: ClientSession
 ) -> None:
 
-    with session.start_transaction(
-        write_concern=pymongo.WriteConcern(w="majority")
-    ):  # TODO handle read_, write_concerns, and read_preference
+    with session.start_transaction(write_concern=pymongo.WriteConcern(w="majority")):
 
         collection = mongo_specs.collections["activity_sessions"]
 
