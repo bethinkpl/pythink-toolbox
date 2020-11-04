@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Docker Compose
-      run: docker-compose -f docker-compose-tests.yml up -d
+      run: docker-compose -f docker-compose-ci.yml up -d
 
     - name: Wait for MongoDB
       run: until docker exec test_mongo mongo -utest_user -ptest_pass --eval "print(\"Don't want to wait no longer!\")"; do sleep 1; done
