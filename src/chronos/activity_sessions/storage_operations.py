@@ -21,7 +21,9 @@ def save_new_activity_sessions(
 ) -> None:
     """Perform all operations to create user activity_sessions & save it to storage."""
 
-    logger.info("Run test_activity_sessions mongo operations for user_id %i", user_id)
+    logger.info(
+        "Run save_new_activity_sessions mongo operations for user_id %i", user_id
+    )
 
     with mongo_specs.client.start_session() as session:
 
