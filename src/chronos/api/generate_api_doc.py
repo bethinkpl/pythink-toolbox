@@ -32,8 +32,7 @@ def get_swagger_ui_html(
     <script>
 
     const ui = SwaggerUIBundle({{
-        spec: spec,
-    """
+        spec: spec,"""
 
     html += """
         dom_id: '#swagger-ui',
