@@ -69,6 +69,7 @@ source = ["src"]
 branch = true
 data_file = "coverage/.coverage"
 source = ["src"]
+omit = ["src/chronos/api/generate_api_doc.py"]
 
 [tool.coverage.report]
 show_missing = true

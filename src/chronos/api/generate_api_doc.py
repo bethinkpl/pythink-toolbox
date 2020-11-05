@@ -1,6 +1,26 @@
 import json
+from typing import Dict, Any
+
+from fastapi.openapi.utils import get_openapi
 
 from chronos.api.main import app
+from chronos import __version__
+
+
+def custom_openapi() -> Dict[str, Any]:
+    """
+    Add custom description to openapi schema.
+    """
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Chronos API",
+        version=__version__,
+        description="Chronos FastAPI schema",
+        routes=app.routes,
+    )
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
 
 
 def get_swagger_ui_html(
