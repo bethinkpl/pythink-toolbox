@@ -1,7 +1,7 @@
 from collections import namedtuple
 from dataclasses import dataclass
 import json
-from typing import Dict, Sequence, Any
+from typing import Dict, Sequence, Any, List
 from datetime import datetime
 
 from pymongo import MongoClient
@@ -9,11 +9,6 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 
 from chronos import settings
-
-
-_MaterializedViewConf = namedtuple(
-    "MaterializedViewConf", ["name", "match_stage_conds"]
-)
 
 
 class _MaterializedView(Collection):  # type: ignore[misc]
@@ -53,9 +48,18 @@ class _MaterializedView(Collection):  # type: ignore[misc]
         )
 
 
+@dataclass
+class _CollectionsBase:
+    def __post_init__(self) -> None:
+        self.names = self.__annotations__.keys()
+
+    def to_list(self) -> List[Collection]:
+        return [self.__getattribute__(name) for name in self.names]
+
+
 def _initialize_collections(database_: Database) -> "_Collections":
     @dataclass
-    class _Collections:
+    class _Collections(_CollectionsBase):
         activity_sessions: Collection
         user_generation_failed: Collection
         generations: Collection
@@ -75,22 +79,35 @@ def _initialize_collections(database_: Database) -> "_Collections":
             database_.create_collection(collection_name, validator=validator)
 
     return _Collections(
-        *(database_.get_collection(collection) for collection in collections_names)
+        *(database_.get_collection(name=col_name) for col_name in collections_names)
     )
 
 
-def _initialize_materialized_views(
-    materialized_views_confs: Sequence[_MaterializedViewConf], database_: Database
-) -> Dict[str, _MaterializedView]:
+def _initialize_materialized_views(database_: Database) -> "_MaterializedViews":
+    @dataclass
+    class _MaterializedViews(_CollectionsBase):
+        learning_time_sessions_duration_mv: _MaterializedView
+        break_sessions_duration_mv: _MaterializedView
+        focus_sessions_duration_mv: _MaterializedView
 
-    return {
-        materialized_view_conf.name: _MaterializedView(
-            name=materialized_view_conf.name,
-            match_stage_conds=materialized_view_conf.match_stage_conds,
-            database_=database_,
-        )
-        for materialized_view_conf in materialized_views_confs
+    materialized_views_confs = {
+        "learning_time_sessions_duration_mv": {
+            "$or": [{"is_active": {"$eq": True}}, {"is_break": {"$eq": True}}]
+        },
+        "break_sessions_duration_mv": {"is_break": {"$eq": True}},
+        "focus_sessions_duration_mv": {"is_focus": {"$eq": True}},
     }
+
+    return _MaterializedViews(
+        **{
+            name: _MaterializedView(
+                name=name,
+                match_stage_conds=conf,
+                database_=database_,
+            )
+            for name, conf in materialized_views_confs.items()
+        }
+    )
 
 
 client = MongoClient(
@@ -103,23 +120,4 @@ client = MongoClient(
 database = client[settings.MONGO_DATABASE]
 
 collections = _initialize_collections(database_=database)
-
-materialized_views = _initialize_materialized_views(
-    materialized_views_confs=(
-        _MaterializedViewConf(
-            name="learning_time_sessions_duration_mv",
-            match_stage_conds={
-                "$or": [{"is_active": {"$eq": True}}, {"is_break": {"$eq": True}}]
-            },
-        ),
-        _MaterializedViewConf(
-            name="break_sessions_duration_mv",
-            match_stage_conds={"is_break": {"$eq": True}},
-        ),
-        _MaterializedViewConf(
-            name="focus_sessions_duration_mv",
-            match_stage_conds={"is_focus": {"$eq": True}},
-        ),
-    ),
-    database_=database,
-)
+materialized_views = _initialize_materialized_views(database_=database)

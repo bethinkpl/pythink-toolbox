@@ -104,7 +104,7 @@ def update_materialized_views(reference_time: datetime) -> None:
         reference_time: time from which materialized views takes data to update themselves.
     """
 
-    for materialized_view in mongo_specs.materialized_views.values():
+    for materialized_view in mongo_specs.materialized_views.to_list():
         materialized_view.run_aggregation(
             collection=mongo_specs.collections.activity_sessions,
             reference_time=reference_time,
