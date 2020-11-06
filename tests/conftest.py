@@ -44,7 +44,7 @@ def clear_storage_factory_as_fixture() -> Callable[[], None]:
     from chronos.storage.mongo_specs import collections, materialized_views
 
     def _clear_storage() -> None:
-        for collection in {**collections, **materialized_views}.values():
+        for collection in collections.to_list() + materialized_views.to_list():
             collection.delete_many({})
 
     return _clear_storage
