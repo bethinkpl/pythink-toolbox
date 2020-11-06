@@ -1,7 +1,6 @@
-from collections import namedtuple
 from dataclasses import dataclass
 import json
-from typing import Dict, Sequence, Any, List
+from typing import Dict, Any, List
 from datetime import datetime
 
 from pymongo import MongoClient
@@ -51,20 +50,31 @@ class _MaterializedView(Collection):  # type: ignore[misc]
 @dataclass
 class _CollectionsBase:
     def __post_init__(self) -> None:
-        self.names = self.__annotations__.keys()
+        self.names = self.__annotations__.keys()  # pylint: disable=no-member
 
     def to_list(self) -> List[Collection]:
         return [self.__getattribute__(name) for name in self.names]
 
 
-def _initialize_collections(database_: Database) -> "_Collections":
-    @dataclass
-    class _Collections(_CollectionsBase):
-        activity_sessions: Collection
-        user_generation_failed: Collection
-        generations: Collection
+@dataclass
+class _Collections(_CollectionsBase):
+    activity_sessions: Collection
+    user_generation_failed: Collection
+    generations: Collection
 
-    collections_names = list(_Collections.__annotations__.keys())
+
+@dataclass
+class _MaterializedViews(_CollectionsBase):
+    learning_time_sessions_duration_mv: _MaterializedView
+    break_sessions_duration_mv: _MaterializedView
+    focus_sessions_duration_mv: _MaterializedView
+
+
+def _initialize_collections(database_: Database) -> _Collections:
+
+    collections_names = list(
+        _Collections.__annotations__.keys()  # pylint: disable=no-member
+    )
 
     for collection_name in collections_names:
         if collection_name not in database_.list_collection_names():
@@ -83,14 +93,9 @@ def _initialize_collections(database_: Database) -> "_Collections":
     )
 
 
-def _initialize_materialized_views(database_: Database) -> "_MaterializedViews":
-    @dataclass
-    class _MaterializedViews(_CollectionsBase):
-        learning_time_sessions_duration_mv: _MaterializedView
-        break_sessions_duration_mv: _MaterializedView
-        focus_sessions_duration_mv: _MaterializedView
+def _initialize_materialized_views(database_: Database) -> _MaterializedViews:
 
-    materialized_views_confs = {
+    materialized_views_confs: Dict[str, Any] = {
         "learning_time_sessions_duration_mv": {
             "$or": [{"is_active": {"$eq": True}}, {"is_break": {"$eq": True}}]
         },

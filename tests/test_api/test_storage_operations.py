@@ -74,7 +74,7 @@ def populate_materialized_views_with_test_data() -> None:
         },
     ]
 
-    mongo_specs.collections["activity_sessions"].insert_many(activity_sessions)
+    mongo_specs.collections.activity_sessions.insert_many(activity_sessions)
 
     chronos.activity_sessions.storage_operations.update_materialized_views(
         reference_time=datetime(1970, 1, 1)
