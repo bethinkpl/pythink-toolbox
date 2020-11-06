@@ -1,4 +1,5 @@
 from collections import namedtuple
+from dataclasses import dataclass
 import json
 from typing import Dict, Sequence, Any
 from datetime import datetime
@@ -52,9 +53,14 @@ class _MaterializedView(Collection):  # type: ignore[misc]
         )
 
 
-def _initialize_collections(
-    collections_names: Sequence[str], database_: Database
-) -> Dict[str, Collection]:
+def _initialize_collections(database_: Database) -> "_Collections":
+    @dataclass
+    class _Collections:
+        activity_sessions: Collection
+        user_generation_failed: Collection
+        generations: Collection
+
+    collections_names = list(_Collections.__annotations__.keys())
 
     for collection_name in collections_names:
         if collection_name not in database_.list_collection_names():
@@ -68,10 +74,9 @@ def _initialize_collections(
 
             database_.create_collection(collection_name, validator=validator)
 
-    return {
-        collection_name: database_.get_collection(name=collection_name)
-        for collection_name in collections_names
-    }
+    return _Collections(
+        *(database_.get_collection(collection) for collection in collections_names)
+    )
 
 
 def _initialize_materialized_views(
@@ -97,10 +102,7 @@ client = MongoClient(
 
 database = client[settings.MONGO_DATABASE]
 
-collections = _initialize_collections(
-    ["activity_sessions", "user_generation_failed", "generations"],
-    database_=database,
-)
+collections = _initialize_collections(database_=database)
 
 materialized_views = _initialize_materialized_views(
     materialized_views_confs=(

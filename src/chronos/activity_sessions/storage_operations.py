@@ -38,7 +38,7 @@ def save_new_activity_sessions(
                 err,
             )
 
-            mongo_specs.collections["user_generation_failed"].insert_one(
+            mongo_specs.collections.user_generation_failed.insert_one(
                 UserGenerationFailedSchema(
                     user_id=user_id, reference_time=reference_time
                 )
@@ -51,7 +51,7 @@ def _run_user_crud_operations_transaction(
 
     with session.start_transaction(write_concern=pymongo.WriteConcern(w="majority")):
 
-        collection = mongo_specs.collections["activity_sessions"]
+        collection = mongo_specs.collections.activity_sessions
 
         last_active_session: Optional[
             Dict[str, Union[datetime, bson.ObjectId]]
@@ -106,7 +106,7 @@ def update_materialized_views(reference_time: datetime) -> None:
 
     for materialized_view in mongo_specs.materialized_views.values():
         materialized_view.run_aggregation(
-            collection=mongo_specs.collections["activity_sessions"],
+            collection=mongo_specs.collections.activity_sessions,
             reference_time=reference_time,
         )
 
@@ -119,7 +119,7 @@ def extract_users_in_user_generation_failed_collection() -> List[int]:
 
     return [
         doc["user_id"]
-        for doc in mongo_specs.collections["user_generation_failed"].find({})
+        for doc in mongo_specs.collections.user_generation_failed.find({})
     ]
 
 
@@ -139,7 +139,7 @@ def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.O
         "start_time": start_time,
     }
 
-    result = mongo_specs.collections["generations"].insert_one(document=document)
+    result = mongo_specs.collections.generations.insert_one(document=document)
 
     return result.inserted_id
 
@@ -155,7 +155,7 @@ def update_generation_end_time(
         end_time: value of update
     """
 
-    mongo_specs.collections["generations"].update_one(
+    mongo_specs.collections.generations.update_one(
         filter={"_id": generation_id}, update={"$set": {"end_time": end_time}}
     )
 
@@ -167,7 +167,7 @@ def read_last_generation_time_range_end() -> Any:
     with newest `time_range.end` time.
     """
 
-    time_range_end = mongo_specs.collections["generations"].find_one(
+    time_range_end = mongo_specs.collections.generations.find_one(
         projection={"_id": False, "time_range.end": True},
         sort=[("time_range.end", pymongo.DESCENDING)],
     )
