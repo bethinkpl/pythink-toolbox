@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from fastapi.param_functions import Query
 from fastapi.routing import APIRouter
 
@@ -13,7 +12,6 @@ from chronos.api.routers.description import (
     CLT_TAG,
     CLT_DESC,
 )
-from chronos.api.routers.models import ResponseCumulative
 from chronos.api.storage_operations import read_cumulative_learning_time
 
 users_cumulative_learning_time_router = APIRouter()
@@ -22,7 +20,7 @@ users_cumulative_learning_time_router = APIRouter()
 @users_cumulative_learning_time_router.get(
     "/users_cumulative_learning_time/{user_id}",
     tags=CLT_TAG,
-    response_model=ResponseCumulative,
+    response_model=int,
     response_description=CLT_DESC,
 )
 def get_users_cumulative_learning_time(

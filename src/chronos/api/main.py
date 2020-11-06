@@ -23,7 +23,7 @@ app.include_router(users_learning_daily_time_router)
 app.include_router(users_cumulative_learning_time_router)
 
 
-def custom_openapi() -> Dict[str, Any]:
+def custom_openapi() -> Dict[str, Any]:  # pragma: no cover
     """
     Add custom description to openapi schema.
     """
