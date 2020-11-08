@@ -43,7 +43,7 @@ def test_save_new_activity_sessions(
         tested_module.save_new_activity_sessions(
             user_id=TEST_USER_ID,
             activity_events=_activity_events,
-            reference_time=datetime(1970, 1, 1),
+            time_range=datetime(1970, 1, 1),
         )
 
         return get_collection_content_without_id_factory("activity_sessions")
@@ -255,7 +255,7 @@ def test_save_new_activity_sessions(
         tested_module.save_new_activity_sessions(
             user_id=TEST_USER_ID,
             activity_events=mocker.ANY,
-            reference_time=datetime(2013, 1, 1),
+            time_range=datetime(2013, 1, 1),
         )
 
         assert get_collection_content_without_id_factory(

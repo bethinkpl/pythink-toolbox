@@ -8,16 +8,17 @@ import pymongo
 import pymongo.errors
 from pymongo.client_session import ClientSession
 
+import chronos
 from chronos.activity_sessions import generation_operations
 from chronos.custom_types import TimeRange
 from chronos.storage import mongo_specs
-from chronos.storage.schemas import UserGenerationFailedSchema, GenerationsSchema
+from chronos.storage.schemas import UsersGenerationStatuesSchema, GenerationsSchema
 
 logger = logging.getLogger(__name__)
 
 
 def save_new_activity_sessions(
-    user_id: int, activity_events: pd.Series, reference_time: datetime
+    user_id: int, activity_events: pd.Series, time_range_end: datetime
 ) -> None:
     """Perform all operations to create user activity_sessions & save it to storage."""
 
@@ -27,10 +28,15 @@ def save_new_activity_sessions(
 
     with mongo_specs.client.start_session() as session:
 
+        generation_status = UsersGenerationStatuesSchema(
+            user_id=user_id, version=chronos.__version__
+        )
+
         try:
             _run_user_crud_operations_transaction(
                 user_id=user_id, activity_events=activity_events, session=session
             )
+
         except Exception as err:  # pylint: disable=broad-except
             logger.error(
                 "%s has failed with error:\n%s",
@@ -38,10 +44,15 @@ def save_new_activity_sessions(
                 err,
             )
 
-            mongo_specs.collections.user_generation_failed.insert_one(
-                UserGenerationFailedSchema(
-                    user_id=user_id, reference_time=reference_time
-                )
+            generation_status["last_status"] = "failed"
+
+        else:
+            generation_status["last_status"] = "succeed"
+            generation_status["time_until_generations_successful"] = time_range_end
+
+        finally:
+            mongo_specs.collections.users_generation_statuses.update_one(
+                filter={"user_id": user_id}, update=generation_status, upsert=True
             )
 
 
@@ -79,6 +90,10 @@ def _run_user_crud_operations_transaction(
 def _commit_transaction_with_retry(
     session: ClientSession,
 ) -> None:  # TODO test this function
+    """
+    https://docs.mongodb.com/manual/core/transactions-in-applications/#core-api
+    """
+
     while True:
         try:
             session.commit_transaction()
@@ -111,20 +126,22 @@ def update_materialized_views(reference_time: datetime) -> None:
         )
 
 
-def extract_users_in_user_generation_failed_collection() -> List[int]:
-    """Extracts all user_id in generation_failed collection documents.
+def extract_users_with_failed_last_generation() -> List[UsersGenerationStatuesSchema]:
+    """
     Returns:
         List of user_ids
     """
 
-    return [
-        doc["user_id"]
-        for doc in mongo_specs.collections.user_generation_failed.find({})
-    ]
+    return list(
+        mongo_specs.collections.users_generation_statuses.find(
+            filter=UsersGenerationStatuesSchema(last_status="failed"),
+            projection={"_id": 0, "user_id": 1, "time_until_generation_successful": 1},
+        )
+    )
 
 
 def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.ObjectId:
-    """Insert new document to `generation` collection.
+    """Insert new document to `generations` collection.
 
     Args:
         time_range: time range which generation takes into account
