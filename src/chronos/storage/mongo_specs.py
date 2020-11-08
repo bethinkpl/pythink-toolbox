@@ -59,7 +59,7 @@ class _CollectionsBase:
 @dataclass
 class _Collections(_CollectionsBase):
     activity_sessions: Collection
-    user_generation_failed: Collection
+    users_generation_statuses: Collection
     generations: Collection
 
 
@@ -106,9 +106,7 @@ def _initialize_materialized_views(database_: Database) -> _MaterializedViews:
     return _MaterializedViews(
         **{
             name: _MaterializedView(
-                name=name,
-                match_stage_conds=conf,
-                database_=database_,
+                name=name, match_stage_conds=conf, database_=database_
             )
             for name, conf in materialized_views_confs.items()
         }
