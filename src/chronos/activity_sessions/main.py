@@ -41,7 +41,7 @@ def main(time_range: custom_types.TimeRange) -> None:
         user_ids_to_with_failed_generation=user_ids_to_with_failed_generation,
     )
 
-    _generate_for_users_with_failed_status(
+    _generate_activity_sessions_for_users_with_failed_status(
         time_range_end=time_range.end,
         users_with_failed_last_generation=users_with_failed_last_generation,
     )
@@ -77,21 +77,20 @@ def _generate_activity_sessions(
         )
 
 
-def _generate_for_users_with_failed_status(
+def _generate_activity_sessions_for_users_with_failed_status(
     time_range_end: datetime,
     users_with_failed_last_generation: List[UsersGenerationStatuesSchema],
 ) -> None:
 
     for doc in users_with_failed_last_generation:
+
         user_id = doc["user_id"]
+
         activity_events = activity_events_source.read_activity_events_between_datetimes(
             start_time=doc["time_until_generations_successful"],
             end_time=time_range_end,
             user_ids=[user_id],
         ).client_time
-
-        if activity_events.empty:
-            continue
 
         storage_operations.save_new_activity_sessions(
             user_id, activity_events, time_range_end=time_range_end

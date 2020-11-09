@@ -22,6 +22,9 @@ def save_new_activity_sessions(
 ) -> None:
     """Perform all operations to create user activity_sessions & save it to storage."""
 
+    if activity_events.empty:
+        return None
+
     logger.info(
         "Run save_new_activity_sessions mongo operations for user_id %i", user_id
     )
@@ -135,7 +138,7 @@ def extract_users_with_failed_last_generation() -> List[UsersGenerationStatuesSc
     return list(
         mongo_specs.collections.users_generation_statuses.find(
             filter=UsersGenerationStatuesSchema(last_status="failed"),
-            projection={"_id": 0, "user_id": 1, "time_until_generation_successful": 1},
+            projection={"_id": 0, "user_id": 1, "time_until_generations_successful": 1},
         )
     )
 
