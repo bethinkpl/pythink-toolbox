@@ -31,10 +31,10 @@ def ci(session: str, session_args: Sequence[str], environment: str) -> None:
             `poetry run chronos ci "not tests"
     """
 
-    run_args = ["docker", "exec", "chronos_base", "poetry", "run", "nox"]
+    run_args = ["poetry", "run", "nox"]
 
-    if not environment == "ci":
-        run_args.insert(2, "-it")
+    if environment == "local":
+        run_args = ["docker", "exec", "-it", "chronos_base"] + run_args
 
     if session:
         if session.startswith("not"):

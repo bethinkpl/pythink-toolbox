@@ -30,4 +30,4 @@ jobs:
       run: docker exec ci_mongo mongo -uci_user -pci_pass --eval "rs.initiate()"
 
     - name: Run CI checks
-      run: poetry run cli ci --environment=ci
+      run: docker exec chronos_base poetry run cli ci --environment=ci
