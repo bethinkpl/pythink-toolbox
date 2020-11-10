@@ -10,7 +10,7 @@ from chronos.settings import BIGQUERY_PLATFORM_DATASET_ID
 def read_activity_events_between_datetimes(
     start_time: datetime,
     end_time: datetime,
-    user_ids: Optional[List[int]] = None,
+    user_ids: List[int],
     exclude: bool = False,
 ) -> pd.DataFrame:
     """Read activity events from bigquery."""

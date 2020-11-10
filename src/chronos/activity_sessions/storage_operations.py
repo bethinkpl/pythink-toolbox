@@ -23,7 +23,7 @@ def save_new_activity_sessions(
     """Perform all operations to create user activity_sessions & save it to storage."""
 
     if activity_events.empty:
-        return None
+        return
 
     logger.info(
         "Run save_new_activity_sessions mongo operations for user_id %i", user_id
