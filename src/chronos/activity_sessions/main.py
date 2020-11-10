@@ -81,6 +81,7 @@ def _generate_activity_sessions_for_users_with_failed_status(
     time_range_end: datetime,
     users_with_failed_last_generation: List[UsersGenerationStatuesSchema],
 ) -> None:
+    # FIXME test it
 
     for doc in users_with_failed_last_generation:
 
