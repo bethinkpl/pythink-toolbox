@@ -27,7 +27,7 @@ jobs:
       run: until docker exec ci_mongo mongo -uci_user -pci_pass --eval "print(\"Don't want to wait no longer!\")"; do sleep 1; done
 
     - name: Initiate Mongo replica sets
-      run: docker exec test_ci mongo -uci_user -pci_pass --eval "rs.initiate()"
+      run: docker exec ci_mongo mongo -uci_user -pci_pass --eval "rs.initiate()"
 
     - name: Run CI checks
       run: poetry run cli ci --environment=ci
