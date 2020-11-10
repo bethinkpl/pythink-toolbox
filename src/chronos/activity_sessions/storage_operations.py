@@ -54,8 +54,11 @@ def save_new_activity_sessions(
             generation_status["time_until_generations_successful"] = time_range_end
 
         finally:
+
             mongo_specs.collections.users_generation_statuses.update_one(
-                filter={"user_id": user_id}, update=generation_status, upsert=True
+                filter={"user_id": user_id},
+                update={"$set": generation_status},
+                upsert=True,
             )
 
 
