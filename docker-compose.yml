@@ -3,7 +3,7 @@ version: '3.1'
 services:
   mongo:
     container_name: chronos_mongo
-    image: mongo:4.4.0-bionic
+    image: mongo:4.4.1-bionic
     restart: always
     ports:
       - 27017:27017
@@ -21,12 +21,27 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: local
+    depends_on:
+      - mongo
+
+  chronos-base:
+    container_name: chronos_base
+    build:
+      context: .
+      dockerfile: docker/base/Dockerfile
+    restart: always
+    volumes:
+      - ".:/chronos"
+    depends_on:
+      - mongo
+    env_file:
+      .env
 
   api:
     container_name: chronos_api
     restart: always
     ports:
-      - 6000:80
+      - 8108:80
     build:
       context: .
       dockerfile: docker/api/Dockerfile
@@ -35,3 +50,5 @@ services:
       MODULE_NAME: src.chronos.api.main
     volumes:
       - ".:/chronos"
+    depends_on:
+      - mongo

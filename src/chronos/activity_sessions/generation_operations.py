@@ -1,9 +1,12 @@
 from datetime import datetime
 import logging
-from typing import List, Optional, TypedDict, Union, Dict
+from typing import List, Optional, Union, Dict
 
 import pandas as pd
 import pandera
+
+import chronos
+from chronos.storage.schemas import ActivitySessionSchema
 
 MAX_DURATION_BETWEEN_EVENTS_TO_CREATE_SESSION = pd.Timedelta(minutes=5)
 MIN_FOCUS_DURATION = pd.Timedelta(minutes=15)
@@ -12,27 +15,16 @@ MAX_BREAK_DURATION = pd.Timedelta(minutes=30)
 logger = logging.getLogger(__name__)
 
 
-class ActivitySession(TypedDict):
-    """Activity sessions schema."""
-
-    user_id: int
-    start_time: datetime
-    end_time: datetime
-    is_active: bool
-    is_focus: bool
-    is_break: bool
-
-
 def generate_user_activity_sessions(
     user_id: int,
     activity_events: pd.Series,
     last_active_session: Optional[Dict[str, datetime]],
-) -> List[ActivitySession]:
+) -> List[ActivitySessionSchema]:
     """Perform all operations to create activity_sessions for user."""
 
     logger.info("Creating activity_sessions for user %i.", user_id)
 
-    activity_sessions: List[ActivitySession] = (
+    activity_sessions: List[ActivitySessionSchema] = (
         activity_events.pipe(_initialize_sessions_creation)
         .pipe(_add_last_active_session, last_active_session=last_active_session)
         .pipe(_create_active_sessions)
@@ -208,7 +200,9 @@ def _sessions_validation(activity_sessions: pd.DataFrame) -> pd.DataFrame:
     return activity_sessions
 
 
-def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySession]:
+def _to_dict(
+    activity_sessions: pd.DataFrame, user_id: int
+) -> List[ActivitySessionSchema]:
 
     assert not activity_sessions.empty
 
@@ -219,19 +213,15 @@ def _to_dict(activity_sessions: pd.DataFrame, user_id: int) -> List[ActivitySess
     for record in records:
         record["start_time"] = record["start_time"].to_pydatetime()
         record["end_time"] = record["end_time"].to_pydatetime()
+        record["version"] = chronos.__version__
 
-    activity_sessions_records: List[ActivitySession] = records
+    activity_sessions_records: List[ActivitySessionSchema] = records
 
     logger.debug("activity_sessions to insert to mongo db: \n %s", activity_sessions)
 
     return activity_sessions_records
 
 
-def _log_pandas_object(
-    identifier: str, data: Union[pd.Series, pd.DataFrame], level: str = "debug"
-) -> None:
+def _log_pandas_object(identifier: str, data: Union[pd.Series, pd.DataFrame]) -> None:
     msg = f"{identifier}: \n %s"
-    if level == "debug":  # pragma: no cover
-        logger.debug(msg, data.to_string())
-    else:
-        raise NotImplementedError  # add other ifs when other levels are needed
+    logger.debug(msg, data.to_string())

@@ -1,0 +1,30 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": [ "time_range", "start_time" ],
+    "properties": {
+      "time_range": {
+        "bsonType": "object",
+        "required": [ "start", "end" ],
+          "properties": {
+            "start": {
+              "bsonType": "date",
+              "description": "must be a `date` & is required"
+            },
+            "end": {
+              "bsonType": "date",
+              "description": "must be a `date` & is required"
+            }
+          }
+      },
+      "start_time": {
+        "bsonType": "date",
+        "description": "must be `date` & is required"
+      },
+      "end_time": {
+        "bsonType": "date",
+        "description": "must be `date` & is NOT required"
+      }
+    }
+  }
+}

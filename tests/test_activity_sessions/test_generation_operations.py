@@ -1,6 +1,8 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
 # pylint: disable=protected-access
+# pylint: disable=duplicate-code
+
 from datetime import datetime
 from typing import Optional, Dict
 
@@ -11,6 +13,7 @@ import pandera.errors
 import pytest
 from pythink_toolbox.testing import parametrization
 
+import chronos
 import chronos.activity_sessions.generation_operations as tested_module
 
 
@@ -39,6 +42,7 @@ def test__create_user_activity_sessions() -> None:
             "is_active": True,
             "is_focus": False,
             "is_break": False,
+            "version": chronos.__version__,
         }
     ]
 
@@ -342,7 +346,7 @@ def test__determine_if_focus(active_and_inactive_sessions: pd.DataFrame) -> None
     )
 
     pd.testing.assert_series_equal(
-        ((output.duration > pd.Timedelta(minutes=15)) & output.is_active),
+        ((output.duration >= pd.Timedelta(minutes=15)) & output.is_active),
         output.is_focus,
         check_names=False,
     )
@@ -381,7 +385,6 @@ def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None
                 activity_sessions_with_focus=activity_sessions_with_focus
             )
         except AssertionError:
-            assert True
             return
 
     hypothesis.assume(
@@ -402,7 +405,7 @@ def test__determine_if_break(activity_sessions_with_focus: pd.DataFrame) -> None
     assert isinstance(output, pd.DataFrame)
 
     for row in output.itertuples():
-        if not row.Index:
+        if row.Index != 0:
             prev_row = output.iloc[row.Index - 1]
         else:
             prev_row = pd.Series({"is_focus": False})
@@ -603,6 +606,7 @@ def test__to_dict() -> None:
             "is_active": True,
             "is_focus": False,
             "is_break": False,
+            "version": chronos.__version__,
         },
         {
             "user_id": user_id,
@@ -611,6 +615,7 @@ def test__to_dict() -> None:
             "is_active": False,
             "is_focus": False,
             "is_break": False,
+            "version": chronos.__version__,
         },
         {
             "user_id": user_id,
@@ -619,5 +624,6 @@ def test__to_dict() -> None:
             "is_active": True,
             "is_focus": True,
             "is_break": False,
+            "version": chronos.__version__,
         },
     ]

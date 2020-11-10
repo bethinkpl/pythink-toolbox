@@ -20,19 +20,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
+    - name: Docker Compose
+      run: docker-compose -f docker-compose-ci.yml up -d
 
-    - name: Install poetry
-      uses: dschep/install-poetry-action@v1.3
-      with:
-        version: 1.0.9
-        create_virtualenvs: install
+    - name: Wait for MongoDB
+      run: until docker exec ci_mongo mongo -uci_user -pci_pass --eval "print(\"Don't want to wait no longer!\")"; do sleep 1; done
 
-    - name: Install dependiencies
-      run: poetry install
+    - name: Initiate Mongo replica sets
+      run: docker exec ci_mongo mongo -uci_user -pci_pass --eval "rs.initiate()"
 
-    - name: Run Nox-based CI
-      run: poetry run nox
+    - name: Run CI checks
+      run: docker exec chronos_base poetry run cli ci --environment=ci

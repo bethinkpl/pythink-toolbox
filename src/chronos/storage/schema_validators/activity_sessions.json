@@ -1,0 +1,44 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": [
+      "user_id",
+      "start_time",
+      "end_time",
+      "is_active",
+      "is_focus",
+      "is_break"
+    ],
+    "properties": {
+      "user_id": {
+        "bsonType": "int",
+        "minimum": 0,
+        "description": "must be `int` & is required"
+      },
+      "start_time": {
+        "bsonType": "date",
+        "description": "must be `date` & is required"
+      },
+      "end_time": {
+        "bsonType": "date",
+        "description": "must be `date` & is required"
+      },
+      "is_active": {
+        "bsonType": "bool",
+        "description": "must be `bool` & is required"
+      },
+      "is_focus": {
+        "bsonType": "bool",
+        "description": "must be `bool` & is required"
+      },
+      "is_break": {
+        "bsonType": "bool",
+        "description": "must be `bool` & is required"
+      },
+      "version": {
+        "bsonType": "string",
+        "description": "must be `string` & is required"
+      }
+    }
+  }
+}
