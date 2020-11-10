@@ -4,7 +4,7 @@ import nox
 
 LOCATIONS = ["src", "tests", "noxfile.py", "cli.py"]
 
-nox.options.sessions = ["pre_commit", "all_tests", "pylint", "mypy"]
+nox.options.sessions = ["update_env", "pre_commit", "all_tests", "pylint", "mypy"]
 
 
 @nox.session(python=False)

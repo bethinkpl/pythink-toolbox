@@ -28,6 +28,7 @@ class MaterializedViewSchema(TypedDict):
 class UserGenerationFailedSchema(TypedDict):
     user_id: int
     reference_time: datetime
+    version: str
 
 
 class _GenerationsTimeRangeSchema(TypedDict):
@@ -36,6 +37,9 @@ class _GenerationsTimeRangeSchema(TypedDict):
 
 
 class GenerationsSchema(TypedDict, total=False):
+    """`generations` collection schema."""
+
     time_range: _GenerationsTimeRangeSchema
     start_time: datetime
     end_time: datetime
+    version: str

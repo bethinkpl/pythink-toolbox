@@ -1,7 +1,11 @@
 {
   "$jsonSchema": {
     "bsonType": "object",
-    "required": [ "time_range", "start_time" ],
+    "required": [
+      "time_range",
+      "start_time",
+      "version"
+    ],
     "properties": {
       "time_range": {
         "bsonType": "object",
@@ -24,6 +28,10 @@
       "end_time": {
         "bsonType": "date",
         "description": "must be `date` & is NOT required"
+      },
+      "version": {
+        "bsonType": "string",
+        "description": "must be `string` & is required"
       }
     }
   }

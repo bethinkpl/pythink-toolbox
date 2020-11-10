@@ -40,7 +40,9 @@ def save_new_activity_sessions(
 
             mongo_specs.collections.user_generation_failed.insert_one(
                 UserGenerationFailedSchema(
-                    user_id=user_id, reference_time=reference_time
+                    user_id=user_id,
+                    reference_time=reference_time,
+                    version=chronos.__version__,
                 )
             )
 
@@ -137,6 +139,7 @@ def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.O
     document: GenerationsSchema = {
         "time_range": {"start": time_range.start, "end": time_range.end},
         "start_time": start_time,
+        "version": chronos.__version__,
     }
 
     result = mongo_specs.collections.generations.insert_one(document=document)
