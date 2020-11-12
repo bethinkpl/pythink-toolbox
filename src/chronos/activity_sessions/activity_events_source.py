@@ -1,4 +1,4 @@
-from typing import Union, Optional, List, Dict
+from typing import Union, List, Dict
 from datetime import datetime
 
 import datatosk
