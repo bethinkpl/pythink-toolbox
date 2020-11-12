@@ -160,6 +160,7 @@ def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.O
     document: GenerationsSchema = {
         "time_range": {"start": time_range.start, "end": time_range.end},
         "start_time": start_time,
+        "version": chronos.__version__,
     }
 
     result = mongo_specs.collections.generations.insert_one(document=document)

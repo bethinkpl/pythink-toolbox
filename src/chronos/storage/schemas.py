@@ -40,6 +40,9 @@ class _TimeRangeSchema(TypedDict):
 
 
 class GenerationsSchema(TypedDict, total=False):
+    """`generations` collection schema."""
+
     time_range: _TimeRangeSchema
     start_time: datetime
     end_time: datetime
+    version: str
