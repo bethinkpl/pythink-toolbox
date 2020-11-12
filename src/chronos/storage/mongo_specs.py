@@ -6,6 +6,7 @@ from datetime import datetime
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
+import pymongo.errors
 
 from chronos import settings
 
@@ -121,6 +122,11 @@ client = MongoClient(
     username=settings.MONGO_USERNAME,
     password=settings.MONGO_PASSWORD,
 )
+try:
+    client.admin.command("replSetGetStatus")
+except pymongo.errors.OperationFailure as err:
+    if err.details["codeName"] == "NotYetInitialized":
+        client.admin.command("replSetInitiate")
 
 database = client[settings.MONGO_DATABASE]
 
