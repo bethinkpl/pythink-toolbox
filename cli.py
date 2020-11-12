@@ -15,10 +15,17 @@ def cli_main() -> None:
 
 
 @click.command()
+def local_ci():
+    subprocess.run(
+        ["docker-compose", "-f", "docker-compose-ci.yml", "run", "chronos-ci"],
+        check=True,
+    )
+
+
+@click.command()
 @click.argument("session", default="", type=str)
 @click.argument("session_args", nargs=-1)
-@click.option("--environment", type=click.Choice(["local", "ci"]), default="local")
-def ci(session: str, session_args: Sequence[str], environment: str) -> None:
+def ci(session: str, session_args: Sequence[str]) -> None:
     """Run Continuous Integration flow or part of it.\n
     Sessions defined in noxfile.py.\n
     Run `poetry run cli ci [session]` to run particular CI session.
@@ -32,9 +39,6 @@ def ci(session: str, session_args: Sequence[str], environment: str) -> None:
     """
 
     run_args = ["nox"]
-
-    if environment == "local":
-        run_args = ["docker", "exec", "-it", "chronos_base"] + run_args
 
     if session:
         if session.startswith("not"):
@@ -85,5 +89,6 @@ def generate_activity_sessions() -> None:
         main(time_range=TimeRange(start=last_generation_time, end=datetime.now()))
 
 
+cli_main.add_command(local_ci)
 cli_main.add_command(ci)
 cli_main.add_command(generate_activity_sessions)

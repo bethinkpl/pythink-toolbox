@@ -29,6 +29,7 @@ services:
     build:
       context: .
       dockerfile: docker/base/Dockerfile
+      target: base
     restart: always
     volumes:
       - ".:/chronos"

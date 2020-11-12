@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: docker/base/Dockerfile
+      target: ci
     volumes:
       - ".:/chronos"
     depends_on:
