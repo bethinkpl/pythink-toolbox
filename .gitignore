@@ -134,3 +134,5 @@ dmypy.json
 
 # Google Cloud credentials files
 gcloud-credentials*
+
+*.DS_Store

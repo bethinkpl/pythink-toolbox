@@ -9,7 +9,7 @@ from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
 import pandas as pd
 
-import chronos
+from chronos import __version__
 import chronos.activity_sessions.main as tested_module
 from chronos.custom_types import TimeRange
 from chronos.activity_sessions.activity_events_source import (
@@ -69,7 +69,7 @@ def test_main(
             "is_active": True,
             "is_break": False,
             "is_focus": True,
-            "version": chronos.__version__,
+            "version": __version__,
         },
         {
             "user_id": 1,
@@ -78,7 +78,7 @@ def test_main(
             "is_active": False,
             "is_break": True,
             "is_focus": False,
-            "version": chronos.__version__,
+            "version": __version__,
         },
         {
             "user_id": 1,
@@ -87,7 +87,7 @@ def test_main(
             "is_active": True,
             "is_break": False,
             "is_focus": True,
-            "version": chronos.__version__,
+            "version": __version__,
         },
         {
             "user_id": 2,
@@ -96,7 +96,7 @@ def test_main(
             "is_active": True,
             "is_break": False,
             "is_focus": False,
-            "version": chronos.__version__,
+            "version": __version__,
         },
     ]
     actual_activity_sessions_data = get_collection_content_without_id_factory(
@@ -199,7 +199,7 @@ def test_main(
             "time_range": {"start": datetime(2000, 1, 1), "end": datetime(2000, 1, 2)},
             "start_time": datetime(2000, 1, 2),
             "end_time": datetime(2000, 1, 2),
-            "version": chronos.__version__,
+            "version": __version__,
         }
     ]
 

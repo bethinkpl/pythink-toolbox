@@ -32,20 +32,18 @@ def check_black(session: Any) -> None:
     )
 
 
+tests_base_args = ["--cov=src", "--cov-report", "html"]
+
+
 @nox.session(python=False)
 def all_tests(session: Any) -> None:
     """Test src & output coverage report.
     Report generation configuration in pyproject.toml & pytest.ini files.
     Usage:
-        `poetry run nox -s tests [-- path]`
+        `nox -s tests [-- path]`
     """
-    args = session.posargs or [
-        "--cov=src",
-        "--cov-report",
-        "html",
-        ".",
-    ]
-    session.run("poetry", "run", "pytest", "-v", *args, external=True)
+    args = session.posargs or tests_base_args + ["."]
+    session.run("pytest", *args, external=True)
 
 
 @nox.session(python=False)
@@ -53,17 +51,10 @@ def unit_tests(session: Any) -> None:
     """Test src & output coverage report.
     Report generation configuration in pyproject.toml & pytest.ini files.
     Usage:
-        `poetry run nox -s tests [-- path]`
+        `nox -s tests [-- path]`
     """
-    args = session.posargs or [
-        "--cov=src",
-        "--cov-report",
-        "html",
-        "-m",
-        "not integration",
-        ".",
-    ]
-    session.run("poetry", "run", "pytest", "-v", *args, external=True)
+    args = session.posargs or tests_base_args + ["-m", "not integration", "."]
+    session.run("pytest", *args, external=True)
 
 
 @nox.session(python=False)
@@ -71,39 +62,30 @@ def integration_tests(session: Any) -> None:
     """Test src & output coverage report.
     Report generation configuration in pyproject.toml & pytest.ini files.
     Usage:
-        `poetry run nox -s tests [-- path]`
+        `nox -s tests [-- path]`
     """
-    args = session.posargs or [
-        "--cov=src",
-        "--cov-report",
-        "html",
-        "-m",
-        "integration",
-        ".",
-    ]
-    session.run("poetry", "run", "pytest", "-v", *args, external=True)
+    args = session.posargs or tests_base_args + ["-m", "integration", "."]
+    session.run("pytest", *args, external=True)
 
 
 @nox.session(python=False)
 def pylint(session: Any) -> None:
     """Run pylint fot linting whole codebase.
     Usage:
-        `poetry run nox -s pylint [-- path]`
+        `nox -s pylint [-- path]`
     """
     args = session.posargs or LOCATIONS
-    session.run("poetry", "run", "pylint", *args, external=True)
+    session.run("pylint", *args, external=True)
 
 
 @nox.session(python=False)
 def mypy(session: Any) -> None:
     """Check type hints with mypy.
     Usage:
-        `poetry run nox -s mypy [-- path]`
+        `nox -s mypy [-- path]`
     """
     args = session.posargs or LOCATIONS
     session.run(
-        "poetry",
-        "run",
         "mypy",
         "--show-error-codes",
         "--config-file",
