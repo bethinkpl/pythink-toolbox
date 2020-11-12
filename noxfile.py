@@ -4,7 +4,7 @@ import nox
 
 LOCATIONS = ["src", "tests", "noxfile.py", "cli.py"]
 
-nox.options.sessions = ["update_env", "pre_commit", "all_tests", "pylint", "mypy"]
+nox.options.sessions = ["update_env", "check_black", "all_tests", "pylint", "mypy"]
 
 
 @nox.session(python=False)
@@ -17,18 +17,17 @@ def update_env(session: Any) -> None:
 
 
 @nox.session(python=False)
-def pre_commit(session: Any) -> None:
-    """Run pre-commit checks.
+def check_black(session: Any) -> None:
+    """Check if code is properly formatted with black.
     Usage:
-        `poetry run nox -s pre-commit`
+        `poetry run nox -s check_black [--path]`
     """
-    session.run("poetry", "run", "pre-commit", "install", external=True)
     session.run(
         "poetry",
         "run",
-        "pre-commit",
-        "run",
-        "--all-files",
+        "black",
+        "--check",
+        *LOCATIONS,
         external=True,
     )
 
