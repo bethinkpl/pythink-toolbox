@@ -32,7 +32,9 @@ def get_collection_content_without_id_factory_as_fixture() -> Callable[
     def _get_collection_content_without_id(
         collection_name: str,
     ) -> List[Dict[str, Union[int, datetime, bool]]]:
-        return _filter_id_field(query_result=collections[collection_name].find())
+        return _filter_id_field(
+            query_result=collections.__getattribute__(collection_name).find()
+        )
 
     return _get_collection_content_without_id
 
@@ -44,7 +46,7 @@ def clear_storage_factory_as_fixture() -> Callable[[], None]:
     from chronos.storage.mongo_specs import collections, materialized_views
 
     def _clear_storage() -> None:
-        for collection in {**collections, **materialized_views}.values():
+        for collection in collections.to_list() + materialized_views.to_list():
             collection.delete_many({})
 
     return _clear_storage
@@ -84,6 +86,6 @@ def insert_data_to_activity_sessions_collection_factory_as_fixture() -> Callable
     def _insert_data_to_activity_sessions_collection(
         data: List[schemas.ActivitySessionSchema],
     ) -> None:
-        collections["activity_sessions"].insert_many(data)
+        collections.activity_sessions.insert_many(data)
 
     return _insert_data_to_activity_sessions_collection

@@ -17,7 +17,8 @@ def cli_main() -> None:
 @click.command()
 @click.argument("session", default="", type=str)
 @click.argument("session_args", nargs=-1)
-def ci(session: str, session_args: Sequence[str]) -> None:
+@click.option("--environment", type=click.Choice(["local", "ci"]), default="local")
+def ci(session: str, session_args: Sequence[str], environment: str) -> None:
     """Run Continuous Integration flow or part of it.\n
     Sessions defined in noxfile.py.\n
     Run `poetry run chronos ci [session]` to run particular CI session.
@@ -31,11 +32,16 @@ def ci(session: str, session_args: Sequence[str]) -> None:
     """
 
     run_args = ["poetry", "run", "nox"]
+
+    if environment == "local":
+        run_args = ["docker", "exec", "-it", "chronos_base"] + run_args
+
     if session:
         if session.startswith("not"):
             run_args += ["-k", f"{session}"]
         else:
             run_args += ["-s", session]
+
     if session_args:
         run_args += ["--", *session_args]
 

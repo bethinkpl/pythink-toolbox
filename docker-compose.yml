@@ -21,6 +21,21 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: local
+    depends_on:
+      - mongo
+
+  chronos-base:
+    container_name: chronos_base
+    build:
+      context: .
+      dockerfile: docker/base/Dockerfile
+    restart: always
+    volumes:
+      - ".:/chronos"
+    depends_on:
+      - mongo
+    env_file:
+      .env
 
   api:
     container_name: chronos_api
@@ -35,3 +50,5 @@ services:
       MODULE_NAME: src.chronos.api.main
     volumes:
       - ".:/chronos"
+    depends_on:
+      - mongo

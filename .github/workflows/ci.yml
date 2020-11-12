@@ -24,10 +24,10 @@ jobs:
       run: docker-compose -f docker-compose-ci.yml up -d
 
     - name: Wait for MongoDB
-      run: until docker exec test_mongo mongo -utest_user -ptest_pass --eval "print(\"Don't want to wait no longer!\")"; do sleep 1; done
+      run: until docker exec ci_mongo mongo -uci_user -pci_pass --eval "print(\"Don't want to wait no longer!\")"; do sleep 1; done
 
     - name: Initiate Mongo replica sets
-      run: docker exec test_mongo mongo -utest_user -ptest_pass --eval "rs.initiate()"
+      run: docker exec ci_mongo mongo -uci_user -pci_pass --eval "rs.initiate()"
 
-    - name: Run Nox-based CI
-      run: docker exec chronos_tests poetry run cli ci
+    - name: Run CI checks
+      run: docker exec chronos_base poetry run cli ci --environment=ci

@@ -1,31 +1,29 @@
 version: '3.1'
 
 services:
-  chronos-tests:
-    container_name: chronos_tests
+  chronos-ci:
+    container_name: chronos_base
     build:
       context: .
-      dockerfile: docker/tests/Dockerfile
+      dockerfile: docker/base/Dockerfile
     volumes:
       - ".:/chronos"
     depends_on:
-      - test-mongo
-    links:
-      - test-mongo
+      - ci-mongo
     environment:
-      CHRONOS_MONGO_HOST: test-mongo
+      CHRONOS_MONGO_HOST: ci_mongo
       CHRONOS_MONGO_PORT: 27017
       CHRONOS_MONGO_DATABASE: test_db
-      CHRONOS_MONGO_USER: test_user
-      CHRONOS_MONGO_PASSWORD: test_pass
+      CHRONOS_MONGO_USER: ci_user
+      CHRONOS_MONGO_PASSWORD: ci_pass
 
-  test-mongo:
-    container_name: test_mongo
+  ci-mongo:
+    container_name: ci_mongo
     image: mongo:4.4.1-bionic
     restart: always
     ports:
       - 27017:27017
     command: --replSet replica_set0
     environment:
-      MONGO_INITDB_ROOT_USERNAME: test_user
-      MONGO_INITDB_ROOT_PASSWORD: test_pass
+      MONGO_INITDB_ROOT_USERNAME: ci_user
+      MONGO_INITDB_ROOT_PASSWORD: ci_pass
