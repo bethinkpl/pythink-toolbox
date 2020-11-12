@@ -3,6 +3,8 @@ import os
 from typing import List, Dict, Union, Callable, Iterator, Any
 from datetime import datetime
 
+import _pytest.config
+import _pytest.main
 from pymongo.cursor import Cursor
 import pytest
 
@@ -10,6 +12,20 @@ from chronos.storage import schemas
 
 
 os.environ["CHRONOS_MONGO_DATABASE"] = "test_db"
+
+
+def pytest_sessionstart(session: _pytest.main.Session):
+    from chronos.storage.mongo_specs import client, database
+
+    client.drop_database(database.name)
+
+
+def pytest_sessionfinish(
+    session: _pytest.main.Session, exitstatus: _pytest.config.ExitCode
+):
+    from chronos.storage.mongo_specs import client, database
+
+    client.drop_database(database.name)
 
 
 def _filter_id_field(
@@ -41,7 +57,7 @@ def get_collection_content_without_id_factory_as_fixture() -> Callable[
 
 @pytest.fixture(name="clear_storage_factory")
 def clear_storage_factory_as_fixture() -> Callable[[], None]:
-    """Clears whole db.
+    """Removes documents from every collection.
     https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures"""
     from chronos.storage.mongo_specs import collections, materialized_views
 
@@ -54,7 +70,7 @@ def clear_storage_factory_as_fixture() -> Callable[[], None]:
 
 @pytest.fixture
 def clear_storage(clear_storage_factory: Callable[[], None]) -> Iterator[None]:
-    """Clears whole db before and test call."""
+    """Removes documents from every collection before and after test call."""
     clear_storage_factory()
     yield
     clear_storage_factory()
