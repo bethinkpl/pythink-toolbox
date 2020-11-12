@@ -8,6 +8,7 @@ import pymongo
 import pymongo.errors
 from pymongo.client_session import ClientSession
 
+import chronos
 from chronos.activity_sessions import generation_operations
 from chronos.custom_types import TimeRange
 from chronos.storage import mongo_specs
