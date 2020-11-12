@@ -73,7 +73,7 @@ omit = ["src/chronos/api/generate_api_doc.py"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 94 #TODO cover more code
+fail_under = 95 #TODO cover more code
 
 [tool.coverage.html]
 directory = "coverage/html_report"
