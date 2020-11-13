@@ -19,9 +19,7 @@ def test_get_users_cumulative_learning_time(
     api_client: TestClient, status_ok: int, headers: Dict[str, str]
 ) -> None:
     response = api_client.get(
-        f"users_cumulative_learning_time/{USER_ID}",
-        headers=headers,
-        params=TEST_DATA,
+        f"users_cumulative_learning_time/{USER_ID}", headers=headers, params=TEST_DATA
     )
     assert response.status_code == status_ok
     assert isinstance(response.json(), int)
