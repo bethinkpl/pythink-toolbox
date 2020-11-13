@@ -1,38 +1,41 @@
 {
   "$jsonSchema": {
     "bsonType": "object",
-    "required": [
-      "time_range",
-      "start_time",
-      "version"
-    ],
     "properties": {
-      "time_range": {
-        "bsonType": "object",
-        "required": [ "start", "end" ],
-          "properties": {
-            "start": {
-              "bsonType": "date",
-              "description": "must be a `date` & is required"
-            },
-            "end": {
-              "bsonType": "date",
-              "description": "must be a `date` & is required"
-            }
-          }
+      "end_time": {
+        "bsonType": "date",
+        "description": "must be `date` & is NOT required"
       },
       "start_time": {
         "bsonType": "date",
         "description": "must be `date` & is required"
       },
-      "end_time": {
-        "bsonType": "date",
-        "description": "must be `date` & is NOT required"
+      "time_range": {
+        "bsonType": "object",
+        "properties": {
+          "end": {
+            "bsonType": "date",
+            "description": "must be a `date` & is required"
+          },
+          "start": {
+            "bsonType": "date",
+            "description": "must be a `date` & is required"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ]
       },
       "version": {
         "bsonType": "string",
         "description": "must be `string` & is required"
       }
-    }
+    },
+    "required": [
+      "time_range",
+      "start_time",
+      "version"
+    ]
   }
 }
