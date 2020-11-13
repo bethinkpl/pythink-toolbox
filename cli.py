@@ -29,8 +29,9 @@ def ci(session: str, session_args: Sequence[str]) -> None:
         - Run all checks but tests:
             `poetry run cli ci "not tests"
     """
+    docker_compose_args = ["docker-compose", "-f", "docker-compose-ci.yml"]
 
-    run_args = ["docker-compose", "-f", "docker-compose-ci.yml", "run", "chronos-ci"]
+    run_args = docker_compose_args + ["run", "chronos-ci"]
 
     if session:
         run_args += ["nox"]
@@ -42,7 +43,12 @@ def ci(session: str, session_args: Sequence[str]) -> None:
     if session_args:
         run_args += ["--", *session_args]
 
-    subprocess.run(run_args, check=True)
+    try:
+        subprocess.run(run_args, check=True)
+    except subprocess.CalledProcessError as err:
+        raise err
+    finally:
+        subprocess.run(docker_compose_args + ["down"], check=True)
 
 
 @click.command()

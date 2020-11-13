@@ -21,7 +21,6 @@ services:
   ci-mongo:
     container_name: ci_mongo
     image: mongo:4.4.1-bionic
-    restart: always
     ports:
       - 27017:27017
     command: --replSet replica_set0
