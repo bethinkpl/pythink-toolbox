@@ -2,5 +2,5 @@
 
 ## CI on local env
 ```shell script
-poetry run cli local-ci
+poetry run cli ci
 ```

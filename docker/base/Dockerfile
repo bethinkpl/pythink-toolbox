@@ -13,4 +13,4 @@ RUN poetry config virtualenvs.create false \
 CMD tail -f /dev/null
 
 FROM base as ci
-CMD poetry run cli ci
+CMD nox

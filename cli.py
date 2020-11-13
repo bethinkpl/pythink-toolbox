@@ -15,14 +15,6 @@ def cli_main() -> None:
 
 
 @click.command()
-def local_ci():
-    subprocess.run(
-        ["docker-compose", "-f", "docker-compose-ci.yml", "run", "chronos-ci"],
-        check=True,
-    )
-
-
-@click.command()
 @click.argument("session", default="", type=str)
 @click.argument("session_args", nargs=-1)
 def ci(session: str, session_args: Sequence[str]) -> None:
@@ -38,9 +30,10 @@ def ci(session: str, session_args: Sequence[str]) -> None:
             `poetry run cli ci "not tests"
     """
 
-    run_args = ["nox"]
+    run_args = ["docker-compose", "-f", "docker-compose-ci.yml", "run", "chronos-ci"]
 
     if session:
+        run_args += ["nox"]
         if session.startswith("not"):
             run_args += ["-k", f"{session}"]
         else:
@@ -89,6 +82,5 @@ def generate_activity_sessions() -> None:
         main(time_range=TimeRange(start=last_generation_time, end=datetime.now()))
 
 
-cli_main.add_command(local_ci)
 cli_main.add_command(ci)
 cli_main.add_command(generate_activity_sessions)
