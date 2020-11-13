@@ -12,7 +12,7 @@ repos:
     -   id: name-tests-test
         args: ['--django']
     -   id: pretty-format-json
-        args: ['--autofix']
+        args: ['--autofix', '--no-sort-keys']
 -   repo: local
     hooks:
     -   id: black
