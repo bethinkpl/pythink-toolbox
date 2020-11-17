@@ -4,7 +4,7 @@
 # pylint: disable=duplicate-code
 
 from datetime import datetime
-from typing import Dict, List, Union, Callable, Iterator, Any
+from typing import Dict, List, Union, Callable, Iterator, Any, Literal
 
 import pandas as pd
 import pytest
@@ -24,11 +24,14 @@ TEST_USER_ID = 108
 
 @pytest.mark.integration  # type: ignore[misc]
 @pytest_steps.test_steps(  # type: ignore[misc]
+    "Empty activity events",
     "Initial input - creates two separate active sessions and inactive in the middle",
     "Takes last active session & extends its duration.",
     "Takes last active session & extends its duration, so it changes to focus session.",
     "Add new sessions one focused in the end and on that is 'break' before.",
     "Exception raised - check data in failed_generation is correct.",
+    "Exception raised - for other user.",
+    "Other user - proper generation.",
 )
 def test_save_new_activity_sessions(
     get_collection_content_without_id_factory: Callable[
@@ -48,9 +51,35 @@ def test_save_new_activity_sessions(
 
         return get_collection_content_without_id_factory("activity_sessions")
 
+    users_generation_statuses_default_val = [
+        {
+            "user_id": TEST_USER_ID,
+            "last_status": "succeed",
+            "time_until_generations_successful": datetime(1970, 1, 1),
+            "version": chronos.__version__,
+        }
+    ]
+
     clear_storage_factory()
 
+    # ================================= TEST STEP =====================================
+    # Empty activity events
+
+    activity_events_0 = pd.Series(dtype="datetime64[ns]")
+    expected_collection_content_0 = []
+
+    actual_activity_sessions_collection_content = (
+        _save_new_activity_sessions_and_get_its_content(
+            _activity_events=activity_events_0
+        )
+    )
+    assert actual_activity_sessions_collection_content == expected_collection_content_0
+
+    yield
+
+    # ================================= TEST STEP =====================================
     # Initial input - creates two separate active sessions and inactive in the middle
+
     activity_events_1 = pd.Series([datetime(2000, 1, 1), datetime(2000, 1, 2)])
     expected_collection_content_1 = [
         {
@@ -88,9 +117,16 @@ def test_save_new_activity_sessions(
         )
     )
     assert actual_activity_sessions_collection_content == expected_collection_content_1
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == users_generation_statuses_default_val
+    )
+
     yield
 
+    # ================================= TEST STEP =====================================
     # Takes last active session & extends its duration.
+
     activity_events_2 = pd.Series([datetime(2000, 1, 2, 0, 5)])
     expected_collection_content_2 = [
         {
@@ -129,9 +165,16 @@ def test_save_new_activity_sessions(
     )
 
     assert actual_activity_sessions_collection_content == expected_collection_content_2
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == users_generation_statuses_default_val
+    )
+
     yield
 
+    # ================================= TEST STEP =====================================
     # Takes last active session & extends its duration, so it changes to focus session.
+
     activity_events_3 = pd.Series(
         [datetime(2000, 1, 2, 0, 10), datetime(2000, 1, 2, 0, 15)]
     )
@@ -172,8 +215,14 @@ def test_save_new_activity_sessions(
     )
 
     assert actual_activity_sessions_collection_content == expected_collection_content_3
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == users_generation_statuses_default_val
+    )
+
     yield
 
+    # ================================= TEST STEP =====================================
     # Add new sessions one focused in the end and on that is 'break' before.
     activity_events_4 = pd.Series(
         [
@@ -239,33 +288,105 @@ def test_save_new_activity_sessions(
     )
 
     assert actual_activity_sessions_collection_content == expected_collection_content_4
-    yield
-
-    # Exception raised - check data in failed_generation is correct.
-
-    generate_user_activity_sessions_mock = mocker.patch(
-        mocking.transform_function_to_target_string(
-            chronos.activity_sessions.generation_operations.generate_user_activity_sessions
-        )
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == users_generation_statuses_default_val
     )
 
-    generate_user_activity_sessions_mock.side_effect = Exception("mocked error")
+    yield
 
-    with pytest.raises(Exception):
-        tested_module.save_new_activity_sessions(
-            user_id=TEST_USER_ID,
-            activity_events=mocker.ANY,
-            time_range_end=datetime(2013, 1, 1),
-        )
+    # ================================= TEST STEP =====================================
+    # Exception raised - check data in failed_generation is correct.
 
-        assert get_collection_content_without_id_factory(
-            "failed_generation_collection"
-        ) == [{"user_id": TEST_USER_ID, "reference_time": datetime(2013, 1, 1)}]
+    mocker.patch(
+        mocking.transform_function_to_target_string(
+            tested_module._run_user_crud_operations_transaction
+        ),
+        side_effect=RuntimeError("mocked error"),
+        __name__="test",
+    )
 
-        assert (
-            get_collection_content_without_id_factory("activity_sessions")
-            == expected_collection_content_4
-        )
+    tested_module.save_new_activity_sessions(
+        user_id=TEST_USER_ID,
+        activity_events=pd.Series([datetime(2000, 1, 1)]),
+        time_range_end=datetime(2013, 1, 1),
+    )
+
+    assert (
+        get_collection_content_without_id_factory("activity_sessions")
+        == expected_collection_content_4
+    )
+
+    users_generation_statuses_default_val[0]["last_status"] = "failed"
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == users_generation_statuses_default_val
+    )
+
+    yield
+
+    # ================================= TEST STEP =====================================
+    # Exception raised - for other user
+
+    tested_module.save_new_activity_sessions(
+        user_id=TEST_USER_ID + 1,
+        activity_events=pd.Series([datetime(2000, 1, 1)]),
+        time_range_end=datetime(2013, 1, 1),
+    )
+
+    assert (
+        get_collection_content_without_id_factory("activity_sessions")
+        == expected_collection_content_4
+    )
+
+    expected_users_generation_statuses = users_generation_statuses_default_val + [
+        {
+            "user_id": TEST_USER_ID + 1,
+            "last_status": "failed",
+            "version": chronos.__version__,
+        }
+    ]
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == expected_users_generation_statuses
+    )
+
+    yield
+
+    # ================================= TEST STEP =====================================
+    # Other user - proper generation.
+
+    mocker.stopall()
+
+    tested_module.save_new_activity_sessions(
+        user_id=TEST_USER_ID + 1,
+        activity_events=pd.Series([datetime(2000, 1, 1)]),
+        time_range_end=datetime(2013, 1, 1),
+    )
+
+    assert get_collection_content_without_id_factory(
+        "activity_sessions"
+    ) == expected_collection_content_4 + [
+        {
+            "user_id": TEST_USER_ID + 1,
+            "start_time": datetime(1999, 12, 31, 23, 59),
+            "end_time": datetime(2000, 1, 1, 0, 0),
+            "is_active": True,
+            "is_focus": False,
+            "is_break": False,
+            "version": chronos.__version__,
+        }
+    ]
+
+    expected_users_generation_statuses[1]["last_status"] = "succeed"
+    expected_users_generation_statuses[1][
+        "time_until_generations_successful"
+    ] = datetime(2013, 1, 1)
+
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == expected_users_generation_statuses
+    )
 
     clear_storage_factory()
     yield
