@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Union, List, Any
+from typing import Optional, Dict, Union, List, Any, Literal
 from datetime import datetime
 
 import bson
@@ -9,7 +9,9 @@ import pymongo.errors
 from pymongo.client_session import ClientSession
 
 import chronos
-from chronos.activity_sessions import generation_operations
+from chronos.activity_sessions.generation_operations import (
+    generate_user_activity_sessions,
+)
 from chronos.custom_types import TimeRange
 from chronos.storage import mongo_specs
 from chronos.storage.schemas import UsersGenerationStatuesSchema, GenerationsSchema
@@ -30,11 +32,7 @@ def save_new_activity_sessions(
     )
 
     with mongo_specs.client.start_session() as session:
-
-        generation_status = UsersGenerationStatuesSchema(
-            user_id=user_id, version=chronos.__version__
-        )
-
+        status: Literal["failed", "succeed"]
         try:
             _run_user_crud_operations_transaction(
                 user_id=user_id, activity_events=activity_events, session=session
@@ -46,20 +44,34 @@ def save_new_activity_sessions(
                 _run_user_crud_operations_transaction.__name__,
                 err,
             )
-
-            generation_status["last_status"] = "failed"
+            status = "failed"
 
         else:
-            generation_status["last_status"] = "succeed"
-            generation_status["time_until_generations_successful"] = time_range_end
+            status = "succeed"
 
         finally:
-
-            mongo_specs.collections.users_generation_statuses.update_one(
-                filter={"user_id": user_id},
-                update={"$set": generation_status},
-                upsert=True,
+            _users_generation_statuses_update(
+                user_id=user_id, status=status, time_range_end=time_range_end
             )
+
+
+def _users_generation_statuses_update(
+    user_id: int, status: Literal["failed", "succeed"], time_range_end: datetime
+):
+    generation_status = UsersGenerationStatuesSchema(
+        user_id=user_id, version=chronos.__version__
+    )
+
+    generation_status["last_status"] = status
+
+    if status == "succeed":
+        generation_status["time_until_generations_successful"] = time_range_end
+
+    mongo_specs.collections.users_generation_statuses.update_one(
+        filter={"user_id": user_id},
+        update={"$set": generation_status},
+        upsert=True,
+    )
 
 
 def _run_user_crud_operations_transaction(
@@ -81,7 +93,7 @@ def _run_user_crud_operations_transaction(
 
         logger.debug("last_active_session from mongo: \n%s", last_active_session)
 
-        user_activity_sessions = generation_operations.generate_user_activity_sessions(
+        user_activity_sessions = generate_user_activity_sessions(
             user_id=user_id,
             activity_events=activity_events,
             last_active_session=last_active_session,
