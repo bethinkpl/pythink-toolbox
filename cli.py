@@ -16,8 +16,9 @@ def cli_main() -> None:
 
 @click.command()
 @click.argument("session", default="", type=str)
-@click.argument("session_args", nargs=-1)
-def ci(session: str, session_args: Sequence[str]) -> None:
+@click.argument("other_args", nargs=-1)
+@click.option("-v", "--verbose", count=True)
+def ci(session: str, other_args: Sequence[str], verbose: int) -> None:
     """Run Continuous Integration flow or part of it.\n
     Sessions defined in noxfile.py.\n
     Run `poetry run cli ci [session]` to run particular CI session.
@@ -31,7 +32,7 @@ def ci(session: str, session_args: Sequence[str]) -> None:
     """
     docker_compose_args = ["docker-compose", "-f", "docker-compose-ci.yml"]
 
-    run_args = docker_compose_args + ["run", "chronos-ci"]
+    run_args = docker_compose_args + ["run", "--rm", "chronos-ci"]
 
     if session:
         run_args += ["nox"]
@@ -40,15 +41,18 @@ def ci(session: str, session_args: Sequence[str]) -> None:
         else:
             run_args += ["-s", session]
 
-    if session_args:
-        run_args += ["--", *session_args]
+    if other_args:
+        run_args += ["--", f"-{'v'*verbose}", *other_args]
 
     try:
+        click.secho(f"RUN: {' '.join(run_args)}", fg="cyan", bold=True)
         subprocess.run(run_args, check=True)
     except subprocess.CalledProcessError as err:
         raise err
     finally:
-        subprocess.run(docker_compose_args + ["down"], check=True)
+        down_args = docker_compose_args + ["down", "-v"]
+        click.secho(f"RUN: {' '.join(down_args)}", fg="cyan", bold=True)
+        subprocess.run(down_args, check=True)
 
 
 @click.command()
