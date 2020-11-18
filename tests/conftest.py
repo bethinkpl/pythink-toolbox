@@ -14,15 +14,23 @@ from chronos.storage import schemas
 os.environ["CHRONOS_MONGO_DATABASE"] = "test_db"
 
 
-def pytest_sessionstart(session: _pytest.main.Session):
+def pytest_sessionstart(
+    session: _pytest.main.Session,  # pylint: disable=unused-argument
+):
+    """Runs this code before test session starts."""
+
     from chronos.storage.mongo_specs import client, database
 
     client.drop_database(database.name)
 
 
+# pylint: disable=unused-argument
 def pytest_sessionfinish(
-    session: _pytest.main.Session, exitstatus: _pytest.config.ExitCode
+    session: _pytest.main.Session,
+    exitstatus: _pytest.config.ExitCode,
 ):
+    """Runs this code after test session is finished."""
+
     from chronos.storage.mongo_specs import client, database
 
     client.drop_database(database.name)

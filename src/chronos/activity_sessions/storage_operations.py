@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Union, List, Any, Literal
+from typing import Optional, Dict, Union, List, Literal
 from datetime import datetime
 
 import bson

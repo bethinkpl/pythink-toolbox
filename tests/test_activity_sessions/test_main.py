@@ -1,7 +1,6 @@
 # pylint: disable=missing-function-docstring
 
 from datetime import datetime, timedelta
-import time
 from typing import List, Dict, Union, Callable
 
 import freezegun
@@ -35,7 +34,7 @@ def test_main(
 ) -> None:
     """End-to-end overall happy-path activity sessions creation and materialized views updates."""
 
-    def mock_side_effect(*args, **kwargs):
+    def mock_side_effect(**kwargs):
         if "user_exclude" in kwargs:
             assert kwargs["user_exclude"]
             return pd.DataFrame(
@@ -59,11 +58,11 @@ def test_main(
                     [2, datetime(2000, 1, 1, 0, 1)],
                 ],
             )
-        else:
-            return pd.DataFrame(
-                columns=["user_id", "client_time"],
-                data=[[3, datetime(1999, 12, 31, 1, 1)]],
-            )
+
+        return pd.DataFrame(
+            columns=["user_id", "client_time"],
+            data=[[3, datetime(1999, 12, 31, 1, 1)]],
+        )
 
     mocker.patch(
         transform_function_to_target_string(read_activity_events_between_datetimes),
