@@ -153,7 +153,11 @@ def extract_users_with_failed_last_generation() -> List[UsersGenerationStatuesSc
     return list(
         mongo_specs.collections.users_generation_statuses.find(
             filter=UsersGenerationStatuesSchema(last_status="failed"),
-            projection={"_id": 0, "user_id": 1, "time_until_generations_successful": 1},
+            projection={
+                "_id": False,
+                "user_id": True,
+                "time_until_generations_successful": True,
+            },
         )
     )
 
