@@ -62,10 +62,10 @@ def generate_activity_sessions() -> None:
 
     import logging
 
+    from pymongo import DESCENDING
+
     from chronos.activity_sessions.main import main
-    from chronos.activity_sessions.storage_operations import (
-        read_last_generation_time_range_end,
-    )
+    from chronos.storage import mongo_specs
     from chronos.custom_types import TimeRange
 
     def _generate_from_scratch() -> None:
@@ -84,12 +84,19 @@ def generate_activity_sessions() -> None:
                 start=time_range.end, end=time_range.end + chunk_size
             )
 
-    last_generation_time = read_last_generation_time_range_end()
+    time_range_end = mongo_specs.collections.generations.find_one(
+        projection={"_id": False, "time_range.end": True},
+        sort=[("time_range.end", DESCENDING)],
+    )
 
-    if last_generation_time is None:
+    try:
+        last_generation_time = time_range_end["time_range"]["end"]
+    except KeyError:
         _generate_from_scratch()
     else:
         main(time_range=TimeRange(start=last_generation_time, end=datetime.now()))
+
+    # FIXME test it
 
 
 cli_main.add_command(ci)
