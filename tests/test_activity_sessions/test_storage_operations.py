@@ -3,6 +3,7 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=duplicate-code
 # pylint: disable=protected-access
+# pylint: disable=too-many-statements
 
 from datetime import datetime
 from typing import Dict, List, Union, Callable, Iterator, Any
@@ -66,12 +67,12 @@ def test_save_new_activity_sessions(
     # ================================= TEST STEP =====================================
     # Empty activity events
 
-    activity_events_0 = pd.Series(dtype="datetime64[ns]")
+    activity_events = pd.Series(dtype="datetime64[ns]")
     expected_collection_content = []
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
-            _activity_events=activity_events_0
+            _activity_events=activity_events
         )
     )
     assert actual_activity_sessions_collection_content == expected_collection_content
@@ -81,7 +82,7 @@ def test_save_new_activity_sessions(
     # ================================= TEST STEP =====================================
     # Initial input - creates two separate active sessions and inactive in the middle
 
-    activity_events_1 = pd.Series([datetime(2000, 1, 1), datetime(2000, 1, 2)])
+    activity_events = pd.Series([datetime(2000, 1, 1), datetime(2000, 1, 2)])
     expected_collection_content += [
         {
             "user_id": TEST_USER_ID,
@@ -114,7 +115,7 @@ def test_save_new_activity_sessions(
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
-            _activity_events=activity_events_1
+            _activity_events=activity_events
         )
     )
     assert actual_activity_sessions_collection_content == expected_collection_content
@@ -128,12 +129,12 @@ def test_save_new_activity_sessions(
     # ================================= TEST STEP =====================================
     # Takes last active session & extends its duration.
 
-    activity_events_2 = pd.Series([datetime(2000, 1, 2, 0, 5)])
+    activity_events = pd.Series([datetime(2000, 1, 2, 0, 5)])
     expected_collection_content[-1]["end_time"] = datetime(2000, 1, 2, 0, 5)
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
-            _activity_events=activity_events_2
+            _activity_events=activity_events
         )
     )
 
@@ -148,7 +149,7 @@ def test_save_new_activity_sessions(
     # ================================= TEST STEP =====================================
     # Takes last active session & extends its duration, so it changes to focus session.
 
-    activity_events_3 = pd.Series(
+    activity_events = pd.Series(
         [datetime(2000, 1, 2, 0, 10), datetime(2000, 1, 2, 0, 15)]
     )
     expected_collection_content[-1]["end_time"] = datetime(2000, 1, 2, 0, 15)
@@ -156,7 +157,7 @@ def test_save_new_activity_sessions(
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
-            _activity_events=activity_events_3
+            _activity_events=activity_events
         )
     )
 
@@ -170,7 +171,7 @@ def test_save_new_activity_sessions(
 
     # ================================= TEST STEP =====================================
     # Add new sessions one focused in the end and on that is 'break' before.
-    activity_events_4 = pd.Series(
+    activity_events = pd.Series(
         [
             datetime(2000, 1, 2, 0, 21, 1),
             datetime(2000, 1, 2, 0, 25),
@@ -202,7 +203,7 @@ def test_save_new_activity_sessions(
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
-            _activity_events=activity_events_4
+            _activity_events=activity_events
         )
     )
 
