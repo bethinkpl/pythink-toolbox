@@ -66,14 +66,14 @@ def test_save_new_activity_sessions(
     # Empty activity events
 
     activity_events_0 = pd.Series(dtype="datetime64[ns]")
-    expected_collection_content_0 = []
+    expected_collection_content = []
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
             _activity_events=activity_events_0
         )
     )
-    assert actual_activity_sessions_collection_content == expected_collection_content_0
+    assert actual_activity_sessions_collection_content == expected_collection_content
 
     yield
 
@@ -81,7 +81,7 @@ def test_save_new_activity_sessions(
     # Initial input - creates two separate active sessions and inactive in the middle
 
     activity_events_1 = pd.Series([datetime(2000, 1, 1), datetime(2000, 1, 2)])
-    expected_collection_content_1 = [
+    expected_collection_content += [
         {
             "user_id": TEST_USER_ID,
             "start_time": datetime(1999, 12, 31, 23, 59),
@@ -116,7 +116,7 @@ def test_save_new_activity_sessions(
             _activity_events=activity_events_1
         )
     )
-    assert actual_activity_sessions_collection_content == expected_collection_content_1
+    assert actual_activity_sessions_collection_content == expected_collection_content
     assert (
         get_collection_content_without_id_factory("users_generation_statuses")
         == users_generation_statuses_default_val
@@ -128,35 +128,7 @@ def test_save_new_activity_sessions(
     # Takes last active session & extends its duration.
 
     activity_events_2 = pd.Series([datetime(2000, 1, 2, 0, 5)])
-    expected_collection_content_2 = [
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(1999, 12, 31, 23, 59),
-            "end_time": datetime(2000, 1, 1, 0, 0),
-            "is_active": True,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 0, 0),
-            "end_time": datetime(2000, 1, 1, 23, 59),
-            "is_active": False,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 23, 59),
-            "end_time": datetime(2000, 1, 2, 0, 5),
-            "is_active": True,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-    ]
+    expected_collection_content[-1]["end_time"] = datetime(2000, 1, 2, 0, 5)
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
@@ -164,7 +136,7 @@ def test_save_new_activity_sessions(
         )
     )
 
-    assert actual_activity_sessions_collection_content == expected_collection_content_2
+    assert actual_activity_sessions_collection_content == expected_collection_content
     assert (
         get_collection_content_without_id_factory("users_generation_statuses")
         == users_generation_statuses_default_val
@@ -178,35 +150,8 @@ def test_save_new_activity_sessions(
     activity_events_3 = pd.Series(
         [datetime(2000, 1, 2, 0, 10), datetime(2000, 1, 2, 0, 15)]
     )
-    expected_collection_content_3 = [
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(1999, 12, 31, 23, 59),
-            "end_time": datetime(2000, 1, 1, 0, 0),
-            "is_active": True,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 0, 0),
-            "end_time": datetime(2000, 1, 1, 23, 59),
-            "is_active": False,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 23, 59),
-            "end_time": datetime(2000, 1, 2, 0, 15),
-            "is_active": True,
-            "is_focus": True,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-    ]
+    expected_collection_content[-1]["end_time"] = datetime(2000, 1, 2, 0, 15)
+    expected_collection_content[-1]["is_focus"] = True
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
@@ -214,7 +159,7 @@ def test_save_new_activity_sessions(
         )
     )
 
-    assert actual_activity_sessions_collection_content == expected_collection_content_3
+    assert actual_activity_sessions_collection_content == expected_collection_content
     assert (
         get_collection_content_without_id_factory("users_generation_statuses")
         == users_generation_statuses_default_val
@@ -233,34 +178,7 @@ def test_save_new_activity_sessions(
             datetime(2000, 1, 2, 0, 40),
         ]
     )
-    expected_collection_content_4 = [
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(1999, 12, 31, 23, 59),
-            "end_time": datetime(2000, 1, 1, 0, 0),
-            "is_active": True,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 0, 0),
-            "end_time": datetime(2000, 1, 1, 23, 59),
-            "is_active": False,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 23, 59),
-            "end_time": datetime(2000, 1, 2, 0, 15),
-            "is_active": True,
-            "is_focus": True,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
+    expected_collection_content += [
         {
             "user_id": TEST_USER_ID,
             "start_time": datetime(2000, 1, 2, 0, 15),
@@ -287,7 +205,7 @@ def test_save_new_activity_sessions(
         )
     )
 
-    assert actual_activity_sessions_collection_content == expected_collection_content_4
+    assert actual_activity_sessions_collection_content == expected_collection_content
     assert (
         get_collection_content_without_id_factory("users_generation_statuses")
         == users_generation_statuses_default_val
@@ -314,7 +232,7 @@ def test_save_new_activity_sessions(
 
     assert (
         get_collection_content_without_id_factory("activity_sessions")
-        == expected_collection_content_4
+        == expected_collection_content
     )
 
     users_generation_statuses_default_val[0]["last_status"] = "failed"
@@ -336,7 +254,7 @@ def test_save_new_activity_sessions(
 
     assert (
         get_collection_content_without_id_factory("activity_sessions")
-        == expected_collection_content_4
+        == expected_collection_content
     )
 
     expected_users_generation_statuses = users_generation_statuses_default_val + [
@@ -363,10 +281,7 @@ def test_save_new_activity_sessions(
         activity_events=pd.Series([datetime(2000, 1, 1)]),
         time_range_end=datetime(2013, 1, 1),
     )
-
-    assert get_collection_content_without_id_factory(
-        "activity_sessions"
-    ) == expected_collection_content_4 + [
+    expected_collection_content += [
         {
             "user_id": TEST_USER_ID + 1,
             "start_time": datetime(1999, 12, 31, 23, 59),
@@ -377,6 +292,11 @@ def test_save_new_activity_sessions(
             "version": chronos.__version__,
         }
     ]
+
+    assert (
+        get_collection_content_without_id_factory("activity_sessions")
+        == expected_collection_content
+    )
 
     expected_users_generation_statuses[1]["last_status"] = "succeed"
     expected_users_generation_statuses[1][
