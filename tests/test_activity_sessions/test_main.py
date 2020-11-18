@@ -1,7 +1,7 @@
 # pylint: disable=missing-function-docstring
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Union, Callable
+from typing import List, Dict, Union, Callable, Any
 
 import freezegun
 import pytest
@@ -34,7 +34,7 @@ def test_main(
 ) -> None:
     """End-to-end overall happy-path activity sessions creation and materialized views updates."""
 
-    def mock_side_effect(**kwargs):
+    def mock_side_effect(**kwargs: Any) -> pd.DataFrame:
         if "user_exclude" in kwargs:
             assert kwargs["user_exclude"]
             return pd.DataFrame(

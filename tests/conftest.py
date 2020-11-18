@@ -1,11 +1,9 @@
 # pylint: disable=import-outside-toplevel
 import os
-from typing import List, Dict, Union, Callable, Iterator, Any
-from datetime import datetime
+from typing import List, Dict, Callable, Iterator, Any
 
 import _pytest.config
 import _pytest.main
-from pymongo.cursor import Cursor
 import pytest
 
 from chronos.storage import schemas
@@ -16,7 +14,7 @@ os.environ["CHRONOS_MONGO_DATABASE"] = "test_db"
 
 def pytest_sessionstart(
     session: _pytest.main.Session,  # pylint: disable=unused-argument
-):
+) -> None:
     """Runs this code before test session starts."""
 
     from chronos.storage.mongo_specs import client, database
@@ -28,21 +26,12 @@ def pytest_sessionstart(
 def pytest_sessionfinish(
     session: _pytest.main.Session,
     exitstatus: _pytest.config.ExitCode,
-):
+) -> None:
     """Runs this code after test session is finished."""
 
     from chronos.storage.mongo_specs import client, database
 
     client.drop_database(database.name)
-
-
-def _filter_id_field(
-    query_result: Cursor,
-) -> List[Dict[str, Union[int, datetime, bool]]]:
-    return [
-        {key: value for key, value in document.items() if key != "_id"}
-        for document in query_result
-    ]
 
 
 @pytest.fixture(name="get_collection_content_without_id_factory")
@@ -55,10 +44,12 @@ def get_collection_content_without_id_factory_as_fixture() -> Callable[
 
     def _get_collection_content_without_id(
         collection_name: str,
-    ) -> List[Dict[str, Union[int, datetime, bool]]]:
-        return _filter_id_field(
-            query_result=collections.__getattribute__(collection_name).find()
-        )
+    ) -> List[Dict[str, Any]]:
+
+        return [
+            {key: value for key, value in document.items() if key != "_id"}
+            for document in collections.__getattribute__(collection_name).find()
+        ]
 
     return _get_collection_content_without_id
 

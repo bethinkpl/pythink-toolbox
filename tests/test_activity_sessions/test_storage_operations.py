@@ -6,7 +6,7 @@
 # pylint: disable=too-many-statements
 
 from datetime import datetime
-from typing import Dict, List, Union, Callable, Iterator, Any
+from typing import Dict, List, Callable, Iterator, Any
 
 import pandas as pd
 import pytest
@@ -36,15 +36,13 @@ TEST_USER_ID = 108
     "Other user - proper generation.",
 )
 def test_save_new_activity_sessions(
-    get_collection_content_without_id_factory: Callable[
-        [str], List[Dict[str, Union[int, datetime, bool]]]
-    ],
+    get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]],
     clear_storage_factory: Callable[[], None],
     mocker: pytest_mock.MockerFixture,
 ) -> Iterator[None]:
     def _save_new_activity_sessions_and_get_its_content(
         _activity_events: pd.Series,
-    ) -> List[Dict[str, Union[int, datetime, bool]]]:
+    ) -> List[Dict[str, Any]]:
         tested_module.save_new_activity_sessions(
             user_id=TEST_USER_ID,
             activity_events=_activity_events,
@@ -68,7 +66,7 @@ def test_save_new_activity_sessions(
     # Empty activity events
 
     activity_events = pd.Series(dtype="datetime64[ns]")
-    expected_collection_content = []
+    expected_collection_content: List[schemas.ActivitySessionSchema] = []
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(

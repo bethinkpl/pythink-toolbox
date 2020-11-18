@@ -57,7 +57,7 @@ def save_new_activity_sessions(
 
 def _users_generation_statuses_update(
     user_id: int, status: Literal["failed", "succeed"], time_range_end: datetime
-):
+) -> None:
     generation_status = UsersGenerationStatuesSchema(
         user_id=user_id, version=chronos.__version__
     )
