@@ -96,8 +96,6 @@ def generate_activity_sessions() -> None:
     else:
         main(time_range=TimeRange(start=last_generation_time, end=datetime.now()))
 
-    # FIXME test it
-
 
 cli_main.add_command(ci)
 cli_main.add_command(generate_activity_sessions)
