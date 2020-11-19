@@ -1,4 +1,4 @@
 #!/bin/sh
 
-poetry run python src/chronos/api/generate_api_doc.py
+poetry run cli generate-api-documentation
 git add docs
