@@ -108,36 +108,34 @@ def generate_api_documentation() -> None:
     swagger_favicon_url = "https://fastapi.tiangolo.com/img/favicon.png"
 
     html = f"""
-    <!DOCTYPE html>
-    <html>
+  <!DOCTYPE html>
+  <html>
     <head>
-    <link type="text/css" rel="stylesheet" href="{swagger_css_url}">
-    <link rel="shortcut icon" href="{swagger_favicon_url}">
-    <title>{title}</title>
+      <link type="text/css" rel="stylesheet" href="{swagger_css_url}" />
+      <link rel="shortcut icon" href="{swagger_favicon_url}" />
+      <title>{title}</title>
     </head>
     <body>
-    <div id="swagger-ui">
-    </div>
-    <script src="{swagger_js_url}"></script>
-    <script src="{spec_url}"></script>
-    <!-- `SwaggerUIBundle` is now available on the page -->
-    <script>
-
-    const ui = SwaggerUIBundle({{
-        spec: spec,
-        dom_id: '#swagger-ui',
-        presets: [
-        SwaggerUIBundle.presets.apis,
-        SwaggerUIBundle.SwaggerUIStandalonePreset
-        ],
-        layout: "BaseLayout",
-        deepLinking: true,
-        showExtensions: true,
-        showCommonExtensions: true
-    }})
-    </script>
+      <div id="swagger-ui"></div>
+      <script src="{swagger_js_url}"></script>
+      <script src="{spec_url}"></script>
+      <!-- `SwaggerUIBundle` is now available on the page -->
+      <script>
+        const ui = SwaggerUIBundle({{
+            spec: spec,
+            dom_id: '#swagger-ui',
+            presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIBundle.SwaggerUIStandalonePreset
+            ],
+            layout: "BaseLayout",
+            deepLinking: true,
+            showExtensions: true,
+            showCommonExtensions: true
+        }})
+      </script>
     </body>
-    </html>
+  </html>
     """.strip()
 
     with open("docs/index.html", "w") as file:
