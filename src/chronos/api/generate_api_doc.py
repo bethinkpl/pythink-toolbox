@@ -3,7 +3,7 @@ import json
 from chronos.api.main import app
 
 
-def get_swagger_ui_html(
+def _get_swagger_ui_html(
     *,
     spec_url: str,
     title: str,
@@ -58,7 +58,7 @@ with open("docs/spec.js", "w") as file:
     file.write(f"var spec = {json.dumps(app.openapi()).strip()}\n")
 
 with open("docs/index.html", "w") as file:
-    index = get_swagger_ui_html(
+    index = _get_swagger_ui_html(
         spec_url="./spec.js",
         title=app.title + " - Swagger UI",
     )

@@ -23,7 +23,7 @@ app.include_router(users_learning_daily_time_router)
 app.include_router(users_cumulative_learning_time_router)
 
 
-def custom_openapi() -> Dict[str, Any]:  # pragma: no cover
+def _custom_openapi() -> Dict[str, Any]:  # pragma: no cover
     """
     Add custom description to openapi schema.
     """
@@ -39,4 +39,4 @@ def custom_openapi() -> Dict[str, Any]:  # pragma: no cover
     return app.openapi_schema
 
 
-setattr(app, "openapi", custom_openapi)  # https://github.com/python/mypy/issues/2427
+setattr(app, "openapi", _custom_openapi)  # https://github.com/python/mypy/issues/2427
