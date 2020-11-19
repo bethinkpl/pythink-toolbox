@@ -777,3 +777,29 @@ def test_update_generation_end_time(
     assert (
         actual_generations_collection_content == expected_generations_collection_content
     )
+
+
+@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
+@pytest.mark.integration  # type: ignore[misc]
+def test_read_last_generation_time_range_end() -> None:
+
+    with pytest.raises(ValueError):
+        tested_module.read_last_generation_time_range_end()
+
+    for i in range(1, 4):
+        tested_module.insert_new_generation(
+            time_range=custom_types.TimeRange(
+                start=datetime(2000, i, i), end=datetime(2000, i, i, i)
+            ),
+            start_time=datetime(2000, i, i, i, i),
+        )
+
+    expected_last_generation_time_range_end = datetime(2000, 3, 3, 3)
+
+    actual_last_generation_time_range_end = (
+        tested_module.read_last_generation_time_range_end()
+    )
+
+    assert (
+        actual_last_generation_time_range_end == expected_last_generation_time_range_end
+    )

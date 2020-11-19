@@ -18,12 +18,60 @@ from chronos.activity_sessions.activity_events_source import (
 from chronos.storage import schemas, mongo_specs
 
 
+@freezegun.freeze_time("2000-01-01")
+def test_main(mocker: MockerFixture) -> None:
+    """Checks which function is called depending on conditions."""
+
+    # ================================== TEST CASE ====================================
+    mocker.patch(
+        "chronos.activity_sessions.main.read_last_generation_time_range_end",
+        return_value=datetime(1999, 12, 31),
+    )
+
+    mocked__run_activity_sessions_generation_for_all_users = mocker.patch(
+        transform_function_to_target_string(
+            tested_module._run_activity_sessions_generation_for_all_users
+        )
+    )
+    mocked__run_activity_sessions_generation_for_all_users_from_scratch = mocker.patch(
+        transform_function_to_target_string(
+            tested_module._run_activity_sessions_generation_for_all_users_from_scratch
+        )
+    )
+
+    tested_module.main()
+
+    mocked__run_activity_sessions_generation_for_all_users.assert_called_once_with(
+        time_range=TimeRange(start=datetime(1999, 12, 31), end=datetime(2000, 1, 1))
+    )
+
+    mocked__run_activity_sessions_generation_for_all_users_from_scratch.assert_not_called()
+
+    # ================================== TEST CASE ====================================
+    mocker.patch(
+        "chronos.activity_sessions.main.read_last_generation_time_range_end",
+        side_effect=ValueError("mocked err"),
+    )
+
+    mocked__run_activity_sessions_generation_for_all_users.reset_mock()
+
+    mocked__run_activity_sessions_generation_for_all_users_from_scratch.reset_mock()
+
+    tested_module.main()
+
+    mocked__run_activity_sessions_generation_for_all_users.assert_not_called()
+
+    mocked__run_activity_sessions_generation_for_all_users_from_scratch.assert_called_once_with(
+        time_range_end=datetime(2000, 1, 1)
+    )
+
+
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
 @freezegun.freeze_time("2000-1-2")  # type: ignore[misc]
 @pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
 @pytest.mark.e2e  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
-def test_main(
+def test__run_activity_sessions_generation_for_all_users(
     mocker: MockerFixture,
     get_collection_content_without_id_factory: Callable[
         [str], List[Dict[str, Union[int, datetime, bool]]]
@@ -78,7 +126,9 @@ def test_main(
         )
     )
 
-    tested_module.main(time_range=TimeRange(datetime(2000, 1, 1), datetime(2000, 1, 2)))
+    tested_module._run_activity_sessions_generation_for_all_users(
+        time_range=TimeRange(datetime(2000, 1, 1), datetime(2000, 1, 2))
+    )
 
     # ===================================== CHECK =====================================
     expected_activity_sessions_data = [
@@ -230,3 +280,23 @@ def test_main(
     assert expected_generations_data == get_collection_content_without_id_factory(
         "generations"
     )
+
+
+def test__run_activity_sessions_generation_for_all_users_from_scratch(
+    mocker: MockerFixture,
+) -> None:
+    """Checks how many times _run_activity_sessions_generation_for_all_users is called."""
+
+    mocked__run_activity_sessions_generation_for_all_users = mocker.patch(
+        transform_function_to_target_string(
+            tested_module._run_activity_sessions_generation_for_all_users
+        )
+    )
+
+    time_range_end = datetime(2019, 8, 11) + timedelta(days=301)
+
+    tested_module._run_activity_sessions_generation_for_all_users_from_scratch(
+        time_range_end=time_range_end
+    )
+
+    assert mocked__run_activity_sessions_generation_for_all_users.call_count == 3
