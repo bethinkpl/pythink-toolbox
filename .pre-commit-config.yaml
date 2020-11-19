@@ -5,7 +5,6 @@ repos:
         name: generate-API-documenation
         entry: docs/generate_api_doc.sh
         language: script
-        types: [python]
         pass_filenames: false
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
