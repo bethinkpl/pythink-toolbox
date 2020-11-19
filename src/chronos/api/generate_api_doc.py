@@ -32,9 +32,7 @@ def _get_swagger_ui_html(
     <script>
 
     const ui = SwaggerUIBundle({{
-        spec: spec,"""
-
-    html += """
+        spec: spec,
         dom_id: '#swagger-ui',
         presets: [
         SwaggerUIBundle.presets.apis,
@@ -44,13 +42,13 @@ def _get_swagger_ui_html(
         deepLinking: true,
         showExtensions: true,
         showCommonExtensions: true
-    })"""
+    }})
 
-    html += """
     </script>
     </body>
     </html>
     """.strip()
+
     return html
 
 
