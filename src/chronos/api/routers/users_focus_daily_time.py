@@ -4,13 +4,13 @@ from typing import List
 from fastapi.param_functions import Query
 from fastapi.routing import APIRouter
 
-from chronos.api.routers.description import (
-    START_ALIAS,
-    START_TITLE,
-    START_DESC,
-    END_ALIAS,
-    END_TITLE,
-    END_DESC,
+from chronos.api.routers.consts import (
+    RANGE_START_ALIAS,
+    RANGE_START_TITLE,
+    RANGE_START_DESC,
+    RANGE_END_ALIAS,
+    RANGE_END_TITLE,
+    RANGE_END_DESC,
 )
 from chronos.api.routers.models import UserDailyModel
 from chronos.api.storage_operations import UserDailyTime, read_daily_focus_time
@@ -27,10 +27,13 @@ users_focus_daily_time_router = APIRouter()
 def get_users_focus_daily_time(
     user_id: int,
     range_start: datetime = Query(
-        ..., alias=START_ALIAS, title=START_TITLE, description=START_DESC
+        ...,
+        alias=RANGE_START_ALIAS,
+        title=RANGE_START_TITLE,
+        description=RANGE_START_DESC,
     ),
     range_end: datetime = Query(
-        ..., alias=END_ALIAS, title=END_TITLE, description=END_DESC
+        ..., alias=RANGE_END_ALIAS, title=RANGE_END_TITLE, description=RANGE_END_DESC
     ),
 ) -> List[UserDailyTime]:
     """
