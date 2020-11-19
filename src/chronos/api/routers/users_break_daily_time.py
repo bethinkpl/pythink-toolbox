@@ -11,8 +11,6 @@ from chronos.api.routers.description import (
     END_ALIAS,
     END_TITLE,
     END_DESC,
-    BDT_TAG,
-    BDT_DESC,
 )
 from chronos.api.routers.models import UserDailyModel
 from chronos.api.storage_operations import UserDailyTime, read_daily_break_time
@@ -22,9 +20,9 @@ users_break_daily_time_router = APIRouter()
 
 @users_break_daily_time_router.get(
     "/users_break_daily_time/{user_id}",
-    tags=BDT_TAG,
+    tags=["Users Break Time"],
     response_model=List[UserDailyModel],
-    response_description=BDT_DESC,
+    response_description="Response delivers a list of time in milliseconds and corresponding date in ISO format.",
 )
 def get_users_break_daily_time(
     user_id: int,

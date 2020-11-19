@@ -11,8 +11,6 @@ from chronos.api.routers.description import (
     END_ALIAS,
     END_TITLE,
     END_DESC,
-    LDT_TAG,
-    LDT_DESC,
 )
 from chronos.api.routers.models import UserDailyModel
 from chronos.api.storage_operations import UserDailyTime, read_daily_learning_time
@@ -22,9 +20,9 @@ users_learning_daily_time_router = APIRouter()
 
 @users_learning_daily_time_router.get(
     "/users_learning_daily_time/{user_id}",
-    tags=LDT_TAG,
+    tags=["Users Learning Time"],
     response_model=List[UserDailyModel],
-    response_description=LDT_DESC,
+    response_description="Response delivers a list of time in milliseconds and corresponding date in ISO format.",
 )
 def get_users_learning_daily_time(
     user_id: int,

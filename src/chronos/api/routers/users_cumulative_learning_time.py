@@ -9,8 +9,6 @@ from chronos.api.routers.description import (
     END_ALIAS,
     END_TITLE,
     END_DESC,
-    CLT_TAG,
-    CLT_DESC,
 )
 from chronos.api.storage_operations import read_cumulative_learning_time
 
@@ -19,9 +17,9 @@ users_cumulative_learning_time_router = APIRouter()
 
 @users_cumulative_learning_time_router.get(
     "/users_cumulative_learning_time/{user_id}",
-    tags=CLT_TAG,
+    tags=["Cumulative Learning Time For All Users"],
     response_model=int,
-    response_description=CLT_DESC,
+    response_description="Response delivers cumulative time in milliseconds.",
 )
 def get_users_cumulative_learning_time(
     user_id: int,
