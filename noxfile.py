@@ -22,14 +22,9 @@ def check_black(session: Any) -> None:
     Usage:
         `poetry run nox -s check_black [--path]`
     """
-    session.run(
-        "poetry",
-        "run",
-        "black",
-        "--check",
-        *LOCATIONS,
-        external=True,
-    )
+
+    args = session.posargs or LOCATIONS
+    session.run("black", "--check", *args, external=True)
 
 
 tests_base_args = ["--cov=src", "--cov-report", "html"]
