@@ -2,14 +2,7 @@ from datetime import datetime
 from fastapi.param_functions import Query
 from fastapi.routing import APIRouter
 
-from chronos.api.routers.consts import (
-    RANGE_START_ALIAS,
-    RANGE_START_TITLE,
-    RANGE_START_DESC,
-    RANGE_END_ALIAS,
-    RANGE_END_TITLE,
-    RANGE_END_DESC,
-)
+from chronos.api.routers import consts
 from chronos.api.storage_operations import read_cumulative_learning_time
 
 users_cumulative_learning_time_router = APIRouter()
@@ -25,12 +18,15 @@ def get_users_cumulative_learning_time(
     user_id: int,
     range_start: datetime = Query(
         ...,
-        alias=RANGE_START_ALIAS,
-        title=RANGE_START_TITLE,
-        description=RANGE_START_DESC,
+        alias=consts.RANGE_START_ALIAS,
+        title=consts.RANGE_START_TITLE,
+        description=consts.RANGE_START_DESC,
     ),
     range_end: datetime = Query(
-        ..., alias=RANGE_END_ALIAS, title=RANGE_END_TITLE, description=RANGE_END_DESC
+        ...,
+        alias=consts.RANGE_END_ALIAS,
+        title=consts.RANGE_END_TITLE,
+        description=consts.RANGE_END_DESC,
     ),
 ) -> int:
     """
