@@ -1,4 +1,11 @@
 repos:
+-   repo: local
+    hooks:
+    -   id: generate-API-documenation
+        name: generate-API-documenation
+        entry: docs/generate_api_doc.sh
+        language: script
+        pass_filenames: false
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.3.0
     hooks:
