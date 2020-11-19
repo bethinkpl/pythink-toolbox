@@ -1,4 +1,5 @@
 # pylint: disable=missing-function-docstring
+# pylint: disable=protected-access
 
 from datetime import datetime, timedelta
 from typing import List, Dict, Union, Callable, Any
@@ -18,7 +19,7 @@ from chronos.activity_sessions.activity_events_source import (
 from chronos.storage import schemas, mongo_specs
 
 
-@freezegun.freeze_time("2000-01-01")
+@freezegun.freeze_time("2000-01-01")  # type: ignore[misc]
 def test_main(mocker: MockerFixture) -> None:
     """Checks which function is called depending on conditions."""
 

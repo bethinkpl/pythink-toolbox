@@ -14,7 +14,7 @@ from chronos.storage.schemas import UsersGenerationStatuesSchema
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main() -> None:
     """Activity sessions generation entry point."""
 
     logger.info("GENERATING ACTIVITY SESSIONS PROCEDURE INITIATED 🤠")

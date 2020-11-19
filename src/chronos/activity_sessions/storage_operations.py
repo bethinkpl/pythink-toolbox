@@ -209,12 +209,13 @@ def read_last_generation_time_range_end() -> datetime:
         ValueError when no document with `time_range.end` field
     """
 
-    time_range_end = mongo_specs.collections.generations.find_one(
+    document = mongo_specs.collections.generations.find_one(
         projection={"_id": False, "time_range.end": True},
         sort=[("time_range.end", pymongo.DESCENDING)],
     )
 
-    if not time_range_end:
+    if not document:
         raise ValueError("No time_range.end in the collection.")
 
-    return time_range_end["time_range"]["end"]
+    time_range_end: datetime = document["time_range"]["end"]
+    return time_range_end
