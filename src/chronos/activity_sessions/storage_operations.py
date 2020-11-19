@@ -198,3 +198,23 @@ def update_generation_end_time(
     mongo_specs.collections.generations.update_one(
         filter={"_id": generation_id}, update={"$set": {"end_time": end_time}}
     )
+
+
+def read_last_generation_time_range_end() -> datetime:
+    """
+    Returns:
+        Document from generation collection
+    with newest `time_range.end` time.
+    Raises:
+        ValueError when no document with `time_range.end` field
+    """
+
+    time_range_end = mongo_specs.collections.generations.find_one(
+        projection={"_id": False, "time_range.end": True},
+        sort=[("time_range.end", pymongo.DESCENDING)],
+    )
+
+    if not time_range_end:
+        raise ValueError("No time_range.end in the collection.")
+
+    return time_range_end["time_range"]["end"]

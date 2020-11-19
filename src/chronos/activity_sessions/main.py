@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from typing import List
 
@@ -6,12 +6,58 @@ from tqdm import tqdm
 
 from chronos.activity_sessions import storage_operations, activity_events_source
 from chronos import custom_types
+from chronos.activity_sessions.storage_operations import (
+    read_last_generation_time_range_end,
+)
 from chronos.storage.schemas import UsersGenerationStatuesSchema
 
 logger = logging.getLogger(__name__)
 
 
-def main(time_range: custom_types.TimeRange) -> None:
+def main():
+    """Activity sessions generation entry point."""
+
+    logger.info("GENERATING ACTIVITY SESSIONS PROCEDURE INITIATED 🤠")
+
+    try:
+        last_generation_time = read_last_generation_time_range_end()
+    except ValueError:
+        _run_activity_sessions_generation_for_all_users_from_scratch(
+            time_range_end=datetime.now()
+        )
+    else:
+        _run_activity_sessions_generation_for_all_users(
+            time_range=custom_types.TimeRange(
+                start=last_generation_time, end=datetime.now()
+            )
+        )
+
+
+def _run_activity_sessions_generation_for_all_users_from_scratch(
+    time_range_end: datetime,
+) -> None:
+    """Create activity_sessions for all the users
+    when no generation was performed initially."""
+
+    logger.info("Generating activity sessions from scratch")
+
+    start_date = datetime(2019, 8, 11)  # 13 Aug 2019 - date of table creation
+    chunk_size = timedelta(days=100)  # arbitrary set
+
+    time_range = custom_types.TimeRange(start=start_date, end=start_date + chunk_size)
+
+    while time_range.end < time_range_end:
+
+        _run_activity_sessions_generation_for_all_users(time_range=time_range)
+
+        time_range = custom_types.TimeRange(
+            start=time_range.end, end=time_range.end + chunk_size
+        )
+
+
+def _run_activity_sessions_generation_for_all_users(
+    time_range: custom_types.TimeRange,
+) -> None:
     """Create activity_sessions for all the users
     who had activity_events in a given time range
     and update the materialized views."""

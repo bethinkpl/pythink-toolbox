@@ -1,7 +1,6 @@
 # pylint: disable=import-outside-toplevel
 import subprocess
 from typing import Sequence
-from datetime import datetime, timedelta
 
 import click
 
@@ -42,7 +41,8 @@ def ci(session: str, other_args: Sequence[str], verbose: int) -> None:
             run_args += ["-s", session]
 
     if other_args:
-        run_args += ["--", f"-{'v'*verbose}", *other_args]
+        verbosity = ["-" + "v" * verbose] if verbose else []
+        run_args += ["--", *verbosity, *other_args]
 
     try:
         click.secho(f"RUN: {' '.join(run_args)}", fg="cyan", bold=True)
@@ -60,41 +60,9 @@ def generate_activity_sessions() -> None:
     """Generates activity_sessions from time of last generation to now
     and updates materialized views."""
 
-    import logging
+    import chronos.activity_sessions.main
 
-    from pymongo import DESCENDING
-
-    from chronos.activity_sessions.main import main
-    from chronos.storage import mongo_specs
-    from chronos.custom_types import TimeRange
-
-    def _generate_from_scratch() -> None:
-        logging.info("Generating activity sessions from scratch")
-
-        start_date = datetime(2019, 8, 11)  # 13 Aug 2019 - date of table creation
-        chunk_size = timedelta(days=100)
-
-        time_range = TimeRange(start=start_date, end=start_date + chunk_size)
-
-        while time_range.end < datetime.now():
-
-            main(time_range=time_range)
-
-            time_range = TimeRange(
-                start=time_range.end, end=time_range.end + chunk_size
-            )
-
-    time_range_end = mongo_specs.collections.generations.find_one(
-        projection={"_id": False, "time_range.end": True},
-        sort=[("time_range.end", DESCENDING)],
-    )
-
-    try:
-        last_generation_time = time_range_end["time_range"]["end"]
-    except KeyError:
-        _generate_from_scratch()
-    else:
-        main(time_range=TimeRange(start=last_generation_time, end=datetime.now()))
+    chronos.activity_sessions.main.main()
 
 
 cli_main.add_command(ci)
