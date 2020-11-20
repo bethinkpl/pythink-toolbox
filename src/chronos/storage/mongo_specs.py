@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import json
 import time
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from pymongo import MongoClient
@@ -73,16 +73,16 @@ class _MaterializedViews(_CollectionsBase):
 
 
 class _MongoSpecs:
-    def __init__(self):
-        self._client = None
-        self._database = None
-        self._collections = None
-        self._materialized_views = None
+    def __init__(self) -> None:
+        self._client: Optional[MongoClient] = None
+        self._database: Optional[Database] = None
+        self._collections: Optional[_Collections] = None
+        self._materialized_views: Optional[_MaterializedViews] = None
 
     @property
     def client(self) -> MongoClient:
         if self._client is None:
-            self._init_client()
+            self._client = self._init_client()
         return self._client
 
     @property
@@ -94,32 +94,34 @@ class _MongoSpecs:
     @property
     def collections(self) -> _Collections:
         if self._collections is None:
-            self._init_collections()
+            self._collections = self._init_collections()
         return self._collections
 
     @property
     def materialized_views(self) -> _MaterializedViews:
         if self._materialized_views is None:
-            self._init_materialized_views()
+            self._materialized_views = self._init_materialized_views()
         return self._materialized_views
 
-    def _init_client(self):
+    @staticmethod
+    def _init_client() -> MongoClient:
 
-        self._client = MongoClient(
+        client = MongoClient(
             host=settings.MONGO_HOST,
             port=settings.MONGO_PORT,
             username=settings.MONGO_USERNAME,
             password=settings.MONGO_PASSWORD,
         )
         try:
-            self._client.admin.command("replSetGetStatus")
+            client.admin.command("replSetGetStatus")
         except pymongo.errors.OperationFailure as err:
             if err.details["codeName"] == "NotYetInitialized":
-                self._client.admin.command("replSetInitiate")
+                client.admin.command("replSetInitiate")
 
         time.sleep(1)
+        return client
 
-    def _init_collections(self) -> None:
+    def _init_collections(self) -> _Collections:
 
         collections_names = list(
             _Collections.__annotations__.keys()  # pylint: disable=no-member
@@ -137,14 +139,14 @@ class _MongoSpecs:
 
                 self.database.create_collection(collection_name, validator=validator)
 
-        self._collections = _Collections(
+        return _Collections(
             *(
                 self.database.get_collection(name=col_name)
                 for col_name in collections_names
             )
         )
 
-    def _init_materialized_views(self):
+    def _init_materialized_views(self) -> _MaterializedViews:
 
         materialized_views_confs: Dict[str, Any] = {
             "learning_time_sessions_duration_mv": {
@@ -154,7 +156,7 @@ class _MongoSpecs:
             "focus_sessions_duration_mv": {"is_focus": {"$eq": True}},
         }
 
-        self._materialized_views = _MaterializedViews(
+        return _MaterializedViews(
             **{
                 name: _MaterializedView(
                     name=name,
