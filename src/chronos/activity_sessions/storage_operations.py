@@ -13,7 +13,7 @@ from chronos.activity_sessions.generation_operations import (
     generate_user_activity_sessions,
 )
 from chronos.custom_types import TimeRange
-from chronos.storage import mongo_specs
+from chronos.storage.mongo_specs import mongo_specs
 from chronos.storage.schemas import UsersGenerationStatuesSchema, GenerationsSchema
 
 logger = logging.getLogger(__name__)
