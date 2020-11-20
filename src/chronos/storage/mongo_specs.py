@@ -73,6 +73,8 @@ class _MaterializedViews(_CollectionsBase):
 
 
 class _MongoSpecs:
+    """Main storage class, containing all Mongo DB's specifications."""
+
     def __init__(self) -> None:
         self._client: Optional[MongoClient] = None
         self._database: Optional[Database] = None
@@ -81,24 +83,52 @@ class _MongoSpecs:
 
     @property
     def client(self) -> MongoClient:
+        """
+        Returns:
+            MongoClient object specified in configuration.
+        """
+
         if self._client is None:
             self._client = self._init_client()
         return self._client
 
     @property
     def database(self) -> Database:
+        """
+        Returns:
+            Mongo database specified in configuration.
+        """
+
         if self._database is None:
             self._database = self.client[settings.MONGO_DATABASE]
         return self._database
 
     @property
     def collections(self) -> _Collections:
+        """
+        Returns:
+            Mongo collections as attributes of this object
+            specified in _Collections class.
+        Examples:
+            To get `activity_sessions` object:
+            >>> _MongoSpecs().collections.activity_sessions
+        """
+
         if self._collections is None:
             self._collections = self._init_collections()
         return self._collections
 
     @property
     def materialized_views(self) -> _MaterializedViews:
+        """
+        Returns:
+            Mongo materialized_views as attributes of this object
+            specified in _Collections class.
+        Examples:
+            To get `activity_sessions` object:
+            >>> _MongoSpecs().materialized_views.activity_sessions
+        """
+
         if self._materialized_views is None:
             self._materialized_views = self._init_materialized_views()
         return self._materialized_views
