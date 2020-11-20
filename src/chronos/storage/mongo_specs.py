@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import json
-import time
+from time import sleep
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
@@ -148,7 +148,10 @@ class _MongoSpecs:
             if err.details["codeName"] == "NotYetInitialized":
                 client.admin.command("replSetInitiate")
 
-        time.sleep(1)
+        # mongo needs some time to figure out replication
+        # https://pymongo.readthedocs.io/en/stable/examples/high_availability.html#id1
+        sleep(1)
+
         return client
 
     def _init_collections(self) -> _Collections:
