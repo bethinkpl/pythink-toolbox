@@ -17,9 +17,9 @@ def pytest_sessionstart(
 ) -> None:
     """Runs this code before test session starts."""
 
-    from chronos.storage.mongo_specs import client, database
+    from chronos.storage.mongo_specs import mongo_specs
 
-    client.drop_database(database.name)
+    mongo_specs.client.drop_database(mongo_specs.database.name)
 
 
 # pylint: disable=unused-argument
@@ -29,9 +29,9 @@ def pytest_sessionfinish(
 ) -> None:
     """Runs this code after test session is finished."""
 
-    from chronos.storage.mongo_specs import client, database
+    from chronos.storage.mongo_specs import mongo_specs
 
-    client.drop_database(database.name)
+    mongo_specs.client.drop_database(mongo_specs.database.name)
 
 
 @pytest.fixture(name="get_collection_content_without_id_factory")
@@ -40,7 +40,7 @@ def get_collection_content_without_id_factory_as_fixture() -> Callable[
 ]:
     """Returns function that query Mongo activity_sessions collection
     and return all its content"""
-    from chronos.storage.mongo_specs import collections
+    from chronos.storage.mongo_specs import mongo_specs
 
     def _get_collection_content_without_id(
         collection_name: str,
@@ -48,7 +48,9 @@ def get_collection_content_without_id_factory_as_fixture() -> Callable[
 
         return [
             {key: value for key, value in document.items() if key != "_id"}
-            for document in collections.__getattribute__(collection_name).find()
+            for document in mongo_specs.collections.__getattribute__(
+                collection_name
+            ).find()
         ]
 
     return _get_collection_content_without_id
@@ -58,10 +60,13 @@ def get_collection_content_without_id_factory_as_fixture() -> Callable[
 def clear_storage_factory_as_fixture() -> Callable[[], None]:
     """Removes documents from every collection.
     https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures"""
-    from chronos.storage.mongo_specs import collections, materialized_views
+    from chronos.storage.mongo_specs import mongo_specs
 
     def _clear_storage() -> None:
-        for collection in collections.to_list() + materialized_views.to_list():
+        for collection in (
+            *mongo_specs.collections.to_list(),
+            *mongo_specs.materialized_views.to_list(),
+        ):
             collection.delete_many({})
 
     return _clear_storage
@@ -80,12 +85,12 @@ def get_materialized_view_content_factory_as_fixture() -> Callable[
     [str], List[schemas.MaterializedViewSchema]
 ]:
     """Returns function that query materialized view and return all its content."""
-    from chronos.storage.mongo_specs import database
+    from chronos.storage.mongo_specs import mongo_specs
 
     def _get_materialized_view_content(
         materialized_view_name: str,
     ) -> List[schemas.MaterializedViewSchema]:
-        materialized_view = database[materialized_view_name]
+        materialized_view = mongo_specs.database[materialized_view_name]
         return list(materialized_view.find())
 
     return _get_materialized_view_content
@@ -96,11 +101,11 @@ def insert_data_to_activity_sessions_collection_factory_as_fixture() -> Callable
     [List[schemas.ActivitySessionSchema]], None
 ]:
     """Inserts data to activity_sessions collection."""
-    from chronos.storage.mongo_specs import collections
+    from chronos.storage.mongo_specs import mongo_specs
 
     def _insert_data_to_activity_sessions_collection(
         data: List[schemas.ActivitySessionSchema],
     ) -> None:
-        collections.activity_sessions.insert_many(data)
+        mongo_specs.collections.activity_sessions.insert_many(data)
 
     return _insert_data_to_activity_sessions_collection

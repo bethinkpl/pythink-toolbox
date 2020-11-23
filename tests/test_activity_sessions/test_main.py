@@ -16,7 +16,8 @@ from chronos.custom_types import TimeRange
 from chronos.activity_sessions.activity_events_source import (
     read_activity_events_between_datetimes,
 )
-from chronos.storage import schemas, mongo_specs
+from chronos.storage import schemas
+from chronos.storage.mongo_specs import mongo_specs
 
 
 @freezegun.freeze_time("2000-01-01")  # type: ignore[misc]
