@@ -111,7 +111,7 @@ def _commit_transaction_with_retry(
     """
     https://docs.mongodb.com/manual/core/transactions-in-applications/#core-api
     """
-
+    retries = 0
     while True:
         try:
             session.commit_transaction()
@@ -120,10 +120,15 @@ def _commit_transaction_with_retry(
             pymongo.errors.ConnectionFailure,
             pymongo.errors.OperationFailure,
         ) as err:
+            if retries == 5:
+                raise RecursionError(
+                    "Too many retries to commit transaction. Aborting..."
+                ) from err
             if err.has_error_label("UnknownTransactionCommitResult"):
-                logging.error(
+                logger.error(
                     "UnknownTransactionCommitResult, retrying " "commit operation ..."
                 )
+                retries += 1
                 continue
 
             raise RuntimeError(
