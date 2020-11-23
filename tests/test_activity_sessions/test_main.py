@@ -19,10 +19,10 @@ from chronos.storage import schemas
 
 
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
-@freezegun.freeze_time("2000-1-2")  # type: ignore[misc]
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.e2e  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
+@freezegun.freeze_time("2000-1-2")
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.e2e
+@pytest.mark.integration
 def test_main(
     mocker: MockerFixture,
     get_collection_content_without_id_factory: Callable[

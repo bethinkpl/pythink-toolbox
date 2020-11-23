@@ -86,8 +86,8 @@ class ReadTimeScenario(Scenario):
     expected_output: List[tested_module.UserDailyTime]
 
 
-@pytest.mark.integration  # type: ignore[misc]
-@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")  # type: ignore[misc]
+@pytest.mark.integration
+@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")
 @parametrize(  # type: ignore[misc]
     [
         ReadTimeScenario(
@@ -150,8 +150,8 @@ def test_read_daily_learning_time(
     assert expected_output == actual_output
 
 
-@pytest.mark.integration  # type: ignore[misc]
-@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")  # type: ignore[misc]
+@pytest.mark.integration
+@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")
 @parametrize(  # type: ignore[misc]
     [
         ReadTimeScenario(
@@ -197,8 +197,8 @@ def test_read_daily_break_time(
     assert expected_output == actual_output
 
 
-@pytest.mark.integration  # type: ignore[misc]
-@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")  # type: ignore[misc]
+@pytest.mark.integration
+@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")
 @parametrize(  # type: ignore[misc]
     [
         ReadTimeScenario(
@@ -261,8 +261,8 @@ class CumulativeReadTimeScenario(Scenario):
     expected_output: int
 
 
-@pytest.mark.integration  # type: ignore[misc]
-@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")  # type: ignore[misc]
+@pytest.mark.integration
+@pytest.mark.usefixtures("clear_storage", "populate_materialized_views_with_test_data")
 @parametrize(  # type: ignore[misc]
     [
         CumulativeReadTimeScenario(
