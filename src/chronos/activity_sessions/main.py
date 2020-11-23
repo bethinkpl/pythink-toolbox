@@ -78,13 +78,11 @@ def _run_activity_sessions_generation_for_all_users(
         storage_operations.extract_users_with_failed_last_generation()
     )
 
-    user_ids_to_with_failed_generation = [
-        doc["user_id"] for doc in users_with_failed_last_generation
-    ]
-
     _generate_activity_sessions(
         time_range=time_range,
-        user_ids_to_with_failed_generation=user_ids_to_with_failed_generation,
+        user_ids_to_exclude=[
+            doc["user_id"] for doc in users_with_failed_last_generation
+        ],
     )
 
     _generate_activity_sessions_for_users_with_failed_status(
@@ -103,14 +101,14 @@ def _run_activity_sessions_generation_for_all_users(
 
 
 def _generate_activity_sessions(
-    time_range: custom_types.TimeRange, user_ids_to_with_failed_generation: List[int]
+    time_range: custom_types.TimeRange, user_ids_to_exclude: List[int]
 ) -> None:
 
     users_activity_events = (
         activity_events_source.read_activity_events_between_datetimes(
             start_time=time_range.start,
             end_time=time_range.end,
-            user_ids=user_ids_to_with_failed_generation,
+            user_ids=user_ids_to_exclude,
             user_exclude=True,
         )
     )
