@@ -6,9 +6,10 @@
 # pylint: disable=too-many-statements
 
 from datetime import datetime
-from typing import Dict, List, Callable, Iterator, Any
+from typing import Dict, List, Callable, Iterator, Any, Type
 
 import pandas as pd
+import pymongo.errors
 import pytest
 import pytest_mock
 import pytest_steps
@@ -310,6 +311,50 @@ def test_save_new_activity_sessions(
 
     clear_storage_factory()
     yield
+
+
+# =====================================================================================
+
+
+class _CommitTransactionWithRetryScenario(Scenario):
+    mongo_exception: pymongo.errors.PyMongoError
+    custom_exception: Type[RuntimeError]
+
+
+@parametrize(  # type: ignore[misc]
+    [
+        _CommitTransactionWithRetryScenario(
+            desc="ConnectionFailure",
+            mongo_exception=pymongo.errors.ConnectionFailure(),
+            custom_exception=RuntimeError,
+        ),
+        _CommitTransactionWithRetryScenario(
+            desc="OperationFailure",
+            mongo_exception=pymongo.errors.OperationFailure(error=None),
+            custom_exception=RuntimeError,
+        ),
+        _CommitTransactionWithRetryScenario(
+            desc="OperationFailure",
+            mongo_exception=pymongo.errors.OperationFailure(
+                error=None, details={"errorLabels": ["UnknownTransactionCommitResult"]}
+            ),
+            custom_exception=RecursionError,
+        ),
+    ]
+)
+def test__commit_transaction_with_retry(
+    mocker: pytest_mock.MockerFixture,
+    mongo_client: pymongo.MongoClient,
+    mongo_exception: pymongo.errors.PyMongoError,
+    custom_exception: Type[RuntimeError],
+) -> None:
+    with mongo_client.start_session() as session:
+
+        session.commit_transaction = mocker.Mock(
+            side_effect=mongo_exception,
+        )
+        with pytest.raises(custom_exception):
+            tested_module._commit_transaction_with_retry(session=session)
 
 
 # =====================================================================================
@@ -694,7 +739,6 @@ def test_update_materialized_views(
         [List[schemas.ActivitySessionSchema]], None
     ],
 ) -> None:
-
     insert_data_to_activity_sessions_collection_factory(activity_sessions_content)
 
     tested_module.update_materialized_views(reference_time=datetime(1970, 1, 1))
@@ -718,7 +762,6 @@ def test_update_materialized_views(
 def test_insert_new_generation(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
 ) -> None:
-
     tested_module.insert_new_generation(
         time_range=custom_types.TimeRange(
             start=datetime(2000, 1, 1), end=datetime(2000, 1, 1, 1)
@@ -749,7 +792,6 @@ def test_insert_new_generation(
 def test_update_generation_end_time(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
 ) -> None:
-
     generation_id = tested_module.insert_new_generation(
         time_range=custom_types.TimeRange(
             start=datetime(2000, 1, 1), end=datetime(2000, 1, 1, 1)
@@ -782,7 +824,6 @@ def test_update_generation_end_time(
 @pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
 @pytest.mark.integration  # type: ignore[misc]
 def test_read_last_generation_time_range_end() -> None:
-
     with pytest.raises(ValueError):
         tested_module.read_last_generation_time_range_end()
 

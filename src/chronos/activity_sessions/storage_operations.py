@@ -107,7 +107,7 @@ def _run_user_crud_operations_transaction(
 
 def _commit_transaction_with_retry(
     session: ClientSession,
-) -> None:  # TODO test this function
+) -> None:
     """
     https://docs.mongodb.com/manual/core/transactions-in-applications/#core-api
     """
