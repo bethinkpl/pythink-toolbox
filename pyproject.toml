@@ -19,7 +19,7 @@ pythink-toolbox = "^1.0.0"
 pymongo = "^3.11.1"
 fastapi = "^0.61.1"
 uvicorn = "^0.12.3"
-sentry-sdk = "^0.17.4"
+sentry-sdk = "^0.19.4"
 pytest-steps = "^1.7.3"
 
 [tool.poetry.dev-dependencies]
