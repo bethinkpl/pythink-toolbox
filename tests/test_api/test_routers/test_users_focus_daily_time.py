@@ -14,7 +14,7 @@ TEST_DATA = {
 USER_ID = 299
 
 
-@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.integration
 def test_get_users_focus_daily_time(api_client: TestClient) -> None:
     response = api_client.get(
         f"users_focus_daily_time/{USER_ID}", headers=HEADERS, params=TEST_DATA
