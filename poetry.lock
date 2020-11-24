@@ -642,9 +642,6 @@ version = "0.13.1"
 dev = ["pre-commit", "tox"]
 
 [[package]]
-name = "pre-commit"
-version = "2.9.0"
-description = "A framework for managing and maintaining multi-language pre-commit hooks."
 category = "dev"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 name = "pre-commit"
@@ -1117,9 +1114,8 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "b4836dc703565d8b6b831d7e96e6de9a7578876ca03d3bd2f7ac710439c550e5"
+content-hash = "154d8439f62419a7e010cbcd5627f03fd4f8d92c3a23c41bf1db36c03b762fd2"
 python-versions = "^3.8"
-content-hash = "e9177362c8045485214170499110dcb794f6bf8db386a6e2ad4a41dde2710a57"
 
 [metadata.files]
 appdirs = [
