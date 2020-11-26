@@ -25,7 +25,7 @@ app.include_router(users_cumulative_learning_time_router)
 
 
 @app.get("/health", status_code=status.HTTP_200_OK)
-def health():
+def health() -> str:
     return "I'm alive"
 
 
