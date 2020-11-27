@@ -1,6 +1,7 @@
+import contextlib
 from datetime import datetime, timedelta
 import logging
-from typing import List
+from typing import List, ContextManager
 
 from tqdm import tqdm
 
@@ -68,37 +69,46 @@ def _run_activity_sessions_generation_for_all_users(
         time_range.start,
         time_range.end,
     )
+    with _save_generation_data(time_range=time_range):
 
+        users_with_failed_last_generation = (
+            storage_operations.extract_users_with_failed_last_generation()
+        )
+        # earliest_successful_generation = min(
+        #     doc["time_until_generations_successful"]
+        #     for doc in users_with_failed_last_generation
+        # )  # FIXME
+
+        _generate_activity_sessions(
+            time_range=time_range,
+            user_ids_to_exclude=[
+                doc["user_id"] for doc in users_with_failed_last_generation
+            ],
+        )
+
+        _generate_activity_sessions_for_users_with_failed_status(
+            time_range_end=time_range.end,
+            users_with_failed_last_generation=users_with_failed_last_generation,
+        )
+
+    storage_operations.update_materialized_views(reference_time=time_range.start)
+    logger.info("Materialized views updated 🙌🏼")
+
+
+@contextlib.contextmanager
+def _save_generation_data(time_range: custom_types.TimeRange) -> ContextManager:
     generation_start_time = datetime.now()
-
     generation_id = storage_operations.insert_new_generation(
         time_range=time_range, start_time=generation_start_time
     )
-
-    users_with_failed_last_generation = (
-        storage_operations.extract_users_with_failed_last_generation()
-    )
-
-    _generate_activity_sessions(
-        time_range=time_range,
-        user_ids_to_exclude=[
-            doc["user_id"] for doc in users_with_failed_last_generation
-        ],
-    )
-
-    _generate_activity_sessions_for_users_with_failed_status(
-        time_range_end=time_range.end,
-        users_with_failed_last_generation=users_with_failed_last_generation,
-    )
+    yield None
 
     generation_end_time = datetime.now()
     storage_operations.update_generation_end_time(
         generation_id=generation_id, end_time=generation_end_time
     )
     logger.info("Generation took %s", generation_end_time - generation_start_time)
-
-    storage_operations.update_materialized_views(reference_time=time_range.start)
-    logger.info("Materialized views updated 🙌🏼")
+    # FIXME catch errors
 
 
 def _generate_activity_sessions(
