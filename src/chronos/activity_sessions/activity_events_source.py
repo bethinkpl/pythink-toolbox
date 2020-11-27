@@ -22,7 +22,7 @@ def read_activity_events_between_datetimes(
         FROM `{BIGQUERY_PLATFORM_DATASET_ID}.user_activity_events`
         WHERE client_time >= @start_time
           AND client_time < @end_time
-          AND user_id{" NOT " if user_exclude else " "}IN @user_ids
+          AND user_id{" NOT " if user_exclude else " "}IN UNNEST(@user_ids)
         GROUP BY user_id, client_time
         ORDER BY user_id, client_time;
         """
