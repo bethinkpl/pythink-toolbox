@@ -11,7 +11,7 @@ authors = [
 [tool.poetry.dependencies]
 python = "^3.8"
 pandas = "^1.1.0"
-datatosk = "^1.0.0"
+datatosk = "1.1.0a3" #FIXME
 python-dotenv = "^0.15.0"
 tqdm = "^4.53.0"
 pandera = "^0.4.4"
