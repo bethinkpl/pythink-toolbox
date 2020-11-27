@@ -74,10 +74,14 @@ def _run_activity_sessions_generation_for_all_users(
         users_with_failed_last_generation = (
             storage_operations.extract_users_with_failed_last_generation()
         )
-        # earliest_successful_generation = min(
-        #     doc["time_until_generations_successful"]
-        #     for doc in users_with_failed_last_generation
-        # )  # FIXME
+
+        cyk = [
+            doc["time_until_generations_successful"]
+            for doc in users_with_failed_last_generation
+        ]
+        earliest_successful_generation = (
+            min(cyk) if cyk else other_cyk
+        )  # FIXME addresses https://github.com/bethinkpl/chronos/pull/25#discussion_r531672361
 
         _generate_activity_sessions(
             time_range=time_range,
