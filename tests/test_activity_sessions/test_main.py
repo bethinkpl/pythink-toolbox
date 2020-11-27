@@ -20,7 +20,7 @@ from chronos.storage import schemas
 from chronos.storage.mongo_specs import mongo_specs
 
 
-@freezegun.freeze_time("2000-01-01")  # type: ignore[misc]
+@freezegun.freeze_time("2000-01-01")
 def test_main(mocker: MockerFixture) -> None:
     """Checks which function is called depending on conditions."""
 
@@ -295,7 +295,7 @@ def test__run_activity_sessions_generation_for_all_users_from_scratch(
         )
     )
 
-    time_range_end = datetime(2019, 8, 11) + timedelta(days=301)
+    time_range_end = datetime(2019, 8, 11) + timedelta(days=91)
 
     tested_module._run_activity_sessions_generation_for_all_users_from_scratch(
         time_range_end=time_range_end
