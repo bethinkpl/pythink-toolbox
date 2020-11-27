@@ -19,7 +19,7 @@ pythink-toolbox = "^1.0.0"
 pymongo = "^3.11.1"
 fastapi = "^0.61.1"
 uvicorn = "^0.12.3"
-sentry-sdk = "^0.17.4"
+sentry-sdk = "^0.19.4"
 pytest-steps = "^1.7.3"
 
 [tool.poetry.dev-dependencies]
@@ -30,7 +30,7 @@ pytest-mock = "^3.3.1"
 coverage = { version = "^5.1",  extras = ["toml"] }
 pytest-cov = "^2.10.1"
 hypothesis = { version = "^5.41.3",  extras = ["numpy", "pandas"] }
-mypy = "^0.782"
+mypy = "^0.790"
 nox = "^2020.5.24"
 pre-commit = "^2.9.0"
 freezegun = "^1.0.0"

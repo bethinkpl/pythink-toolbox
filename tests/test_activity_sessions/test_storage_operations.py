@@ -24,7 +24,7 @@ from chronos.storage import schemas
 TEST_USER_ID = 108
 
 
-@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.integration
 @pytest_steps.test_steps(  # type: ignore[misc]
     "Empty activity events",
     "Initial input - creates two separate active sessions and inactive in the middle",
@@ -679,8 +679,8 @@ TEST_DATA = [
 ]
 
 
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.integration
 @parametrize(TEST_DATA)  # type: ignore[misc]
 def test_update_materialized_views(
     activity_sessions_content: List[schemas.ActivitySessionSchema],
@@ -713,8 +713,8 @@ def test_update_materialized_views(
     assert expected_materialized_views_content == actual_materialized_views_content
 
 
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.integration
 def test_insert_new_generation(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
 ) -> None:
@@ -744,8 +744,8 @@ def test_insert_new_generation(
     )
 
 
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.integration
 def test_update_generation_end_time(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
 ) -> None:
@@ -779,8 +779,8 @@ def test_update_generation_end_time(
     )
 
 
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.integration
 def test_read_last_generation_time_range_end() -> None:
 
     with pytest.raises(ValueError):
