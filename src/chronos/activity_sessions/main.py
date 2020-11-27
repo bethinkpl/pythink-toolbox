@@ -9,6 +9,7 @@ from chronos import custom_types
 from chronos.activity_sessions.storage_operations import (
     read_last_generation_time_range_end,
 )
+from chronos import settings
 from chronos.storage.schemas import UsersGenerationStatuesSchema
 
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ def _run_activity_sessions_generation_for_all_users_from_scratch(
     logger.info("Generating activity sessions from scratch")
 
     start_date = datetime(2019, 8, 11)  # 13 Aug 2019 - date of table creation
-    chunk_size = timedelta(days=100)  # arbitrary set
+    chunk_size = timedelta(days=settings.ACTIVITY_SESSIONS_GENERATION_CHUNK_SIZE)
 
     time_range = custom_types.TimeRange(start=start_date, end=start_date + chunk_size)
 

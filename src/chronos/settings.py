@@ -1,6 +1,7 @@
 import logging
 import os
 import pathlib
+from typing import Final
 
 import dotenv
 
@@ -12,6 +13,8 @@ dotenv.load_dotenv(PROJECT_DIR / ".env")
 
 
 # === CHRONOS SPECIFIC ===
+
+ACTIVITY_SESSIONS_GENERATION_CHUNK_SIZE: Final[int] = 30
 
 # --- Storage ---
 MONGO_HOST = os.getenv("CHRONOS_MONGO_HOST", "")
