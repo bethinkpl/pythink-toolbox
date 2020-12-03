@@ -160,17 +160,16 @@ toml = ["toml"]
 
 [[package]]
 name = "datatosk"
-version = "1.0.0"
+version = "1.1.0"
 description = "Python library for fetching data from different sources"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
-google-cloud-bigquery = ">=1.24.0,<2.0.0"
-mysqlclient = ">=1.4.6,<2.0.0"
+google-cloud-bigquery = {version = ">=2.4.0,<3.0.0", extras = ["pandas", "pyarrow"]}
+mysqlclient = ">=2.0.1,<3.0.0"
 pandas = ">=1.0.1,<2.0.0"
-pandas-gbq = ">=0.13.1,<0.14.0"
 pymongo = ">=3.11.0,<4.0.0"
 sqlalchemy = ">=1.3.13,<2.0.0"
 
@@ -259,62 +258,29 @@ six = ">=1.9.0"
 aiohttp = ["aiohttp (>=3.6.2,<4.0.0dev)"]
 
 [[package]]
-name = "google-auth-oauthlib"
-version = "0.4.2"
-description = "Google Authentication Library"
+name = "google-cloud-bigquery"
+version = "2.5.0"
+description = "Google BigQuery API client library"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-google-auth = "*"
-requests-oauthlib = ">=0.7.0"
-
-[package.extras]
-tool = ["click"]
-
-[[package]]
-name = "google-cloud-bigquery"
-version = "1.28.0"
-description = "Google BigQuery API client library"
-category = "main"
-optional = false
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
-
-[package.dependencies]
-google-api-core = ">=1.21.0,<2.0dev"
-google-cloud-bigquery-storage = {version = ">=1.0.0,<2.0.0dev", optional = true, markers = "extra == \"bqstorage\""}
+google-api-core = {version = ">=1.23.0,<2.0.0dev", extras = ["grpc"]}
 google-cloud-core = ">=1.4.1,<2.0dev"
 google-resumable-media = ">=0.6.0,<2.0dev"
-grpcio = {version = ">=1.32.0,<2.0dev", optional = true, markers = "extra == \"bqstorage\""}
 pandas = {version = ">=0.23.0", optional = true, markers = "extra == \"pandas\""}
-pyarrow = {version = ">=1.0.0,<2.0dev", optional = true, markers = "extra == \"bqstorage\""}
+proto-plus = ">=1.10.0"
+protobuf = ">=3.12.0"
+pyarrow = {version = ">=1.0.0,<3.0dev", optional = true, markers = "extra == \"pandas\""}
 six = ">=1.13.0,<2.0.0dev"
 
 [package.extras]
-all = ["google-cloud-bigquery-storage (>=1.0.0,<2.0.0dev)", "grpcio (>=1.32.0,<2.0dev)", "pyarrow (>=1.0.0,<2.0dev)", "pandas (>=0.23.0)", "tqdm (>=4.7.4,<5.0.0dev)", "opentelemetry-api (==0.9b0)", "opentelemetry-sdk (==0.9b0)", "opentelemetry-instrumentation (==0.9b0)", "pyarrow (>=0.16.0,<0.17.0dev)", "pyarrow (>=1.0.0,<2.0de)"]
-bqstorage = ["google-cloud-bigquery-storage (>=1.0.0,<2.0.0dev)", "grpcio (>=1.32.0,<2.0dev)", "pyarrow (>=1.0.0,<2.0dev)"]
-fastparquet = ["fastparquet", "python-snappy", "llvmlite (<=0.31.0)", "llvmlite (<=0.34.0)"]
-opentelemetry = ["opentelemetry-api (==0.9b0)", "opentelemetry-sdk (==0.9b0)", "opentelemetry-instrumentation (==0.9b0)"]
-pandas = ["pandas (>=0.23.0)"]
-pyarrow = ["pyarrow (>=0.16.0,<0.17.0dev)", "pyarrow (>=1.0.0,<2.0de)"]
+all = ["google-cloud-bigquery-storage (>=2.0.0,<3.0.0dev)", "grpcio (>=1.32.0,<2.0dev)", "pyarrow (>=1.0.0,<3.0dev)", "pandas (>=0.23.0)", "tqdm (>=4.7.4,<5.0.0dev)", "opentelemetry-api (==0.11b0)", "opentelemetry-sdk (==0.11b0)", "opentelemetry-instrumentation (==0.11b0)"]
+bqstorage = ["google-cloud-bigquery-storage (>=2.0.0,<3.0.0dev)", "grpcio (>=1.32.0,<2.0dev)", "pyarrow (>=1.0.0,<3.0dev)"]
+opentelemetry = ["opentelemetry-api (==0.11b0)", "opentelemetry-sdk (==0.11b0)", "opentelemetry-instrumentation (==0.11b0)"]
+pandas = ["pandas (>=0.23.0)", "pyarrow (>=1.0.0,<3.0dev)"]
 tqdm = ["tqdm (>=4.7.4,<5.0.0dev)"]
-
-[[package]]
-name = "google-cloud-bigquery-storage"
-version = "1.1.0"
-description = "BigQuery Storage API API client library"
-category = "main"
-optional = false
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
-
-[package.dependencies]
-google-api-core = {version = ">=1.14.0,<2.0.0dev", extras = ["grpc"]}
-
-[package.extras]
-fastavro = ["fastavro (>=0.21.2)"]
-pandas = ["pandas (>=0.17.1)"]
-pyarrow = ["pyarrow (>=0.15.0)"]
 
 [[package]]
 name = "google-cloud-core"
@@ -514,11 +480,11 @@ python-versions = "*"
 
 [[package]]
 name = "mysqlclient"
-version = "1.4.6"
+version = "2.0.1"
 description = "Python interface to MySQL"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.5"
 
 [[package]]
 name = "nodeenv"
@@ -554,19 +520,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "oauthlib"
-version = "3.1.0"
-description = "A generic, spec-compliant, thorough implementation of the OAuth request-signing logic"
-category = "main"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-
-[package.extras]
-rsa = ["cryptography"]
-signals = ["blinker"]
-signedtoken = ["cryptography", "pyjwt (>=1.0.0)"]
-
-[[package]]
 name = "packaging"
 version = "20.4"
 description = "Core utilities for Python packages"
@@ -593,24 +546,6 @@ pytz = ">=2017.2"
 
 [package.extras]
 test = ["pytest (>=4.0.2)", "pytest-xdist", "hypothesis (>=3.58)"]
-
-[[package]]
-name = "pandas-gbq"
-version = "0.13.3"
-description = "Pandas interface to Google BigQuery"
-category = "main"
-optional = false
-python-versions = ">=3.5"
-
-[package.dependencies]
-google-auth = "*"
-google-auth-oauthlib = "*"
-google-cloud-bigquery = {version = ">=1.11.1,<2.0.0dev", extras = ["bqstorage", "pandas"]}
-pandas = ">=0.19.0"
-pydata-google-auth = "*"
-
-[package.extras]
-tqdm = ["tqdm (>=4.23.0)"]
 
 [[package]]
 name = "pandera"
@@ -662,6 +597,20 @@ nodeenv = ">=0.11.1"
 pyyaml = ">=5.1"
 toml = "*"
 virtualenv = ">=20.0.8"
+
+[[package]]
+name = "proto-plus"
+version = "1.11.0"
+description = "Beautiful, Pythonic protocol buffers."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+protobuf = ">=3.12.0"
+
+[package.extras]
+testing = ["google-api-core[grpc] (>=1.22.2)"]
 
 [[package]]
 name = "protobuf"
@@ -732,18 +681,6 @@ python-versions = ">=3.6"
 dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
 typing_extensions = ["typing-extensions (>=3.7.2)"]
-
-[[package]]
-name = "pydata-google-auth"
-version = "1.1.0"
-description = "PyData helpers for authenticating to Google APIs"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-google-auth = "*"
-google-auth-oauthlib = "*"
 
 [[package]]
 name = "pylint"
@@ -924,21 +861,6 @@ urllib3 = ">=1.21.1,<1.27"
 [package.extras]
 security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
 socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
-
-[[package]]
-name = "requests-oauthlib"
-version = "1.3.0"
-description = "OAuthlib authentication support for Requests."
-category = "main"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-
-[package.dependencies]
-oauthlib = ">=3.0.0"
-requests = ">=2.0.0"
-
-[package.extras]
-rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 
 [[package]]
 name = "rsa"
@@ -1129,7 +1051,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "48523dd3361e8bd6eb22f2f604854590729dce00af3dba8d28180e353ccaf03c"
+content-hash = "043a82e13e2dcaacd7f273b5f965aba6814b7645311ccd7bed56e59670ad35c8"
 
 [metadata.files]
 appdirs = [
@@ -1258,8 +1180,8 @@ coverage = [
     {file = "coverage-5.3.tar.gz", hash = "sha256:280baa8ec489c4f542f8940f9c4c2181f0306a8ee1a54eceba071a449fb870a0"},
 ]
 datatosk = [
-    {file = "datatosk-1.0.0-py3-none-any.whl", hash = "sha256:f684a61480d423a74027e8b30695479debcfc517dfeb9f4779dc2f2b5aa2247f"},
-    {file = "datatosk-1.0.0.tar.gz", hash = "sha256:c1fb361e27d7e6fcd3e9647569fa930f29117d946a102d4ce5785152c9a6e926"},
+    {file = "datatosk-1.1.0-py3-none-any.whl", hash = "sha256:647015831db113259ab19699ff7f6457293f5755c354850f9f74e880f5f9d5c6"},
+    {file = "datatosk-1.1.0.tar.gz", hash = "sha256:2a8edc1c56968c620f82cad4083dd0574eb8d87d4b0133b5cb160ce6f57d9f3b"},
 ]
 distlib = [
     {file = "distlib-0.3.1-py2.py3-none-any.whl", hash = "sha256:8c09de2c67b3e7deef7184574fc060ab8a793e7adbb183d942c389c8b13c52fb"},
@@ -1285,17 +1207,9 @@ google-auth = [
     {file = "google-auth-1.23.0.tar.gz", hash = "sha256:5176db85f1e7e837a646cd9cede72c3c404ccf2e3373d9ee14b2db88febad440"},
     {file = "google_auth-1.23.0-py2.py3-none-any.whl", hash = "sha256:b728625ff5dfce8f9e56a499c8a4eb51443a67f20f6d28b67d5774c310ec4b6b"},
 ]
-google-auth-oauthlib = [
-    {file = "google-auth-oauthlib-0.4.2.tar.gz", hash = "sha256:65b65bc39ad8cab15039b35e5898455d3d66296d0584d96fe0e79d67d04c51d9"},
-    {file = "google_auth_oauthlib-0.4.2-py2.py3-none-any.whl", hash = "sha256:d4d98c831ea21d574699978827490a41b94f05d565c617fe1b420e88f1fc8d8d"},
-]
 google-cloud-bigquery = [
-    {file = "google-cloud-bigquery-1.28.0.tar.gz", hash = "sha256:9784cff71d6a46ce202748169f9c7e38fc99d6babbb2f3cdc540475d11f572b9"},
-    {file = "google_cloud_bigquery-1.28.0-py2.py3-none-any.whl", hash = "sha256:9266e989531f290d3b836dc7b308ac22b350c4d664af19325bd0102261231b71"},
-]
-google-cloud-bigquery-storage = [
-    {file = "google-cloud-bigquery-storage-1.1.0.tar.gz", hash = "sha256:c92533cedbb672f1a35555c112d4d5cccb9f8f6d0e98a604fbf98223773adad3"},
-    {file = "google_cloud_bigquery_storage-1.1.0-py2.py3-none-any.whl", hash = "sha256:fc543e9d2343d34c043ad48984333ba84de10be31b7af8435548aaf8555507c4"},
+    {file = "google-cloud-bigquery-2.5.0.tar.gz", hash = "sha256:1e47e8b17a2f06f968a85933bd6665d699dbe7e5204cb8cd82605ce0d2e84102"},
+    {file = "google_cloud_bigquery-2.5.0-py2.py3-none-any.whl", hash = "sha256:67b298a3aaf50a6a50a3c308d336fc5a7213b8de70153bacab19c3998aca1451"},
 ]
 google-cloud-core = [
     {file = "google-cloud-core-1.4.3.tar.gz", hash = "sha256:21afb70c1b0bce8eeb8abb5dca63c5fd37fc8aea18f4b6d60e803bd3d27e6b80"},
@@ -1453,10 +1367,10 @@ mypy-extensions = [
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
 ]
 mysqlclient = [
-    {file = "mysqlclient-1.4.6-cp36-cp36m-win_amd64.whl", hash = "sha256:4c82187dd6ab3607150fbb1fa5ef4643118f3da122b8ba31c3149ddd9cf0cb39"},
-    {file = "mysqlclient-1.4.6-cp37-cp37m-win_amd64.whl", hash = "sha256:9e6080a7aee4cc6a06b58b59239f20f1d259c1d2fddf68ddeed242d2311c7087"},
-    {file = "mysqlclient-1.4.6-cp38-cp38-win_amd64.whl", hash = "sha256:f646f8d17d02be0872291f258cce3813497bc7888cd4712a577fd1e719b2f213"},
-    {file = "mysqlclient-1.4.6.tar.gz", hash = "sha256:f3fdaa9a38752a3b214a6fe79d7cae3653731a53e577821f9187e67cbecb2e16"},
+    {file = "mysqlclient-2.0.1-cp36-cp36m-win_amd64.whl", hash = "sha256:edd42ccaa444b00702d5374b2f5f7585c9d0ce201917f15339f1c3cf91c1b1ed"},
+    {file = "mysqlclient-2.0.1-cp37-cp37m-win_amd64.whl", hash = "sha256:3f39855a4ad22805361e782cc4d1010ac74796225fa2d1c03cc16673ccdc983a"},
+    {file = "mysqlclient-2.0.1-cp38-cp38-win_amd64.whl", hash = "sha256:a6b5648f648b16335e3b1aaec93dc3fcc81a9a661180e306936437cc522c810b"},
+    {file = "mysqlclient-2.0.1.tar.gz", hash = "sha256:fb2f75aea14722390d2d8ddf384ad99da708c707a96656210a7be8af20a2c5e5"},
 ]
 nodeenv = [
     {file = "nodeenv-1.5.0-py2.py3-none-any.whl", hash = "sha256:5304d424c529c997bc888453aeaa6362d242b6b4631e90f3d4bf1b290f1c84a9"},
@@ -1502,10 +1416,6 @@ numpy = [
     {file = "numpy-1.19.4-pp36-pypy36_pp73-manylinux2010_x86_64.whl", hash = "sha256:2a2740aa9733d2e5b2dfb33639d98a64c3b0f24765fed86b0fd2aec07f6a0a08"},
     {file = "numpy-1.19.4.zip", hash = "sha256:141ec3a3300ab89c7f2b0775289954d193cc8edb621ea05f99db9cb181530512"},
 ]
-oauthlib = [
-    {file = "oauthlib-3.1.0-py2.py3-none-any.whl", hash = "sha256:df884cd6cbe20e32633f1db1072e9356f53638e4361bef4e8b03c9127c9328ea"},
-    {file = "oauthlib-3.1.0.tar.gz", hash = "sha256:bee41cc35fcca6e988463cacc3bcb8a96224f470ca547e697b604cc697b2f889"},
-]
 packaging = [
     {file = "packaging-20.4-py2.py3-none-any.whl", hash = "sha256:998416ba6962ae7fbd6596850b80e17859a5753ba17c32284f67bfff33784181"},
     {file = "packaging-20.4.tar.gz", hash = "sha256:4357f74f47b9c12db93624a82154e9b120fa8293699949152b22065d556079f8"},
@@ -1536,10 +1446,6 @@ pandas = [
     {file = "pandas-1.1.4-cp39-cp39-win_amd64.whl", hash = "sha256:0a11a6290ef3667575cbd4785a1b62d658c25a2fd70a5adedba32e156a8f1773"},
     {file = "pandas-1.1.4.tar.gz", hash = "sha256:a979d0404b135c63954dea79e6246c45dd45371a88631cdbb4877d844e6de3b6"},
 ]
-pandas-gbq = [
-    {file = "pandas-gbq-0.13.3.tar.gz", hash = "sha256:d96b7fd29021892ba55a6d094e8f9ceb1973a5e72b819d0a01b26f12e132a205"},
-    {file = "pandas_gbq-0.13.3-py3-none-any.whl", hash = "sha256:6b02d2279e9629e332199d0a34a2f19d3c43df958a11967f9609595383b06674"},
-]
 pandera = [
     {file = "pandera-0.4.5-py3-none-any.whl", hash = "sha256:8f3c0cef8822d150ffb181b4d70e7604526b6bde14131838831c25a2f82ccb28"},
     {file = "pandera-0.4.5.tar.gz", hash = "sha256:eb0efb6e8d7d1a5edfbf15d8e8c8c0958c27484a98cffcd371ef688707b0b19c"},
@@ -1555,6 +1461,9 @@ pluggy = [
 pre-commit = [
     {file = "pre_commit-2.9.2-py2.py3-none-any.whl", hash = "sha256:949b13efb7467ae27e2c8f9e83434dacf2682595124d8902554a4e18351e5781"},
     {file = "pre_commit-2.9.2.tar.gz", hash = "sha256:e31c04bc23741194a7c0b983fe512801e151a0638c6001c49f2bd034f8a664a1"},
+]
+proto-plus = [
+    {file = "proto-plus-1.11.0.tar.gz", hash = "sha256:416a0f13987789333cd8760a0ee998f8eccd6d7165ee9f283d64ca2de3e8774d"},
 ]
 protobuf = [
     {file = "protobuf-3.13.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:9c2e63c1743cba12737169c447374fab3dfeb18111a460a8c1a000e35836b18c"},
@@ -1660,10 +1569,6 @@ pydantic = [
     {file = "pydantic-1.7.2-cp39-cp39-win_amd64.whl", hash = "sha256:f045cf7afb3352a03bc6cb993578a34560ac24c5d004fa33c76efec6ada1361a"},
     {file = "pydantic-1.7.2-py3-none-any.whl", hash = "sha256:6665f7ab7fbbf4d3c1040925ff4d42d7549a8c15fe041164adfe4fc2134d4cce"},
     {file = "pydantic-1.7.2.tar.gz", hash = "sha256:c8200aecbd1fb914e1bd061d71a4d1d79ecb553165296af0c14989b89e90d09b"},
-]
-pydata-google-auth = [
-    {file = "pydata-google-auth-1.1.0.tar.gz", hash = "sha256:27adc45f281ade0065b56a065413918c5c0546614f0868418cf6ea49b501805e"},
-    {file = "pydata_google_auth-1.1.0-py2.py3-none-any.whl", hash = "sha256:051e5370fb83bb113fcbba0d1e5b389ebc6790c675fabdab959f10694f9562b6"},
 ]
 pylint = [
     {file = "pylint-2.6.0-py3-none-any.whl", hash = "sha256:bfe68f020f8a0fece830a22dd4d5dddb4ecc6137db04face4c3420a46a52239f"},
@@ -1832,11 +1737,6 @@ regex = [
 requests = [
     {file = "requests-2.25.0-py2.py3-none-any.whl", hash = "sha256:e786fa28d8c9154e6a4de5d46a1d921b8749f8b74e28bde23768e5e16eece998"},
     {file = "requests-2.25.0.tar.gz", hash = "sha256:7f1a0b932f4a60a1a65caa4263921bb7d9ee911957e0ae4a23a6dd08185ad5f8"},
-]
-requests-oauthlib = [
-    {file = "requests-oauthlib-1.3.0.tar.gz", hash = "sha256:b4261601a71fd721a8bd6d7aa1cc1d6a8a93b4a9f5e96626f8e4d91e8beeaa6a"},
-    {file = "requests_oauthlib-1.3.0-py2.py3-none-any.whl", hash = "sha256:7f71572defaecd16372f9006f33c2ec8c077c3cfa6f5911a9a90202beb513f3d"},
-    {file = "requests_oauthlib-1.3.0-py3.7.egg", hash = "sha256:fa6c47b933f01060936d87ae9327fead68768b69c6c9ea2109c48be30f2d4dbc"},
 ]
 rsa = [
     {file = "rsa-4.6-py3-none-any.whl", hash = "sha256:6166864e23d6b5195a5cfed6cd9fed0fe774e226d8f854fcb23b7bbef0350233"},
