@@ -149,11 +149,15 @@ def update_materialized_views(reference_time: datetime) -> None:
             reference_time=reference_time,
         )
 
+    logger.info("Materialized views updated 🙌🏼")
 
-def extract_users_with_failed_last_generation() -> List[UsersGenerationStatuesSchema]:
+
+def extract_user_ids_and_time_when_last_status_failed_from_generations() -> List[
+    UsersGenerationStatuesSchema
+]:
     """
     Returns:
-        List of user_ids
+        List of doc with user_id and time_until_generations_successful fields.
     """
 
     return list(
@@ -166,6 +170,32 @@ def extract_users_with_failed_last_generation() -> List[UsersGenerationStatuesSc
             },
         )
     )
+
+
+def extract_min_time_when_last_status_failed_from_generations() -> Optional[datetime]:
+    """
+    Returns:
+        time of earliest timestamp of docs with last_status="failed"
+    """
+
+    doc = mongo_specs.collections.users_generation_statuses.find_one(
+        filter={
+            "last_status": "failed",
+            "time_until_generations_successful": {"$exists": True},
+        },
+        projection={
+            "_id": False,
+            "time_until_generations_successful": True,
+        },
+        sort=[("time_until_generations_successful", 1)],
+    )
+    try:
+        time_until_generations_successful: datetime = doc[
+            "time_until_generations_successful"
+        ]
+        return time_until_generations_successful
+    except TypeError:
+        return None
 
 
 def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.ObjectId:

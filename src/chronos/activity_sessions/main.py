@@ -1,19 +1,22 @@
-import contextlib
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 import logging
-from typing import List, ContextManager
+from typing import List, ContextManager, Union, Dict
 
 from tqdm import tqdm
+import pandas as pd
 
 from chronos.activity_sessions import storage_operations, activity_events_source
 from chronos import custom_types
 from chronos.activity_sessions.storage_operations import (
     read_last_generation_time_range_end,
+    extract_min_time_when_last_status_failed_from_generations,
 )
 from chronos import settings
-from chronos.storage.schemas import UsersGenerationStatuesSchema
 
 logger = logging.getLogger(__name__)
+
+ACTIVITY_EVENTS_TABLE_CREATION = datetime(2019, 8, 11)
 
 
 def main() -> None:
@@ -21,86 +24,87 @@ def main() -> None:
 
     logger.info("GENERATING ACTIVITY SESSIONS PROCEDURE INITIATED 🤠")
 
-    try:
-        last_generation_time = read_last_generation_time_range_end()
-    except ValueError:
-        _run_activity_sessions_generation_for_all_users_from_scratch(
-            time_range_end=datetime.now()
-        )
-    else:
-        _run_activity_sessions_generation_for_all_users(
-            time_range=custom_types.TimeRange(
-                start=last_generation_time, end=datetime.now()
-            )
-        )
+    min_time_when_last_status_failed_from_generations = (
+        extract_min_time_when_last_status_failed_from_generations()
+    )  # has to be extracted in the beginning, cuz it can change value during activity sessions generation
+
+    time_range = custom_types.TimeRange(
+        start=read_last_generation_time_range_end() or ACTIVITY_EVENTS_TABLE_CREATION,
+        end=datetime.now(),
+    )
+
+    _run_activity_sessions_generation(
+        time_range=time_range,
+    )
+
+    storage_operations.update_materialized_views(
+        reference_time=min_time_when_last_status_failed_from_generations
+        or time_range.start
+    )
 
 
-def _run_activity_sessions_generation_for_all_users_from_scratch(
-    time_range_end: datetime,
-) -> None:
-    """Create activity_sessions for all the users
-    when no generation was performed initially."""
-
-    logger.info("Generating activity sessions from scratch")
-
-    start_date = datetime(2019, 8, 11)  # 13 Aug 2019 - date of table creation
-    chunk_size = timedelta(days=settings.ACTIVITY_SESSIONS_GENERATION_CHUNK_SIZE)
-
-    time_range = custom_types.TimeRange(start=start_date, end=start_date + chunk_size)
-
-    while time_range.end < time_range_end:
-
-        _run_activity_sessions_generation_for_all_users(time_range=time_range)
-
-        time_range = custom_types.TimeRange(
-            start=time_range.end, end=time_range.end + chunk_size
-        )
-
-
-def _run_activity_sessions_generation_for_all_users(
+def _run_activity_sessions_generation(
     time_range: custom_types.TimeRange,
 ) -> None:
     """Create activity_sessions for all the users
-    who had activity_events in a given time range
-    and update the materialized views."""
+    who had activity_events in a given time range."""
 
     logger.info(
         "Generating activity sessions for range between %s & %s",
         time_range.start,
         time_range.end,
     )
-    with _save_generation_data(time_range=time_range):
 
-        users_with_failed_last_generation = (
-            storage_operations.extract_users_with_failed_last_generation()
+    interval_time_ranges = _calculate_intervals_for_time_range(
+        time_range=time_range,
+        interval_size=settings.ACTIVITY_SESSIONS_GENERATION_INTERVAL_SIZE,
+    )
+    for interval_time_range in interval_time_ranges:
+
+        user_ids_and_time_when_last_status_failed_from_generations = (
+            storage_operations.extract_user_ids_and_time_when_last_status_failed_from_generations()
         )
 
-        cyk = [
-            doc["time_until_generations_successful"]
-            for doc in users_with_failed_last_generation
-        ]
-        earliest_successful_generation = (
-            min(cyk) if cyk else other_cyk
-        )  # FIXME addresses https://github.com/bethinkpl/chronos/pull/25#discussion_r531672361
+        with _save_generation_data(time_range=interval_time_range):
+            _generate_activity_sessions(
+                time_range=interval_time_range,
+                user_ids_to_exclude=[
+                    doc["user_id"]
+                    for doc in user_ids_and_time_when_last_status_failed_from_generations
+                ],
+            )
 
-        _generate_activity_sessions(
-            time_range=time_range,
-            user_ids_to_exclude=[
-                doc["user_id"] for doc in users_with_failed_last_generation
-            ],
-        )
-
-        _generate_activity_sessions_for_users_with_failed_status(
-            time_range_end=time_range.end,
-            users_with_failed_last_generation=users_with_failed_last_generation,
-        )
-
-    storage_operations.update_materialized_views(reference_time=time_range.start)
-    logger.info("Materialized views updated 🙌🏼")
+            _generate_activity_sessions_for_users_with_failed_status(
+                time_range_end=interval_time_range.end,
+                user_ids_and_time_when_last_status_failed_from_generations=user_ids_and_time_when_last_status_failed_from_generations,
+            )
 
 
-@contextlib.contextmanager
+def _calculate_intervals_for_time_range(
+    time_range: custom_types.TimeRange,
+    interval_size: timedelta,
+) -> List[custom_types.TimeRange]:
+    # FIXME test
+
+    intervals_starts = pd.date_range(
+        start=time_range.start,
+        end=time_range.end,
+        freq=interval_size,
+    )
+
+    intervals = (
+        pd.DataFrame({"start": intervals_starts})
+        .assign(end=lambda df: df.start.shift(-1))
+        .fillna(time_range.end)
+        .to_dict(orient="records")
+    )
+
+    return [custom_types.TimeRange(**interval) for interval in intervals]
+
+
+@contextmanager
 def _save_generation_data(time_range: custom_types.TimeRange) -> ContextManager:
+    # FIXME test
     generation_start_time = datetime.now()
     generation_id = storage_operations.insert_new_generation(
         time_range=time_range, start_time=generation_start_time
@@ -112,7 +116,6 @@ def _save_generation_data(time_range: custom_types.TimeRange) -> ContextManager:
         generation_id=generation_id, end_time=generation_end_time
     )
     logger.info("Generation took %s", generation_end_time - generation_start_time)
-    # FIXME catch errors
 
 
 def _generate_activity_sessions(
@@ -138,10 +141,12 @@ def _generate_activity_sessions(
 
 def _generate_activity_sessions_for_users_with_failed_status(
     time_range_end: datetime,
-    users_with_failed_last_generation: List[UsersGenerationStatuesSchema],
+    user_ids_and_time_when_last_status_failed_from_generations: List[
+        Dict[str, Union[int, datetime]]
+    ],
 ) -> None:
 
-    for doc in users_with_failed_last_generation:
+    for doc in user_ids_and_time_when_last_status_failed_from_generations:
 
         user_id = doc["user_id"]
 

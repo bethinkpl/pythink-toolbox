@@ -32,12 +32,12 @@ def test_main(mocker: MockerFixture) -> None:
 
     mocked__run_activity_sessions_generation_for_all_users = mocker.patch(
         transform_function_to_target_string(
-            tested_module._run_activity_sessions_generation_for_all_users
+            tested_module._run_activity_sessions_generation
         )
     )
     mocked__run_activity_sessions_generation_for_all_users_from_scratch = mocker.patch(
         transform_function_to_target_string(
-            tested_module._run_activity_sessions_generation_for_all_users_from_scratch
+            tested_module._calculate_intervals_for_time_range
         )
     )
 
@@ -128,7 +128,7 @@ def test__run_activity_sessions_generation_for_all_users(
         )
     )
 
-    tested_module._run_activity_sessions_generation_for_all_users(
+    tested_module._run_activity_sessions_generation(
         time_range=TimeRange(datetime(2000, 1, 1), datetime(2000, 1, 2))
     )
 
@@ -291,14 +291,12 @@ def test__run_activity_sessions_generation_for_all_users_from_scratch(
 
     mocked__run_activity_sessions_generation_for_all_users = mocker.patch(
         transform_function_to_target_string(
-            tested_module._run_activity_sessions_generation_for_all_users
+            tested_module._run_activity_sessions_generation
         )
     )
 
     time_range_end = datetime(2019, 8, 11) + timedelta(days=91)
 
-    tested_module._run_activity_sessions_generation_for_all_users_from_scratch(
-        time_range_end=time_range_end
-    )
+    tested_module._calculate_intervals_for_time_range(time_range_end=time_range_end)
 
     assert mocked__run_activity_sessions_generation_for_all_users.call_count == 3
