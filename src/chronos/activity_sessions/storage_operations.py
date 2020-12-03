@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Union, List, Literal
+from typing import Optional, Dict, Union, List, Literal, Callable, Any
 from datetime import datetime
 
 import bson
@@ -32,37 +32,42 @@ def save_new_activity_sessions(
     )
 
     with mongo_specs.client.start_session() as session:
-        status: Literal["failed", "succeed"]
-        try:
-            _run_user_crud_operations_transaction(
-                user_id=user_id, activity_events=activity_events, session=session
-            )
+        status: Literal["failed", "succeed"] = _run_user_crud_operations_transaction(
+            user_id=user_id,
+            activity_events=activity_events,
+            session=session,
+        )
 
-        except Exception as err:  # pylint: disable=broad-except
+        _users_generation_statuses_update(
+            user_id=user_id, status=status, time_range_end=time_range_end
+        )
+
+
+def _return_status(
+    func: Callable[..., Any]
+) -> Callable[..., Literal["failed", "succeed"]]:
+    def wrapper(*args: Any, **kwargs: Any) -> Literal["failed", "succeed"]:
+        try:
+            func(*args, **kwargs)
+        except Exception as err:
             logger.error(
                 "%s has failed with error:\n%s",
-                _run_user_crud_operations_transaction.__name__,
+                func.__name__,
                 err,
             )
-            status = "failed"
-
+            return "failed"
         else:
-            status = "succeed"
+            return "succeed"
 
-        finally:
-            _users_generation_statuses_update(
-                user_id=user_id, status=status, time_range_end=time_range_end
-            )
+    return wrapper
 
 
 def _users_generation_statuses_update(
     user_id: int, status: Literal["failed", "succeed"], time_range_end: datetime
 ) -> None:
     generation_status = UsersGenerationStatuesSchema(
-        user_id=user_id, version=chronos.__version__
+        user_id=user_id, last_status=status, version=chronos.__version__
     )
-
-    generation_status["last_status"] = status
 
     if status == "succeed":
         generation_status["time_until_generations_successful"] = time_range_end
@@ -74,6 +79,7 @@ def _users_generation_statuses_update(
     )
 
 
+@_return_status
 def _run_user_crud_operations_transaction(
     user_id: int, activity_events: pd.Series, session: ClientSession
 ) -> None:
@@ -200,7 +206,7 @@ def update_generation_end_time(
     )
 
 
-def read_last_generation_time_range_end() -> datetime:
+def read_last_generation_time_range_end() -> Optional[datetime]:
     """
     Returns:
         Document from generation collection
@@ -215,7 +221,7 @@ def read_last_generation_time_range_end() -> datetime:
     )
 
     if not document:
-        raise ValueError("No time_range.end in the collection.")
+        return None
 
     time_range_end: datetime = document["time_range"]["end"]
     return time_range_end
