@@ -30,7 +30,7 @@ class UsersGenerationStatuesSchema(TypedDict, total=False):
 
     user_id: int
     last_status: Literal["succeed", "failed"]
-    time_until_generations_successful: datetime
+    generation_end_time: datetime
     version: str
 
 

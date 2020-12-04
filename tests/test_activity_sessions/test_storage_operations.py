@@ -50,7 +50,7 @@ def test_save_new_activity_sessions(
         {
             "user_id": TEST_USER_ID,
             "last_status": "succeed",
-            "time_until_generations_successful": datetime(1970, 1, 1),
+            "generation_end_time": datetime(1970, 1, 1),
             "version": chronos.__version__,
         }
     ]
@@ -267,7 +267,7 @@ test_scenarios = [
             schemas.UsersGenerationStatuesSchema(
                 user_id=TEST_USER_ID,
                 last_status="succeed",
-                time_until_generations_successful=datetime(2000, 1, 1),
+                generation_end_time=datetime(2000, 1, 1),
                 version=chronos.__version__,
             )
         ],
@@ -287,7 +287,7 @@ def test__users_generation_statuses_update(
 ) -> None:
 
     tested_module._users_generation_statuses_update(
-        user_id=TEST_USER_ID, status=status, time_range_end=time_range_end
+        user_id=TEST_USER_ID, status=status, generation_end_time=time_range_end
     )
 
     assert (
@@ -735,25 +735,25 @@ def test_extract_user_ids_and_time_when_last_status_failed_from_generations(
             schemas.UsersGenerationStatuesSchema(
                 user_id=TEST_USER_ID,
                 last_status="succeed",
-                time_until_generations_successful=datetime(2000, 1, 1),
+                generation_end_time=datetime(2000, 1, 1),
                 version=chronos.__version__,
             ),
             schemas.UsersGenerationStatuesSchema(
                 user_id=TEST_USER_ID,
                 last_status="failed",
-                time_until_generations_successful=datetime(2000, 2, 2),
+                generation_end_time=datetime(2000, 2, 2),
                 version=chronos.__version__,
             ),
             schemas.UsersGenerationStatuesSchema(
                 user_id=TEST_USER_ID,
                 last_status="succeed",
-                time_until_generations_successful=datetime(2000, 3, 3),
+                generation_end_time=datetime(2000, 3, 3),
                 version=chronos.__version__,
             ),
             schemas.UsersGenerationStatuesSchema(
                 user_id=TEST_USER_ID + 1,
                 last_status="failed",
-                time_until_generations_successful=datetime(2000, 4, 4),
+                generation_end_time=datetime(2000, 4, 4),
                 version=chronos.__version__,
             ),
         ],
@@ -762,11 +762,11 @@ def test_extract_user_ids_and_time_when_last_status_failed_from_generations(
     assert tested_module.extract_user_ids_and_time_when_last_status_failed_from_generations() == [
         schemas.UsersGenerationStatuesSchema(
             user_id=TEST_USER_ID,
-            time_until_generations_successful=datetime(2000, 2, 2),
+            generation_end_time=datetime(2000, 2, 2),
         ),
         schemas.UsersGenerationStatuesSchema(
             user_id=TEST_USER_ID + 1,
-            time_until_generations_successful=datetime(2000, 4, 4),
+            generation_end_time=datetime(2000, 4, 4),
         ),
     ]
 
@@ -791,25 +791,25 @@ def test_extract_min_time_when_last_status_failed_from_generations(
             schemas.UsersGenerationStatuesSchema(
                 user_id=TEST_USER_ID,
                 last_status="succeed",
-                time_until_generations_successful=datetime(2000, 1, 1),
+                generation_end_time=datetime(2000, 1, 1),
                 version=chronos.__version__,
             ),
             schemas.UsersGenerationStatuesSchema(
                 user_id=TEST_USER_ID,
                 last_status="failed",
-                time_until_generations_successful=datetime(2000, 2, 2),
+                generation_end_time=datetime(2000, 2, 2),
                 version=chronos.__version__,
             ),
             schemas.UsersGenerationStatuesSchema(
                 user_id=TEST_USER_ID,
                 last_status="succeed",
-                time_until_generations_successful=datetime(2000, 3, 3),
+                generation_end_time=datetime(2000, 3, 3),
                 version=chronos.__version__,
             ),
             schemas.UsersGenerationStatuesSchema(
                 user_id=TEST_USER_ID + 1,
                 last_status="failed",
-                time_until_generations_successful=datetime(2000, 4, 4),
+                generation_end_time=datetime(2000, 4, 4),
                 version=chronos.__version__,
             ),
         ],

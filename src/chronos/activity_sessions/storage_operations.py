@@ -39,12 +39,12 @@ def save_new_activity_sessions(
         )
 
         _users_generation_statuses_update(
-            user_id=user_id, status=status, time_range_end=time_range_end
+            user_id=user_id, status=status, generation_end_time=time_range_end
         )
 
 
 def _users_generation_statuses_update(
-    user_id: int, status: Literal["failed", "succeed"], time_range_end: datetime
+    user_id: int, status: Literal["failed", "succeed"], generation_end_time: datetime
 ) -> None:
 
     generation_status = UsersGenerationStatuesSchema(
@@ -52,7 +52,7 @@ def _users_generation_statuses_update(
     )
 
     if status == "succeed":
-        generation_status["time_until_generations_successful"] = time_range_end
+        generation_status["generation_end_time"] = generation_end_time
 
     mongo_specs.collections.users_generation_statuses.update_one(
         filter={"user_id": user_id},
@@ -156,7 +156,7 @@ def extract_user_ids_and_time_when_last_status_failed_from_generations() -> List
 ]:
     """
     Returns:
-        List of doc with user_id and time_until_generations_successful fields.
+        List of doc with user_id and generation_end_time fields.
     """
 
     return list(
@@ -165,7 +165,7 @@ def extract_user_ids_and_time_when_last_status_failed_from_generations() -> List
             projection={
                 "_id": False,
                 "user_id": True,
-                "time_until_generations_successful": True,
+                "generation_end_time": True,
             },
         )
     )
@@ -180,19 +180,17 @@ def extract_min_time_when_last_status_failed_from_generations() -> Optional[date
     doc = mongo_specs.collections.users_generation_statuses.find_one(
         filter={
             "last_status": "failed",
-            "time_until_generations_successful": {"$exists": True},
+            "generation_end_time": {"$exists": True},
         },
         projection={
             "_id": False,
-            "time_until_generations_successful": True,
+            "generation_end_time": True,
         },
-        sort=[("time_until_generations_successful", 1)],
+        sort=[("generation_end_time", 1)],
     )
     try:
-        time_until_generations_successful: datetime = doc[
-            "time_until_generations_successful"
-        ]
-        return time_until_generations_successful
+        generation_end_time: datetime = doc["generation_end_time"]
+        return generation_end_time
     except TypeError:
         return None
 

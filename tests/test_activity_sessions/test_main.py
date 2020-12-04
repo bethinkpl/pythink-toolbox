@@ -170,7 +170,7 @@ def test__run_activity_sessions_generation(
         schemas.UsersGenerationStatuesSchema(
             user_id=3,
             last_status="failed",
-            time_until_generations_successful=datetime(1999, 12, 31, 1),
+            generation_end_time=datetime(1999, 12, 31, 1),
             version=__version__,
         )
     )

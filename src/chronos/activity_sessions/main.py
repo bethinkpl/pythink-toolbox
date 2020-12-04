@@ -146,9 +146,7 @@ def _generate_activity_sessions_for_users_with_failed_status(
     for user_id_and_start_time in user_ids_and_start_times:
 
         user_id: int = user_id_and_start_time["user_id"]
-        start_time: datetime = user_id_and_start_time[
-            "time_until_generations_successful"
-        ]
+        start_time: datetime = user_id_and_start_time["generation_end_time"]
 
         activity_events = activity_events_source.read_activity_events_between_datetimes(
             start_time=start_time,

@@ -10,7 +10,7 @@
           "failed"
         ]
       },
-      "time_until_generations_successful": {
+      "generation_end_time": {
         "bsonType": "date",
         "description": "must be `date`"
       },
