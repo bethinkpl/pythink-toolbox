@@ -176,7 +176,6 @@ def extract_min_time_when_last_status_failed_from_generations() -> Optional[date
     Returns:
         time of earliest timestamp of docs with last_status="failed"
     """
-    # FIXME test
 
     doc = mongo_specs.collections.users_generation_statuses.find_one(
         filter={
