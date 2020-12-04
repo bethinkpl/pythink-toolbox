@@ -58,7 +58,7 @@ def _run_activity_sessions_generation(
         time_range=time_range,
         interval_size=settings.ACTIVITY_SESSIONS_GENERATION_INTERVAL_SIZE,
     )
-    for interval_time_range in interval_time_ranges:
+    for interval_time_range in tqdm(interval_time_ranges):
 
         user_ids_and_time_when_last_status_failed_from_generations = (
             storage_operations.extract_user_ids_and_time_when_last_status_failed_from_generations()
@@ -131,7 +131,7 @@ def _generate_activity_sessions(
 
     users_activity_events_groups = users_activity_events.groupby("user_id").client_time
 
-    for user_id, activity_events in tqdm(users_activity_events_groups):
+    for user_id, activity_events in users_activity_events_groups:
         storage_operations.save_new_activity_sessions(
             user_id, activity_events, time_range_end=time_range.end
         )

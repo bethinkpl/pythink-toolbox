@@ -99,8 +99,6 @@ def _run_user_crud_operations_transaction(
             session=session,
         )
 
-        logger.debug("last_active_session from mongo: \n%s", last_active_session)
-
         user_activity_sessions = generate_user_activity_sessions(
             user_id=user_id,
             activity_events=activity_events,
