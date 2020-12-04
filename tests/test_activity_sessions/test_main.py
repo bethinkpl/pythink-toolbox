@@ -2,13 +2,14 @@
 # pylint: disable=protected-access
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Union, Callable, Any
+from typing import List, Dict, Union, Callable, Any, Optional
 
 import freezegun
 import pytest
 from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
 import pandas as pd
+from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
 from chronos import __version__
 import chronos.activity_sessions.main as tested_module
@@ -20,51 +21,98 @@ from chronos.storage import schemas
 from chronos.storage.mongo_specs import mongo_specs
 
 
-@freezegun.freeze_time("2000-01-01")
-def test_main(mocker: MockerFixture) -> None:
-    """Checks which function is called depending on conditions."""
+class MainScenario(Scenario):
+    read_last_generation_time_range_end_return: Optional[datetime]
+    extract_min_time_when_last_status_failed_from_generations_return: Optional[datetime]
+    expected_time_range: TimeRange
+    expected_reference_time: datetime
 
-    # ================================== TEST CASE ====================================
+
+test_scenarios = [
+    MainScenario(
+        desc="all Nones",
+        read_last_generation_time_range_end_return=None,
+        extract_min_time_when_last_status_failed_from_generations_return=None,
+        expected_time_range=TimeRange(
+            start=datetime(2019, 8, 11), end=datetime(2020, 1, 1)
+        ),
+        expected_reference_time=datetime(2019, 8, 11),
+    ),
+    MainScenario(
+        desc="read_last_generation_time_range_end_return not None",
+        read_last_generation_time_range_end_return=datetime(2019, 12, 1),
+        extract_min_time_when_last_status_failed_from_generations_return=None,
+        expected_time_range=TimeRange(
+            start=datetime(2019, 12, 1), end=datetime(2020, 1, 1)
+        ),
+        expected_reference_time=datetime(2019, 12, 1),
+    ),
+    MainScenario(
+        desc="extract_min_time_when_last_status_failed_from_generations_return not None",
+        read_last_generation_time_range_end_return=None,
+        extract_min_time_when_last_status_failed_from_generations_return=datetime(
+            2019, 9, 8
+        ),
+        expected_time_range=TimeRange(
+            start=datetime(2019, 8, 11), end=datetime(2020, 1, 1)
+        ),
+        expected_reference_time=datetime(2019, 9, 8),
+    ),
+    MainScenario(
+        desc="both not None",
+        read_last_generation_time_range_end_return=datetime(2019, 12, 1),
+        extract_min_time_when_last_status_failed_from_generations_return=datetime(
+            2019, 9, 8
+        ),
+        expected_time_range=TimeRange(
+            start=datetime(2019, 12, 1), end=datetime(2020, 1, 1)
+        ),
+        expected_reference_time=datetime(2019, 9, 8),
+    ),
+]
+
+
+@freezegun.freeze_time("2020-01-01")
+@parametrize(test_scenarios)
+def test_main(
+    mocker: MockerFixture,
+    read_last_generation_time_range_end_return: Optional[datetime],
+    extract_min_time_when_last_status_failed_from_generations_return: Optional[
+        datetime
+    ],
+    expected_time_range: TimeRange,
+    expected_reference_time: datetime,
+) -> None:
+    """Makes sure that functions are called with proper arguments."""
+
     mocker.patch(
         "chronos.activity_sessions.main.read_last_generation_time_range_end",
-        return_value=datetime(1999, 12, 31),
+        return_value=read_last_generation_time_range_end_return,
     )
 
-    mocked__run_activity_sessions_generation_for_all_users = mocker.patch(
+    mocker.patch(
+        "chronos.activity_sessions.main.extract_min_time_when_last_status_failed_from_generations",
+        return_value=extract_min_time_when_last_status_failed_from_generations_return,
+    )
+
+    mocked__run_activity_sessions_generation = mocker.patch(
         transform_function_to_target_string(
             tested_module._run_activity_sessions_generation
         )
     )
-    mocked__run_activity_sessions_generation_for_all_users_from_scratch = mocker.patch(
+    mocked_update_materialized_views = mocker.patch(
         transform_function_to_target_string(
-            tested_module._calculate_intervals_for_time_range
+            tested_module.storage_operations.update_materialized_views
         )
     )
 
     tested_module.main()
 
-    mocked__run_activity_sessions_generation_for_all_users.assert_called_once_with(
-        time_range=TimeRange(start=datetime(1999, 12, 31), end=datetime(2000, 1, 1))
+    mocked__run_activity_sessions_generation.assert_called_once_with(
+        time_range=expected_time_range
     )
-
-    mocked__run_activity_sessions_generation_for_all_users_from_scratch.assert_not_called()
-
-    # ================================== TEST CASE ====================================
-    mocker.patch(
-        "chronos.activity_sessions.main.read_last_generation_time_range_end",
-        side_effect=ValueError("mocked err"),
-    )
-
-    mocked__run_activity_sessions_generation_for_all_users.reset_mock()
-
-    mocked__run_activity_sessions_generation_for_all_users_from_scratch.reset_mock()
-
-    tested_module.main()
-
-    mocked__run_activity_sessions_generation_for_all_users.assert_not_called()
-
-    mocked__run_activity_sessions_generation_for_all_users_from_scratch.assert_called_once_with(
-        time_range_end=datetime(2000, 1, 1)
+    mocked_update_materialized_views.assert_called_once_with(
+        reference_time=expected_reference_time
     )
 
 

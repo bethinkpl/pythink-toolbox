@@ -24,22 +24,21 @@ def main() -> None:
 
     logger.info("GENERATING ACTIVITY SESSIONS PROCEDURE INITIATED 🤠")
 
-    min_time_when_last_status_failed_from_generations = (
-        extract_min_time_when_last_status_failed_from_generations()
-    )  # has to be extracted in the beginning, cuz it can change value during activity sessions generation
-
     time_range = custom_types.TimeRange(
         start=read_last_generation_time_range_end() or ACTIVITY_EVENTS_TABLE_CREATION,
         end=datetime.now(),
     )
+
+    earliest_activity_session_change_time = (
+        extract_min_time_when_last_status_failed_from_generations() or time_range.start
+    )  # has to be extracted in the beginning, cuz it can change value during activity sessions generation
 
     _run_activity_sessions_generation(
         time_range=time_range,
     )
 
     storage_operations.update_materialized_views(
-        reference_time=min_time_when_last_status_failed_from_generations
-        or time_range.start
+        reference_time=earliest_activity_session_change_time
     )
 
 
@@ -76,7 +75,7 @@ def _run_activity_sessions_generation(
 
             _generate_activity_sessions_for_users_with_failed_status(
                 time_range_end=interval_time_range.end,
-                user_ids_and_time_when_last_status_failed_from_generations=user_ids_and_time_when_last_status_failed_from_generations,
+                user_ids_and_start_times=user_ids_and_time_when_last_status_failed_from_generations,
             )
 
 
@@ -141,17 +140,15 @@ def _generate_activity_sessions(
 
 def _generate_activity_sessions_for_users_with_failed_status(
     time_range_end: datetime,
-    user_ids_and_time_when_last_status_failed_from_generations: List[
-        Dict[str, Union[int, datetime]]
-    ],
+    user_ids_and_start_times: List[Dict[str, Union[int, datetime]]],
 ) -> None:
 
-    for doc in user_ids_and_time_when_last_status_failed_from_generations:
+    for user_id_and_start_time in user_ids_and_start_times:
 
-        user_id = doc["user_id"]
+        user_id = user_id_and_start_time["user_id"]
 
         activity_events = activity_events_source.read_activity_events_between_datetimes(
-            start_time=doc["time_until_generations_successful"],
+            start_time=user_id_and_start_time["time_until_generations_successful"],
             end_time=time_range_end,
             user_ids=[user_id],
         ).client_time
