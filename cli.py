@@ -65,7 +65,7 @@ def generate_activity_sessions() -> None:
         logging.info("Generating activity sessions from scratch")
 
         start_date = datetime(2019, 8, 11)  # 13 Aug 2019 - date of table creation
-        chunk_size = timedelta(days=100)
+        chunk_size = timedelta(days=10)
 
         time_range = TimeRange(start=start_date, end=start_date + chunk_size)
 
