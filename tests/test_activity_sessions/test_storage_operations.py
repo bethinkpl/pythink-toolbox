@@ -299,6 +299,23 @@ def test__users_generation_statuses_update(
 # =====================================================================================
 
 
+def test__return_status():
+    @tested_module._return_status
+    def _test_func():
+        pass
+
+    assert _test_func() == "succeed"
+
+    @tested_module._return_status
+    def _test_func_err():
+        raise Exception
+
+    assert _test_func_err() == "failed"
+
+
+# =====================================================================================
+
+
 class UpdateMaterializedViewsScenario(Scenario):
     activity_sessions_content: List[schemas.ActivitySessionSchema]
     expected_materialized_views_content: Dict[str, List[schemas.MaterializedViewSchema]]

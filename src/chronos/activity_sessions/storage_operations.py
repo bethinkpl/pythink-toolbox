@@ -64,7 +64,6 @@ def _users_generation_statuses_update(
 def _return_status(
     func: Callable[..., Any]
 ) -> Callable[..., Literal["failed", "succeed"]]:
-    # FIXME test it
     def wrapper(*args: Any, **kwargs: Any) -> Literal["failed", "succeed"]:
         try:
             func(*args, **kwargs)
