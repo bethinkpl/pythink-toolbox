@@ -6,13 +6,11 @@
 # pylint: disable=too-many-statements
 
 from datetime import datetime
-from typing import Dict, List, Callable, Iterator, Any
+from typing import Dict, List, Callable, Iterator, Any, Literal
 
 import pandas as pd
 import pytest
-import pytest_mock
 import pytest_steps
-from pythink_toolbox.testing import mocking
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
 import chronos.activity_sessions.storage_operations as tested_module
@@ -36,7 +34,6 @@ TEST_USER_ID = 108
 def test_save_new_activity_sessions(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]],
     clear_storage_factory: Callable[[], None],
-    mocker: pytest_mock.MockerFixture,
 ) -> Iterator[None]:
     def _save_new_activity_sessions_and_get_its_content(
         _activity_events: pd.Series,
@@ -238,6 +235,65 @@ def test_save_new_activity_sessions(
 
     clear_storage_factory()
     yield
+
+
+# =====================================================================================
+
+
+class UsersGenerationStatusesUpdateScenario(Scenario):
+    status: Literal["failed", "succeed"]
+    time_range_end: datetime
+    expected_users_generation_statuses_content: List[
+        schemas.UsersGenerationStatuesSchema
+    ]
+
+
+test_scenarios = [
+    UsersGenerationStatusesUpdateScenario(
+        desc="status failed",
+        status="failed",
+        time_range_end=datetime(2000, 1, 1),
+        expected_users_generation_statuses_content=[
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID, last_status="failed", version=chronos.__version__
+            )
+        ],
+    ),
+    UsersGenerationStatusesUpdateScenario(
+        desc="status succeed",
+        status="succeed",
+        time_range_end=datetime(2000, 1, 1),
+        expected_users_generation_statuses_content=[
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                time_until_generations_successful=datetime(2000, 1, 1),
+                version=chronos.__version__,
+            )
+        ],
+    ),
+]
+
+
+@pytest.mark.usefixtures("clear_storage")
+@parametrize(test_scenarios)
+def test__users_generation_statuses_update(
+    get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]],
+    status: Literal["failed", "succeed"],
+    time_range_end: datetime,
+    expected_users_generation_statuses_content: List[
+        schemas.UsersGenerationStatuesSchema
+    ],
+) -> None:
+
+    tested_module._users_generation_statuses_update(
+        user_id=TEST_USER_ID, status=status, time_range_end=time_range_end
+    )
+
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == expected_users_generation_statuses_content
+    )
 
 
 # =====================================================================================
@@ -641,6 +697,9 @@ def test_update_materialized_views(
     assert expected_materialized_views_content == actual_materialized_views_content
 
 
+# =====================================================================================
+
+
 @pytest.mark.usefixtures("clear_storage")
 @pytest.mark.integration
 def test_insert_new_generation(
@@ -670,6 +729,9 @@ def test_insert_new_generation(
     assert (
         actual_generations_collection_content == expected_generations_collection_content
     )
+
+
+# =====================================================================================
 
 
 @pytest.mark.usefixtures("clear_storage")
@@ -705,6 +767,9 @@ def test_update_generation_end_time(
     assert (
         actual_generations_collection_content == expected_generations_collection_content
     )
+
+
+# =====================================================================================
 
 
 @pytest.mark.usefixtures("clear_storage")
