@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 import logging
-from typing import List, ContextManager, Union, Dict
+from typing import List, Iterator
 
 from tqdm import tqdm
 import pandas as pd
@@ -13,6 +13,7 @@ from chronos.activity_sessions.storage_operations import (
     extract_min_time_when_last_status_failed_from_generations,
 )
 from chronos import settings
+from chronos.storage.schemas import UsersGenerationStatuesSchema
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ def _calculate_intervals_for_time_range(
 
 
 @contextmanager
-def _save_generation_data(time_range: custom_types.TimeRange) -> ContextManager:
+def _save_generation_data(time_range: custom_types.TimeRange) -> Iterator[None]:
     generation_start_time = datetime.now()
     generation_id = storage_operations.insert_new_generation(
         time_range=time_range, start_time=generation_start_time
@@ -139,7 +140,7 @@ def _generate_activity_sessions(
 
 def _generate_activity_sessions_for_users_with_failed_status(
     time_range_end: datetime,
-    user_ids_and_start_times: List[Dict[str, Union[int, datetime]]],
+    user_ids_and_start_times: List[UsersGenerationStatuesSchema],
 ) -> None:
 
     for user_id_and_start_time in user_ids_and_start_times:

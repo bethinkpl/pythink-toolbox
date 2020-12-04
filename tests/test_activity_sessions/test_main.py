@@ -30,7 +30,7 @@ class MainScenario(Scenario):
     expected_reference_time: datetime
 
 
-test_scenarios = [
+test_scenarios: List[MainScenario] = [
     MainScenario(
         desc="all Nones",
         read_last_generation_time_range_end_return=None,
@@ -253,20 +253,20 @@ class CalculateIntervalsForTimeRangeScenario(Scenario):
     expected: List[TimeRange]
 
 
-test_scenarios = [
-    CalculateIntervalsForTimeRangeScenario(  # type: ignore[list-item]
+test_scenarios: List[CalculateIntervalsForTimeRangeScenario] = [  # type: ignore[no-redef]
+    CalculateIntervalsForTimeRangeScenario(
         desc="no range",
         time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 1)),
         expected=[],
     ),
-    CalculateIntervalsForTimeRangeScenario(  # type: ignore[list-item]
+    CalculateIntervalsForTimeRangeScenario(
         desc="one range",
         time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
         expected=[
             TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
         ],
     ),
-    CalculateIntervalsForTimeRangeScenario(  # type: ignore[list-item]
+    CalculateIntervalsForTimeRangeScenario(
         desc="two ranges",
         time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31, 1)),
         expected=[
