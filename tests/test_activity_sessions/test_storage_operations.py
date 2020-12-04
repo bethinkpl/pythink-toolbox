@@ -691,12 +691,12 @@ def test_update_materialized_views(
     get_materialized_view_content_factory: Callable[
         [str], List[schemas.MaterializedViewSchema]
     ],
-    insert_data_to_activity_sessions_collection_factory: Callable[
-        [List[schemas.ActivitySessionSchema]], None
+    insert_data_to_collection_factory: Callable[
+        [str, List[schemas.ActivitySessionSchema]], None
     ],
 ) -> None:
 
-    insert_data_to_activity_sessions_collection_factory(activity_sessions_content)
+    insert_data_to_collection_factory("activity_sessions", activity_sessions_content)
 
     tested_module.update_materialized_views(reference_time=datetime(1970, 1, 1))
 
