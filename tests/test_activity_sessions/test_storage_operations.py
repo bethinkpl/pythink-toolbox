@@ -276,7 +276,7 @@ test_scenarios = [
 
 
 @pytest.mark.usefixtures("clear_storage")
-@parametrize(test_scenarios)
+@parametrize(test_scenarios)  # type: ignore[misc]
 def test__users_generation_statuses_update(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]],
     status: Literal["failed", "succeed"],
@@ -299,15 +299,15 @@ def test__users_generation_statuses_update(
 # =====================================================================================
 
 
-def test__return_status():
+def test__return_status() -> None:
     @tested_module._return_status
-    def _test_func():
+    def _test_func() -> None:
         pass
 
     assert _test_func() == "succeed"
 
     @tested_module._return_status
-    def _test_func_err():
+    def _test_func_err() -> None:
         raise Exception
 
     assert _test_func_err() == "failed"

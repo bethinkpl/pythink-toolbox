@@ -75,7 +75,7 @@ test_scenarios = [
 
 
 @freezegun.freeze_time("2020-01-01")
-@parametrize(test_scenarios)
+@parametrize(test_scenarios)  # type: ignore[misc]
 def test_main(
     mocker: MockerFixture,
     read_last_generation_time_range_end_return: Optional[datetime],
@@ -254,19 +254,19 @@ class CalculateIntervalsForTimeRangeScenario(Scenario):
 
 
 test_scenarios = [
-    CalculateIntervalsForTimeRangeScenario(
+    CalculateIntervalsForTimeRangeScenario(  # type: ignore[list-item]
         desc="no range",
         time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 1)),
         expected=[],
     ),
-    CalculateIntervalsForTimeRangeScenario(
+    CalculateIntervalsForTimeRangeScenario(  # type: ignore[list-item]
         desc="one range",
         time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
         expected=[
             TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
         ],
     ),
-    CalculateIntervalsForTimeRangeScenario(
+    CalculateIntervalsForTimeRangeScenario(  # type: ignore[list-item]
         desc="two ranges",
         time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31, 1)),
         expected=[
@@ -286,7 +286,7 @@ test_scenarios = [
 ]
 
 
-@parametrize(test_scenarios)
+@parametrize(test_scenarios)  # type: ignore[misc]
 def test__calculate_intervals_for_time_range(
     time_range: TimeRange, expected: List[TimeRange]
 ) -> None:
@@ -305,7 +305,7 @@ def test__save_generation_data(
     get_collection_content_without_id_factory: Callable[
         [str], List[Dict[str, Union[int, datetime, bool]]]
     ],
-):
+) -> None:
 
     time_range = TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31))
 
