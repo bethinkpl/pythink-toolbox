@@ -67,7 +67,7 @@ def _return_status(
     def wrapper(*args: Any, **kwargs: Any) -> Literal["failed", "succeed"]:
         try:
             func(*args, **kwargs)
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-except
             logger.error(
                 "%s has failed with error:\n%s",
                 func.__name__,

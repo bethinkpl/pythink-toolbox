@@ -1,4 +1,5 @@
 # pylint: disable=missing-function-docstring
+# pylint: disable=missing-class-docstring
 # pylint: disable=protected-access
 
 from datetime import datetime, timedelta
@@ -8,8 +9,8 @@ import freezegun
 import pytest
 from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
-import pandas as pd
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
+import pandas as pd
 
 from chronos import __version__
 import chronos.activity_sessions.main as tested_module
@@ -126,9 +127,6 @@ def test__run_activity_sessions_generation(
     mocker: MockerFixture,
     get_collection_content_without_id_factory: Callable[
         [str], List[Dict[str, Union[int, datetime, bool]]]
-    ],
-    get_materialized_view_content_factory: Callable[
-        [str], List[schemas.MaterializedViewSchema]
     ],
 ) -> None:
     """End-to-end overall happy-path activity sessions creation and materialized views updates."""
