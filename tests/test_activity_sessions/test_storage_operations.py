@@ -718,6 +718,63 @@ def test_update_materialized_views(
 
 
 @pytest.mark.usefixtures("clear_storage")
+def test_extract_user_ids_and_time_when_last_status_failed_from_generations(
+    insert_data_to_collection_factory: Callable[
+        [str, List[schemas.UsersGenerationStatuesSchema]], None
+    ]
+) -> None:
+
+    assert (
+        tested_module.extract_user_ids_and_time_when_last_status_failed_from_generations()
+        == []
+    )
+
+    insert_data_to_collection_factory(
+        "users_generation_statuses",
+        [
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                time_until_generations_successful=datetime(2000, 1, 1),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="failed",
+                time_until_generations_successful=datetime(2000, 2, 2),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                time_until_generations_successful=datetime(2000, 3, 3),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID + 1,
+                last_status="failed",
+                time_until_generations_successful=datetime(2000, 4, 4),
+                version=chronos.__version__,
+            ),
+        ],
+    )
+
+    assert tested_module.extract_user_ids_and_time_when_last_status_failed_from_generations() == [
+        schemas.UsersGenerationStatuesSchema(
+            user_id=TEST_USER_ID,
+            time_until_generations_successful=datetime(2000, 2, 2),
+        ),
+        schemas.UsersGenerationStatuesSchema(
+            user_id=TEST_USER_ID + 1,
+            time_until_generations_successful=datetime(2000, 4, 4),
+        ),
+    ]
+
+
+# =====================================================================================
+
+
+@pytest.mark.usefixtures("clear_storage")
 @pytest.mark.integration
 def test_insert_new_generation(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]

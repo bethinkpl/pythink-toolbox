@@ -158,7 +158,6 @@ def extract_user_ids_and_time_when_last_status_failed_from_generations() -> List
     Returns:
         List of doc with user_id and time_until_generations_successful fields.
     """
-    # FIXME test
 
     return list(
         mongo_specs.collections.users_generation_statuses.find(
@@ -177,6 +176,7 @@ def extract_min_time_when_last_status_failed_from_generations() -> Optional[date
     Returns:
         time of earliest timestamp of docs with last_status="failed"
     """
+    # FIXME test
 
     doc = mongo_specs.collections.users_generation_statuses.find_one(
         filter={
