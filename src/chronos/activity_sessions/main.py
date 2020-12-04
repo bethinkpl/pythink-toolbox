@@ -103,7 +103,6 @@ def _calculate_intervals_for_time_range(
 
 @contextmanager
 def _save_generation_data(time_range: custom_types.TimeRange) -> ContextManager:
-    # FIXME test
     generation_start_time = datetime.now()
     generation_id = storage_operations.insert_new_generation(
         time_range=time_range, start_time=generation_start_time

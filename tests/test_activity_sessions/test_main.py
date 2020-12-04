@@ -19,6 +19,7 @@ from chronos.activity_sessions.activity_events_source import (
 )
 from chronos.storage import schemas
 from chronos.storage.mongo_specs import mongo_specs
+from chronos.storage.schemas import GenerationsSchema
 
 
 class MainScenario(Scenario):
@@ -384,6 +385,29 @@ def test__calculate_intervals_for_time_range(
     assert expected == actual
 
 
-def test__save_generation_data():
-    # FIXME
-    pass
+@freezegun.freeze_time("2000-03-04")
+def test__save_generation_data(
+    get_collection_content_without_id_factory: Callable[
+        [str], List[Dict[str, Union[int, datetime, bool]]]
+    ],
+):
+
+    time_range = TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31))
+
+    with tested_module._save_generation_data(time_range=time_range):
+        assert get_collection_content_without_id_factory("generations") == [
+            GenerationsSchema(
+                time_range={"start": time_range.start, "end": time_range.end},
+                start_time=datetime(2000, 3, 4),
+                version=__version__,
+            )
+        ]
+
+    assert get_collection_content_without_id_factory("generations") == [
+        GenerationsSchema(
+            time_range={"start": time_range.start, "end": time_range.end},
+            start_time=datetime(2000, 3, 4),
+            end_time=datetime(2000, 3, 4),
+            version=__version__,
+        )
+    ]
