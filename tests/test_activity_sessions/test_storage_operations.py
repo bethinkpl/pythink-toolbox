@@ -31,8 +31,6 @@ TEST_USER_ID = 108
     "Takes last active session & extends its duration.",
     "Takes last active session & extends its duration, so it changes to focus session.",
     "Add new sessions one focused in the end and on that is 'break' before.",
-    "Exception raised - check data in failed_generation is correct.",
-    "Exception raised - for other user.",
     "Other user - proper generation.",
 )
 def test_save_new_activity_sessions(
@@ -214,67 +212,7 @@ def test_save_new_activity_sessions(
     yield
 
     # ================================= TEST STEP =====================================
-    # Exception raised - check data in failed_generation is correct.
-
-    mocker.patch(
-        mocking.transform_function_to_target_string(
-            tested_module._run_user_crud_operations_transaction
-        ),
-        side_effect=RuntimeError("mocked error"),
-        __name__="test",
-    )
-
-    tested_module.save_new_activity_sessions(
-        user_id=TEST_USER_ID,
-        activity_events=pd.Series([datetime(2000, 1, 1)]),
-        time_range_end=datetime(2013, 1, 1),
-    )
-
-    assert (
-        get_collection_content_without_id_factory("activity_sessions")
-        == expected_collection_content
-    )
-
-    users_generation_statuses_default_val[0]["last_status"] = "failed"
-    assert (
-        get_collection_content_without_id_factory("users_generation_statuses")
-        == users_generation_statuses_default_val
-    )
-
-    yield
-
-    # ================================= TEST STEP =====================================
-    # Exception raised - for other user
-
-    tested_module.save_new_activity_sessions(
-        user_id=TEST_USER_ID + 1,
-        activity_events=pd.Series([datetime(2000, 1, 1)]),
-        time_range_end=datetime(2013, 1, 1),
-    )
-
-    assert (
-        get_collection_content_without_id_factory("activity_sessions")
-        == expected_collection_content
-    )
-
-    expected_users_generation_statuses = users_generation_statuses_default_val + [
-        {
-            "user_id": TEST_USER_ID + 1,
-            "last_status": "failed",
-            "version": chronos.__version__,
-        }
-    ]
-    assert (
-        get_collection_content_without_id_factory("users_generation_statuses")
-        == expected_users_generation_statuses
-    )
-
-    yield
-
-    # ================================= TEST STEP =====================================
     # Other user - proper generation.
-
-    mocker.stopall()
 
     tested_module.save_new_activity_sessions(
         user_id=TEST_USER_ID + 1,
@@ -296,16 +234,6 @@ def test_save_new_activity_sessions(
     assert (
         get_collection_content_without_id_factory("activity_sessions")
         == expected_collection_content
-    )
-
-    expected_users_generation_statuses[1]["last_status"] = "succeed"
-    expected_users_generation_statuses[1][
-        "time_until_generations_successful"
-    ] = datetime(2013, 1, 1)
-
-    assert (
-        get_collection_content_without_id_factory("users_generation_statuses")
-        == expected_users_generation_statuses
     )
 
     clear_storage_factory()
@@ -783,8 +711,7 @@ def test_update_generation_end_time(
 @pytest.mark.integration
 def test_read_last_generation_time_range_end() -> None:
 
-    with pytest.raises(ValueError):
-        tested_module.read_last_generation_time_range_end()
+    assert tested_module.read_last_generation_time_range_end() is None
 
     for i in range(1, 4):
         tested_module.insert_new_generation(

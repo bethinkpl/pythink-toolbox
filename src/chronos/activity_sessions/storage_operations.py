@@ -43,9 +43,28 @@ def save_new_activity_sessions(
         )
 
 
+def _users_generation_statuses_update(
+    user_id: int, status: Literal["failed", "succeed"], time_range_end: datetime
+) -> None:
+    # FIXME test
+    generation_status = UsersGenerationStatuesSchema(
+        user_id=user_id, last_status=status, version=chronos.__version__
+    )
+
+    if status == "succeed":
+        generation_status["time_until_generations_successful"] = time_range_end
+
+    mongo_specs.collections.users_generation_statuses.update_one(
+        filter={"user_id": user_id},
+        update={"$set": generation_status},
+        upsert=True,
+    )
+
+
 def _return_status(
     func: Callable[..., Any]
 ) -> Callable[..., Literal["failed", "succeed"]]:
+    # FIXME test it
     def wrapper(*args: Any, **kwargs: Any) -> Literal["failed", "succeed"]:
         try:
             func(*args, **kwargs)
@@ -60,23 +79,6 @@ def _return_status(
             return "succeed"
 
     return wrapper
-
-
-def _users_generation_statuses_update(
-    user_id: int, status: Literal["failed", "succeed"], time_range_end: datetime
-) -> None:
-    generation_status = UsersGenerationStatuesSchema(
-        user_id=user_id, last_status=status, version=chronos.__version__
-    )
-
-    if status == "succeed":
-        generation_status["time_until_generations_successful"] = time_range_end
-
-    mongo_specs.collections.users_generation_statuses.update_one(
-        filter={"user_id": user_id},
-        update={"$set": generation_status},
-        upsert=True,
-    )
 
 
 @_return_status
@@ -159,6 +161,7 @@ def extract_user_ids_and_time_when_last_status_failed_from_generations() -> List
     Returns:
         List of doc with user_id and time_until_generations_successful fields.
     """
+    # FIXME test
 
     return list(
         mongo_specs.collections.users_generation_statuses.find(
