@@ -15,7 +15,7 @@ dotenv.load_dotenv(PROJECT_DIR / ".env")
 
 # === CHRONOS SPECIFIC ===
 
-ACTIVITY_SESSIONS_GENERATION_INTERVAL_SIZE: Final[timedelta] = timedelta(days=30)
+ACTIVITY_SESSIONS_GENERATION_INTERVAL_SIZE: Final[timedelta] = timedelta(days=10)
 
 # --- Storage ---
 MONGO_HOST = os.getenv("CHRONOS_MONGO_HOST", "")
