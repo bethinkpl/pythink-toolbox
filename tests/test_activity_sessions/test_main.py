@@ -121,7 +121,7 @@ def test_main(
 @pytest.mark.usefixtures("clear_storage")
 @pytest.mark.e2e
 @pytest.mark.integration
-def test__run_activity_sessions_generation_for_all_users(
+def test__run_activity_sessions_generation(
     mocker: MockerFixture,
     get_collection_content_without_id_factory: Callable[
         [str], List[Dict[str, Union[int, datetime, bool]]]
@@ -332,19 +332,58 @@ def test__run_activity_sessions_generation_for_all_users(
     )
 
 
-def test__run_activity_sessions_generation_for_all_users_from_scratch(
-    mocker: MockerFixture,
-) -> None:
-    """Checks how many times _run_activity_sessions_generation_for_all_users is called."""
+class CalculateIntervalsForTimeRangeScenario(Scenario):
+    time_range: TimeRange
+    expected: List[TimeRange]
 
-    mocked__run_activity_sessions_generation_for_all_users = mocker.patch(
-        transform_function_to_target_string(
-            tested_module._run_activity_sessions_generation
-        )
+
+test_scenarios = [
+    CalculateIntervalsForTimeRangeScenario(
+        desc="no range",
+        time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 1)),
+        expected=[],
+    ),
+    CalculateIntervalsForTimeRangeScenario(
+        desc="one range",
+        time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
+        expected=[
+            TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
+        ],
+    ),
+    CalculateIntervalsForTimeRangeScenario(
+        desc="two ranges",
+        time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31, 1)),
+        expected=[
+            TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
+            TimeRange(start=datetime(2000, 1, 31), end=datetime(2000, 1, 31, 1)),
+        ],
+    ),
+    CalculateIntervalsForTimeRangeScenario(
+        desc="many ranges",
+        time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 3, 15)),
+        expected=[
+            TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
+            TimeRange(start=datetime(2000, 1, 31), end=datetime(2000, 3, 1)),
+            TimeRange(start=datetime(2000, 3, 1), end=datetime(2000, 3, 15)),
+        ],
+    ),
+]
+
+
+@parametrize(test_scenarios)
+def test__calculate_intervals_for_time_range(
+    time_range: TimeRange, expected: List[TimeRange]
+) -> None:
+
+    interval_size: timedelta = timedelta(days=30)
+
+    actual = tested_module._calculate_intervals_for_time_range(
+        time_range=time_range, interval_size=interval_size
     )
 
-    time_range_end = datetime(2019, 8, 11) + timedelta(days=91)
+    assert expected == actual
 
-    tested_module._calculate_intervals_for_time_range(time_range_end=time_range_end)
 
-    assert mocked__run_activity_sessions_generation_for_all_users.call_count == 3
+def test__save_generation_data():
+    # FIXME
+    pass

@@ -83,7 +83,6 @@ def _calculate_intervals_for_time_range(
     time_range: custom_types.TimeRange,
     interval_size: timedelta,
 ) -> List[custom_types.TimeRange]:
-    # FIXME test
 
     intervals_starts = pd.date_range(
         start=time_range.start,
@@ -95,6 +94,7 @@ def _calculate_intervals_for_time_range(
         pd.DataFrame({"start": intervals_starts})
         .assign(end=lambda df: df.start.shift(-1))
         .fillna(time_range.end)
+        .query("start != end")
         .to_dict(orient="records")
     )
 
