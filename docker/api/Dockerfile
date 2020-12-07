@@ -3,7 +3,11 @@ FROM python:3.8
 EXPOSE 8108
 
 RUN useradd gunicorn
-RUN pip install --no-cache-dir uvicorn[standard] gunicorn poetry
+ENV \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on
+
+RUN pip install poetry
 
 COPY ./docker/api/gunicorn_conf.py /gunicorn_conf.py
 
