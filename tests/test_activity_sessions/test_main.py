@@ -3,21 +3,21 @@
 # pylint: disable=protected-access
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Union, Callable, Any, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import freezegun
+import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
-from pythink_toolbox.testing.parametrization import parametrize, Scenario
-import pandas as pd
+from pythink_toolbox.testing.parametrization import Scenario, parametrize
 
-from chronos import __version__
 import chronos.activity_sessions.main as tested_module
-from chronos.custom_types import TimeRange
+from chronos import __version__
 from chronos.activity_sessions.activity_events_source import (
     read_activity_events_between_datetimes,
 )
+from chronos.custom_types import TimeRange
 from chronos.storage import schemas
 from chronos.storage.mongo_specs import mongo_specs
 from chronos.storage.schemas import GenerationsSchema

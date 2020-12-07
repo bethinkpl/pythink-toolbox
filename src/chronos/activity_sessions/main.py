@@ -1,18 +1,17 @@
+import logging
 from contextlib import contextmanager
 from datetime import datetime, timedelta
-import logging
-from typing import List, Iterator
+from typing import Iterator, List
 
-from tqdm import tqdm
 import pandas as pd
+from tqdm import tqdm
 
-from chronos.activity_sessions import storage_operations, activity_events_source
-from chronos import custom_types
+from chronos import custom_types, settings
+from chronos.activity_sessions import activity_events_source, storage_operations
 from chronos.activity_sessions.storage_operations import (
-    read_last_generation_time_range_end,
     extract_min_last_successful_generation_end_time,
+    read_last_generation_time_range_end,
 )
-from chronos import settings
 from chronos.storage.schemas import UsersGenerationStatuesSchema
 
 logger = logging.getLogger(__name__)

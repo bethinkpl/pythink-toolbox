@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TypedDict, Literal
+from typing import Literal, TypedDict
 
 
 class ActivitySessionSchema(TypedDict):
