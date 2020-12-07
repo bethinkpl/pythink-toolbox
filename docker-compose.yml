@@ -11,6 +11,9 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: local
+    volumes:
+      - mongo-config-volume:/data/configdb
+      - mongo-data-volume:/data/db
 
   mongo-express:
     container_name: chronos_mongo-express
@@ -53,3 +56,7 @@ services:
       - ".:/chronos"
     depends_on:
       - mongo
+
+volumes:
+  mongo-data-volume:
+  mongo-config-volume:
