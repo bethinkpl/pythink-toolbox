@@ -776,16 +776,13 @@ def test_extract_user_ids_and_time_when_last_status_failed_from_generations(
 # =====================================================================================
 
 
-def test_extract_min_time_when_last_status_failed_from_generations(
+def test_extract_min_last_successful_generation_end_time(
     insert_data_to_collection_factory: Callable[
         [str, List[schemas.UsersGenerationStatuesSchema]], None
     ]
 ) -> None:
 
-    assert (
-        tested_module.extract_min_time_when_last_status_failed_from_generations()
-        is None
-    )
+    assert tested_module.extract_min_last_successful_generation_end_time() is None
 
     insert_data_to_collection_factory(
         "users_generation_statuses",
@@ -817,9 +814,8 @@ def test_extract_min_time_when_last_status_failed_from_generations(
         ],
     )
 
-    assert (
-        tested_module.extract_min_time_when_last_status_failed_from_generations()
-        == datetime(2000, 2, 2)
+    assert tested_module.extract_min_last_successful_generation_end_time() == datetime(
+        2000, 2, 2
     )
 
 

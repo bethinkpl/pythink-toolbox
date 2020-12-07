@@ -177,7 +177,7 @@ def extract_user_ids_and_time_when_last_status_failed_from_generations() -> List
     )
 
 
-def extract_min_time_when_last_status_failed_from_generations() -> Optional[datetime]:
+def extract_min_last_successful_generation_end_time() -> Optional[datetime]:
     """
     Returns:
         time of earliest timestamp of docs with last_status="failed"

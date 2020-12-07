@@ -10,7 +10,7 @@ from chronos.activity_sessions import storage_operations, activity_events_source
 from chronos import custom_types
 from chronos.activity_sessions.storage_operations import (
     read_last_generation_time_range_end,
-    extract_min_time_when_last_status_failed_from_generations,
+    extract_min_last_successful_generation_end_time,
 )
 from chronos import settings
 from chronos.storage.schemas import UsersGenerationStatuesSchema
@@ -31,7 +31,7 @@ def main() -> None:
     )
 
     earliest_activity_session_change_time = (
-        extract_min_time_when_last_status_failed_from_generations() or time_range.start
+        extract_min_last_successful_generation_end_time() or time_range.start
     )  # has to be extracted in the beginning, cuz it can change value during activity sessions generation
 
     _run_activity_sessions_generation(
