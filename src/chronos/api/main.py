@@ -1,9 +1,10 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 from fastapi import status
 from fastapi.applications import FastAPI
 from fastapi.openapi.utils import get_openapi
 
+from chronos import __version__
 from chronos.api.routers.users_break_daily_time import users_break_daily_time_router
 from chronos.api.routers.users_cumulative_learning_time import (
     users_cumulative_learning_time_router,
@@ -13,7 +14,6 @@ from chronos.api.routers.users_learning_daily_time import (
     users_learning_daily_time_router,
 )
 from chronos.logger import logger
-from chronos import __version__
 
 logger.init_for_api()
 app = FastAPI()

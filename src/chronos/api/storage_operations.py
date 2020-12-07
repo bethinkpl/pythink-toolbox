@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, TypedDict, Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple, TypedDict
 
 from chronos.storage.mongo_specs import mongo_specs
 

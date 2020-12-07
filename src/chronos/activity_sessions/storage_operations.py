@@ -1,6 +1,6 @@
 import logging
-from typing import Optional, Dict, Union, List, Literal, Callable, Any
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Literal, Optional, Union
 
 import bson
 import pandas as pd
@@ -14,7 +14,7 @@ from chronos.activity_sessions.generation_operations import (
 )
 from chronos.custom_types import TimeRange
 from chronos.storage.mongo_specs import mongo_specs
-from chronos.storage.schemas import UsersGenerationStatuesSchema, GenerationsSchema
+from chronos.storage.schemas import GenerationsSchema, UsersGenerationStatuesSchema
 
 logger = logging.getLogger(__name__)
 
