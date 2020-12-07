@@ -20,11 +20,5 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Docker Compose
-      run: docker-compose -f docker-compose-ci.yml up -d
-
-    - name: Wait for MongoDB
-      run: until docker exec ci_mongo mongo -uci_user -pci_pass --eval "print(\"Don't want to wait no longer!\")"; do sleep 1; done
-
     - name: Run CI checks
-      run: docker exec chronos_base poetry run cli ci --environment=ci
+      run: docker-compose -f docker-compose-ci.yml run chronos-ci

@@ -1,10 +1,10 @@
 # pylint: disable=missing-function-docstring
 from datetime import datetime
+from typing import Dict
 
 import pytest
 from starlette.testclient import TestClient
 
-from tests.consts import HEADERS, STATUS_OK
 
 TEST_DATA = {
     "range-start": datetime(2000, 1, 1).isoformat(),
@@ -15,9 +15,11 @@ USER_ID = 299
 
 
 @pytest.mark.integration
-def test_get_users_break_daily_time(api_client: TestClient) -> None:
+def test_get_users_break_daily_time(
+    api_client: TestClient, status_ok: int, headers: Dict[str, str]
+) -> None:
     response = api_client.get(
-        f"/users_break_daily_time/{USER_ID}", headers=HEADERS, params=TEST_DATA
+        f"/users_break_daily_time/{USER_ID}", headers=headers, params=TEST_DATA
     )
-    assert response.status_code == STATUS_OK
+    assert response.status_code == status_ok
     assert isinstance(response.json(), list)

@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.8 as base
 
 RUN pip install poetry
 
@@ -11,3 +11,6 @@ RUN poetry config virtualenvs.create false \
 
 # to keep container running:
 CMD tail -f /dev/null
+
+FROM base as ci
+CMD nox

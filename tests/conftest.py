@@ -1,9 +1,9 @@
 # pylint: disable=import-outside-toplevel
 import os
-from typing import List, Dict, Union, Callable, Iterator, Any
-from datetime import datetime
+from typing import List, Dict, Callable, Iterator, Any
 
-from pymongo.cursor import Cursor
+import _pytest.config
+import _pytest.main
 import pytest
 
 from chronos.storage import schemas
@@ -12,13 +12,26 @@ from chronos.storage import schemas
 os.environ["CHRONOS_MONGO_DATABASE"] = "test_db"
 
 
-def _filter_id_field(
-    query_result: Cursor,
-) -> List[Dict[str, Union[int, datetime, bool]]]:
-    return [
-        {key: value for key, value in document.items() if key != "_id"}
-        for document in query_result
-    ]
+def pytest_sessionstart(
+    session: _pytest.main.Session,  # pylint: disable=unused-argument
+) -> None:
+    """Runs this code before test session starts."""
+
+    from chronos.storage.mongo_specs import mongo_specs
+
+    mongo_specs.client.drop_database(mongo_specs.database.name)
+
+
+# pylint: disable=unused-argument
+def pytest_sessionfinish(
+    session: _pytest.main.Session,
+    exitstatus: _pytest.config.ExitCode,
+) -> None:
+    """Runs this code after test session is finished."""
+
+    from chronos.storage.mongo_specs import mongo_specs
+
+    mongo_specs.client.drop_database(mongo_specs.database.name)
 
 
 @pytest.fixture(name="get_collection_content_without_id_factory")
@@ -27,26 +40,33 @@ def get_collection_content_without_id_factory_as_fixture() -> Callable[
 ]:
     """Returns function that query Mongo activity_sessions collection
     and return all its content"""
-    from chronos.storage.mongo_specs import collections
+    from chronos.storage.mongo_specs import mongo_specs
 
     def _get_collection_content_without_id(
         collection_name: str,
-    ) -> List[Dict[str, Union[int, datetime, bool]]]:
-        return _filter_id_field(
-            query_result=collections.__getattribute__(collection_name).find()
-        )
+    ) -> List[Dict[str, Any]]:
+
+        return [
+            {key: value for key, value in document.items() if key != "_id"}
+            for document in mongo_specs.collections.__getattribute__(
+                collection_name
+            ).find()
+        ]
 
     return _get_collection_content_without_id
 
 
 @pytest.fixture(name="clear_storage_factory")
 def clear_storage_factory_as_fixture() -> Callable[[], None]:
-    """Clears whole db.
+    """Removes documents from every collection.
     https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures"""
-    from chronos.storage.mongo_specs import collections, materialized_views
+    from chronos.storage.mongo_specs import mongo_specs
 
     def _clear_storage() -> None:
-        for collection in collections.to_list() + materialized_views.to_list():
+        for collection in (
+            *mongo_specs.collections.to_list(),
+            *mongo_specs.materialized_views.to_list(),
+        ):
             collection.delete_many({})
 
     return _clear_storage
@@ -54,7 +74,7 @@ def clear_storage_factory_as_fixture() -> Callable[[], None]:
 
 @pytest.fixture
 def clear_storage(clear_storage_factory: Callable[[], None]) -> Iterator[None]:
-    """Clears whole db before and test call."""
+    """Removes documents from every collection before and after test call."""
     clear_storage_factory()
     yield
     clear_storage_factory()
@@ -65,27 +85,28 @@ def get_materialized_view_content_factory_as_fixture() -> Callable[
     [str], List[schemas.MaterializedViewSchema]
 ]:
     """Returns function that query materialized view and return all its content."""
-    from chronos.storage.mongo_specs import database
+    from chronos.storage.mongo_specs import mongo_specs
 
     def _get_materialized_view_content(
         materialized_view_name: str,
     ) -> List[schemas.MaterializedViewSchema]:
-        materialized_view = database[materialized_view_name]
+        materialized_view = mongo_specs.database[materialized_view_name]
         return list(materialized_view.find())
 
     return _get_materialized_view_content
 
 
-@pytest.fixture(name="insert_data_to_activity_sessions_collection_factory")
-def insert_data_to_activity_sessions_collection_factory_as_fixture() -> Callable[
-    [List[schemas.ActivitySessionSchema]], None
+@pytest.fixture(name="insert_data_to_collection_factory")
+def insert_data_to_collection_factory_as_fixture() -> Callable[
+    [str, List[schemas.ActivitySessionSchema]], None
 ]:
     """Inserts data to activity_sessions collection."""
-    from chronos.storage.mongo_specs import collections
+    from chronos.storage.mongo_specs import mongo_specs
 
     def _insert_data_to_activity_sessions_collection(
+        collection_name: str,
         data: List[schemas.ActivitySessionSchema],
     ) -> None:
-        collections.activity_sessions.insert_many(data)
+        mongo_specs.database.get_collection(collection_name).insert_many(data)
 
     return _insert_data_to_activity_sessions_collection

@@ -1,0 +1,33 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "properties": {
+      "last_status": {
+        "bsonType": "string",
+        "description": "must be `string` & is required",
+        "enum": [
+          "succeed",
+          "failed"
+        ]
+      },
+      "last_successful_generation_end_time": {
+        "bsonType": "date",
+        "description": "must be `date`"
+      },
+      "user_id": {
+        "bsonType": "int",
+        "description": "must be `int` & is required",
+        "minimum": 0
+      },
+      "version": {
+        "bsonType": "string",
+        "description": "must be `string` & is required"
+      }
+    },
+    "required": [
+      "user_id",
+      "last_status",
+      "version"
+    ]
+  }
+}

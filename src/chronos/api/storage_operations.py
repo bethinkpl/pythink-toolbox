@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, TypedDict, Any, Dict, Tuple
 
-from chronos.storage import mongo_specs
+from chronos.storage.mongo_specs import mongo_specs
 
 
 class UserDailyTime(TypedDict):

@@ -11,7 +11,7 @@ import chronos.api.storage_operations as tested_module
 import chronos
 import chronos.activity_sessions.storage_operations
 import chronos.settings
-from chronos.storage import mongo_specs
+from chronos.storage.mongo_specs import mongo_specs
 
 TEST_USER_ID = 1
 

@@ -4,16 +4,7 @@ import nox
 
 LOCATIONS = ["src", "tests", "noxfile.py", "cli.py"]
 
-nox.options.sessions = ["update_env", "check_black", "all_tests", "pylint", "mypy"]
-
-
-@nox.session(python=False)
-def update_env(session: Any) -> None:
-    """Updates environment dependencies.
-    Usage:
-        `poetry run nox -s update_env`
-    """
-    session.run("poetry", "update", external=True)
+nox.options.sessions = ["check_black", "all_tests", "pylint", "mypy"]
 
 
 @nox.session(python=False)

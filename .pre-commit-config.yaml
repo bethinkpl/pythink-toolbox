@@ -7,14 +7,19 @@ repos:
         language: script
         pass_filenames: false
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v3.3.0
     hooks:
+    -   id: check-added-large-files
     -   id: check-yaml
     -   id: check-toml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
     -   id: check-docstring-first
     -   id: check-merge-conflict
+    -   id: name-tests-test
+        args: ['--django']
+    -   id: pretty-format-json
+        args: ['--autofix', '--no-sort-keys']
 -   repo: local
     hooks:
     -   id: black

@@ -29,6 +29,7 @@ services:
     build:
       context: .
       dockerfile: docker/base/Dockerfile
+      target: base
     restart: always
     volumes:
       - ".:/chronos"
@@ -41,10 +42,13 @@ services:
     container_name: chronos_api
     restart: always
     ports:
-      - 8108:8108
+      - 8108:80
     build:
       context: .
       dockerfile: docker/api/Dockerfile
+    command: /start-reload.sh
+    environment:
+      MODULE_NAME: src.chronos.api.main
     volumes:
       - ".:/chronos"
     depends_on:

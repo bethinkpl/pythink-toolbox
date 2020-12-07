@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import json
-from typing import Dict, Any, List
+from time import sleep
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from pymongo import MongoClient
@@ -60,7 +61,7 @@ class _CollectionsBase:
 @dataclass
 class _Collections(_CollectionsBase):
     activity_sessions: Collection
-    user_generation_failed: Collection
+    users_generation_statuses: Collection
     generations: Collection
 
 
@@ -71,64 +72,133 @@ class _MaterializedViews(_CollectionsBase):
     focus_sessions_duration_mv: _MaterializedView
 
 
-def _initialize_collections(database_: Database) -> _Collections:
+class _MongoSpecs:
+    """Main storage class, containing all Mongo DB's specifications."""
 
-    collections_names = list(
-        _Collections.__annotations__.keys()  # pylint: disable=no-member
-    )
+    def __init__(self) -> None:
+        self._client: Optional[MongoClient] = None
+        self._database: Optional[Database] = None
+        self._collections: Optional[_Collections] = None
+        self._materialized_views: Optional[_MaterializedViews] = None
 
-    for collection_name in collections_names:
-        if collection_name not in database_.list_collection_names():
-            validator_file_path = (
-                settings.CHRONOS_PACKAGE_DIR
-                / f"storage/schema_validators/{collection_name}.json"
+    @property
+    def client(self) -> MongoClient:
+        """
+        Returns:
+            MongoClient object specified in configuration.
+        """
+
+        if self._client is None:
+            self._client = self._init_client()
+        return self._client
+
+    @property
+    def database(self) -> Database:
+        """
+        Returns:
+            Mongo database specified in configuration.
+        """
+
+        if self._database is None:
+            self._database = self.client[settings.MONGO_DATABASE]
+        return self._database
+
+    @property
+    def collections(self) -> _Collections:
+        """
+        Returns:
+            Mongo collections as attributes of this object
+            specified in _Collections class.
+        Examples:
+            To get `activity_sessions` object:
+            >>> _MongoSpecs().collections.activity_sessions
+        """
+
+        if self._collections is None:
+            self._collections = self._init_collections()
+        return self._collections
+
+    @property
+    def materialized_views(self) -> _MaterializedViews:
+        """
+        Returns:
+            Mongo materialized_views as attributes of this object
+            specified in _Collections class.
+        Examples:
+            To get `activity_sessions` object:
+            >>> _MongoSpecs().materialized_views.activity_sessions
+        """
+
+        if self._materialized_views is None:
+            self._materialized_views = self._init_materialized_views()
+        return self._materialized_views
+
+    @staticmethod
+    def _init_client() -> MongoClient:
+
+        client = MongoClient(
+            host=settings.MONGO_HOST,
+            port=settings.MONGO_PORT,
+            username=settings.MONGO_USERNAME,
+            password=settings.MONGO_PASSWORD,
+        )
+        try:
+            client.admin.command("replSetGetStatus")
+        except pymongo.errors.OperationFailure as err:
+            if err.details["codeName"] == "NotYetInitialized":
+                client.admin.command("replSetInitiate")
+
+        # mongo needs some time to figure out replication
+        # https://pymongo.readthedocs.io/en/stable/examples/high_availability.html#id1
+        sleep(1)
+
+        return client
+
+    def _init_collections(self) -> _Collections:
+
+        collections_names = list(
+            _Collections.__annotations__.keys()  # pylint: disable=no-member
+        )
+
+        for collection_name in collections_names:
+            if collection_name not in self.database.list_collection_names():
+                validator_file_path = (
+                    settings.CHRONOS_PACKAGE_DIR
+                    / f"storage/schema_validators/{collection_name}.json"
+                )
+
+                with open(validator_file_path, "r") as file:
+                    validator = json.loads(file.read())
+
+                self.database.create_collection(collection_name, validator=validator)
+
+        return _Collections(
+            *(
+                self.database.get_collection(name=col_name)
+                for col_name in collections_names
             )
+        )
 
-            with open(validator_file_path, "r") as file:
-                validator = json.loads(file.read())
+    def _init_materialized_views(self) -> _MaterializedViews:
 
-            database_.create_collection(collection_name, validator=validator)
-
-    return _Collections(
-        *(database_.get_collection(name=col_name) for col_name in collections_names)
-    )
-
-
-def _initialize_materialized_views(database_: Database) -> _MaterializedViews:
-
-    materialized_views_confs: Dict[str, Any] = {
-        "learning_time_sessions_duration_mv": {
-            "$or": [{"is_active": {"$eq": True}}, {"is_break": {"$eq": True}}]
-        },
-        "break_sessions_duration_mv": {"is_break": {"$eq": True}},
-        "focus_sessions_duration_mv": {"is_focus": {"$eq": True}},
-    }
-
-    return _MaterializedViews(
-        **{
-            name: _MaterializedView(
-                name=name,
-                match_stage_conds=conf,
-                database_=database_,
-            )
-            for name, conf in materialized_views_confs.items()
+        materialized_views_confs: Dict[str, Any] = {
+            "learning_time_sessions_duration_mv": {
+                "$or": [{"is_active": {"$eq": True}}, {"is_break": {"$eq": True}}]
+            },
+            "break_sessions_duration_mv": {"is_break": {"$eq": True}},
+            "focus_sessions_duration_mv": {"is_focus": {"$eq": True}},
         }
-    )
+
+        return _MaterializedViews(
+            **{
+                name: _MaterializedView(
+                    name=name,
+                    match_stage_conds=conf,
+                    database_=self.database,
+                )
+                for name, conf in materialized_views_confs.items()
+            }
+        )
 
 
-client = MongoClient(
-    host=settings.MONGO_HOST,
-    port=settings.MONGO_PORT,
-    username=settings.MONGO_USERNAME,
-    password=settings.MONGO_PASSWORD,
-)
-try:
-    client.admin.command("replSetGetStatus")
-except pymongo.errors.OperationFailure as err:
-    if err.details["codeName"] == "NotYetInitialized":
-        client.admin.command("replSetInitiate")
-
-database = client[settings.MONGO_DATABASE]
-
-collections = _initialize_collections(database_=database)
-materialized_views = _initialize_materialized_views(database_=database)
+mongo_specs = _MongoSpecs()

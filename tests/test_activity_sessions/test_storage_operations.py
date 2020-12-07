@@ -2,15 +2,15 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 # pylint: disable=duplicate-code
+# pylint: disable=protected-access
+# pylint: disable=too-many-statements
 
 from datetime import datetime
-from typing import Dict, List, Union, Callable, Iterator, Any
+from typing import Dict, List, Callable, Iterator, Any, Literal
 
 import pandas as pd
 import pytest
-import pytest_mock
 import pytest_steps
-from pythink_toolbox.testing import mocking
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
 import chronos.activity_sessions.storage_operations as tested_module
@@ -24,35 +24,59 @@ TEST_USER_ID = 108
 
 @pytest.mark.integration
 @pytest_steps.test_steps(  # type: ignore[misc]
+    "Empty activity events",
     "Initial input - creates two separate active sessions and inactive in the middle",
     "Takes last active session & extends its duration.",
     "Takes last active session & extends its duration, so it changes to focus session.",
     "Add new sessions one focused in the end and on that is 'break' before.",
-    "Exception raised - check data in failed_generation is correct.",
+    "Other user - proper generation.",
 )
 def test_save_new_activity_sessions(
-    get_collection_content_without_id_factory: Callable[
-        [str], List[Dict[str, Union[int, datetime, bool]]]
-    ],
+    get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]],
     clear_storage_factory: Callable[[], None],
-    mocker: pytest_mock.MockerFixture,
 ) -> Iterator[None]:
     def _save_new_activity_sessions_and_get_its_content(
         _activity_events: pd.Series,
-    ) -> List[Dict[str, Union[int, datetime, bool]]]:
+    ) -> List[Dict[str, Any]]:
         tested_module.save_new_activity_sessions(
             user_id=TEST_USER_ID,
             activity_events=_activity_events,
-            reference_time=datetime(1970, 1, 1),
+            time_range_end=datetime(1970, 1, 1),
         )
 
         return get_collection_content_without_id_factory("activity_sessions")
 
+    users_generation_statuses_default_val = [
+        {
+            "user_id": TEST_USER_ID,
+            "last_status": "succeed",
+            "last_successful_generation_end_time": datetime(1970, 1, 1),
+            "version": chronos.__version__,
+        }
+    ]
+
     clear_storage_factory()
 
+    # ================================= TEST STEP =====================================
+    # Empty activity events
+
+    activity_events = pd.Series(dtype="datetime64[ns]")
+    expected_collection_content: List[schemas.ActivitySessionSchema] = []
+
+    actual_activity_sessions_collection_content = (
+        _save_new_activity_sessions_and_get_its_content(
+            _activity_events=activity_events
+        )
+    )
+    assert actual_activity_sessions_collection_content == expected_collection_content
+
+    yield
+
+    # ================================= TEST STEP =====================================
     # Initial input - creates two separate active sessions and inactive in the middle
-    activity_events_1 = pd.Series([datetime(2000, 1, 1), datetime(2000, 1, 2)])
-    expected_collection_content_1 = [
+
+    activity_events = pd.Series([datetime(2000, 1, 1), datetime(2000, 1, 2)])
+    expected_collection_content += [
         {
             "user_id": TEST_USER_ID,
             "start_time": datetime(1999, 12, 31, 23, 59),
@@ -84,98 +108,63 @@ def test_save_new_activity_sessions(
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
-            _activity_events=activity_events_1
+            _activity_events=activity_events
         )
     )
-    assert actual_activity_sessions_collection_content == expected_collection_content_1
+    assert actual_activity_sessions_collection_content == expected_collection_content
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == users_generation_statuses_default_val
+    )
+
     yield
 
+    # ================================= TEST STEP =====================================
     # Takes last active session & extends its duration.
-    activity_events_2 = pd.Series([datetime(2000, 1, 2, 0, 5)])
-    expected_collection_content_2 = [
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(1999, 12, 31, 23, 59),
-            "end_time": datetime(2000, 1, 1, 0, 0),
-            "is_active": True,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 0, 0),
-            "end_time": datetime(2000, 1, 1, 23, 59),
-            "is_active": False,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 23, 59),
-            "end_time": datetime(2000, 1, 2, 0, 5),
-            "is_active": True,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-    ]
+
+    activity_events = pd.Series([datetime(2000, 1, 2, 0, 5)])
+    expected_collection_content[-1]["end_time"] = datetime(2000, 1, 2, 0, 5)
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
-            _activity_events=activity_events_2
+            _activity_events=activity_events
         )
     )
 
-    assert actual_activity_sessions_collection_content == expected_collection_content_2
+    assert actual_activity_sessions_collection_content == expected_collection_content
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == users_generation_statuses_default_val
+    )
+
     yield
 
+    # ================================= TEST STEP =====================================
     # Takes last active session & extends its duration, so it changes to focus session.
-    activity_events_3 = pd.Series(
+
+    activity_events = pd.Series(
         [datetime(2000, 1, 2, 0, 10), datetime(2000, 1, 2, 0, 15)]
     )
-    expected_collection_content_3 = [
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(1999, 12, 31, 23, 59),
-            "end_time": datetime(2000, 1, 1, 0, 0),
-            "is_active": True,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 0, 0),
-            "end_time": datetime(2000, 1, 1, 23, 59),
-            "is_active": False,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 23, 59),
-            "end_time": datetime(2000, 1, 2, 0, 15),
-            "is_active": True,
-            "is_focus": True,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-    ]
+    expected_collection_content[-1]["end_time"] = datetime(2000, 1, 2, 0, 15)
+    expected_collection_content[-1]["is_focus"] = True
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
-            _activity_events=activity_events_3
+            _activity_events=activity_events
         )
     )
 
-    assert actual_activity_sessions_collection_content == expected_collection_content_3
+    assert actual_activity_sessions_collection_content == expected_collection_content
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == users_generation_statuses_default_val
+    )
+
     yield
 
+    # ================================= TEST STEP =====================================
     # Add new sessions one focused in the end and on that is 'break' before.
-    activity_events_4 = pd.Series(
+    activity_events = pd.Series(
         [
             datetime(2000, 1, 2, 0, 21, 1),
             datetime(2000, 1, 2, 0, 25),
@@ -184,34 +173,7 @@ def test_save_new_activity_sessions(
             datetime(2000, 1, 2, 0, 40),
         ]
     )
-    expected_collection_content_4 = [
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(1999, 12, 31, 23, 59),
-            "end_time": datetime(2000, 1, 1, 0, 0),
-            "is_active": True,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 0, 0),
-            "end_time": datetime(2000, 1, 1, 23, 59),
-            "is_active": False,
-            "is_focus": False,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
-        {
-            "user_id": TEST_USER_ID,
-            "start_time": datetime(2000, 1, 1, 23, 59),
-            "end_time": datetime(2000, 1, 2, 0, 15),
-            "is_active": True,
-            "is_focus": True,
-            "is_break": False,
-            "version": chronos.__version__,
-        },
+    expected_collection_content += [
         {
             "user_id": TEST_USER_ID,
             "start_time": datetime(2000, 1, 2, 0, 15),
@@ -234,41 +196,123 @@ def test_save_new_activity_sessions(
 
     actual_activity_sessions_collection_content = (
         _save_new_activity_sessions_and_get_its_content(
-            _activity_events=activity_events_4
+            _activity_events=activity_events
         )
     )
 
-    assert actual_activity_sessions_collection_content == expected_collection_content_4
+    assert actual_activity_sessions_collection_content == expected_collection_content
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == users_generation_statuses_default_val
+    )
+
     yield
 
-    # Exception raised - check data in failed_generation is correct.
+    # ================================= TEST STEP =====================================
+    # Other user - proper generation.
 
-    generate_user_activity_sessions_mock = mocker.patch(
-        mocking.transform_function_to_target_string(
-            chronos.activity_sessions.generation_operations.generate_user_activity_sessions
-        )
+    tested_module.save_new_activity_sessions(
+        user_id=TEST_USER_ID + 1,
+        activity_events=pd.Series([datetime(2000, 1, 1)]),
+        time_range_end=datetime(2013, 1, 1),
     )
+    expected_collection_content += [
+        {
+            "user_id": TEST_USER_ID + 1,
+            "start_time": datetime(1999, 12, 31, 23, 59),
+            "end_time": datetime(2000, 1, 1, 0, 0),
+            "is_active": True,
+            "is_focus": False,
+            "is_break": False,
+            "version": chronos.__version__,
+        }
+    ]
 
-    generate_user_activity_sessions_mock.side_effect = Exception("mocked error")
-
-    with pytest.raises(Exception):
-        tested_module.save_new_activity_sessions(
-            user_id=TEST_USER_ID,
-            activity_events=mocker.ANY,
-            reference_time=datetime(2013, 1, 1),
-        )
-
-        assert get_collection_content_without_id_factory(
-            "failed_generation_collection"
-        ) == [{"user_id": TEST_USER_ID, "reference_time": datetime(2013, 1, 1)}]
-
-        assert (
-            get_collection_content_without_id_factory("activity_sessions")
-            == expected_collection_content_4
-        )
+    assert (
+        get_collection_content_without_id_factory("activity_sessions")
+        == expected_collection_content
+    )
 
     clear_storage_factory()
     yield
+
+
+# =====================================================================================
+
+
+class UsersGenerationStatusesUpdateScenario(Scenario):
+    status: Literal["failed", "succeed"]
+    time_range_end: datetime
+    expected_users_generation_statuses_content: List[
+        schemas.UsersGenerationStatuesSchema
+    ]
+
+
+test_scenarios = [
+    UsersGenerationStatusesUpdateScenario(
+        desc="status failed",
+        status="failed",
+        time_range_end=datetime(2000, 1, 1),
+        expected_users_generation_statuses_content=[
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID, last_status="failed", version=chronos.__version__
+            )
+        ],
+    ),
+    UsersGenerationStatusesUpdateScenario(
+        desc="status succeed",
+        status="succeed",
+        time_range_end=datetime(2000, 1, 1),
+        expected_users_generation_statuses_content=[
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 1, 1),
+                version=chronos.__version__,
+            )
+        ],
+    ),
+]
+
+
+@pytest.mark.usefixtures("clear_storage")
+@parametrize(test_scenarios)  # type: ignore[misc]
+def test__users_generation_statuses_update(
+    get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]],
+    status: Literal["failed", "succeed"],
+    time_range_end: datetime,
+    expected_users_generation_statuses_content: List[
+        schemas.UsersGenerationStatuesSchema
+    ],
+) -> None:
+
+    tested_module._users_generation_statuses_update(
+        user_id=TEST_USER_ID,
+        status=status,
+        last_successful_generation_end_time=time_range_end,
+    )
+
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == expected_users_generation_statuses_content
+    )
+
+
+# =====================================================================================
+
+
+def test__return_status() -> None:
+    @tested_module._return_status
+    def _test_func() -> None:
+        pass
+
+    assert _test_func() == "succeed"
+
+    @tested_module._return_status
+    def _test_func_err() -> None:
+        raise Exception
+
+    assert _test_func_err() == "failed"
 
 
 # =====================================================================================
@@ -649,12 +693,12 @@ def test_update_materialized_views(
     get_materialized_view_content_factory: Callable[
         [str], List[schemas.MaterializedViewSchema]
     ],
-    insert_data_to_activity_sessions_collection_factory: Callable[
-        [List[schemas.ActivitySessionSchema]], None
+    insert_data_to_collection_factory: Callable[
+        [str, List[schemas.ActivitySessionSchema]], None
     ],
 ) -> None:
 
-    insert_data_to_activity_sessions_collection_factory(activity_sessions_content)
+    insert_data_to_collection_factory("activity_sessions", activity_sessions_content)
 
     tested_module.update_materialized_views(reference_time=datetime(1970, 1, 1))
 
@@ -670,6 +714,112 @@ def test_update_materialized_views(
     }
 
     assert expected_materialized_views_content == actual_materialized_views_content
+
+
+# =====================================================================================
+
+
+@pytest.mark.usefixtures("clear_storage")
+def test_extract_user_ids_and_time_when_last_status_failed_from_generations(
+    insert_data_to_collection_factory: Callable[
+        [str, List[schemas.UsersGenerationStatuesSchema]], None
+    ]
+) -> None:
+
+    assert (
+        tested_module.extract_user_ids_and_time_when_last_status_failed_from_generations()
+        == []
+    )
+
+    insert_data_to_collection_factory(
+        "users_generation_statuses",
+        [
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 1, 1),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="failed",
+                last_successful_generation_end_time=datetime(2000, 2, 2),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 3, 3),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID + 1,
+                last_status="failed",
+                last_successful_generation_end_time=datetime(2000, 4, 4),
+                version=chronos.__version__,
+            ),
+        ],
+    )
+
+    assert tested_module.extract_user_ids_and_time_when_last_status_failed_from_generations() == [
+        schemas.UsersGenerationStatuesSchema(
+            user_id=TEST_USER_ID,
+            last_successful_generation_end_time=datetime(2000, 2, 2),
+        ),
+        schemas.UsersGenerationStatuesSchema(
+            user_id=TEST_USER_ID + 1,
+            last_successful_generation_end_time=datetime(2000, 4, 4),
+        ),
+    ]
+
+
+# =====================================================================================
+
+
+def test_extract_min_last_successful_generation_end_time(
+    insert_data_to_collection_factory: Callable[
+        [str, List[schemas.UsersGenerationStatuesSchema]], None
+    ]
+) -> None:
+
+    assert tested_module.extract_min_last_successful_generation_end_time() is None
+
+    insert_data_to_collection_factory(
+        "users_generation_statuses",
+        [
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 1, 1),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="failed",
+                last_successful_generation_end_time=datetime(2000, 2, 2),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 3, 3),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID + 1,
+                last_status="failed",
+                last_successful_generation_end_time=datetime(2000, 4, 4),
+                version=chronos.__version__,
+            ),
+        ],
+    )
+
+    assert tested_module.extract_min_last_successful_generation_end_time() == datetime(
+        2000, 2, 2
+    )
+
+
+# =====================================================================================
 
 
 @pytest.mark.usefixtures("clear_storage")
@@ -701,6 +851,9 @@ def test_insert_new_generation(
     assert (
         actual_generations_collection_content == expected_generations_collection_content
     )
+
+
+# =====================================================================================
 
 
 @pytest.mark.usefixtures("clear_storage")
@@ -738,9 +891,14 @@ def test_update_generation_end_time(
     )
 
 
+# =====================================================================================
+
+
 @pytest.mark.usefixtures("clear_storage")
 @pytest.mark.integration
 def test_read_last_generation_time_range_end() -> None:
+
+    assert tested_module.read_last_generation_time_range_end() is None
 
     for i in range(1, 4):
         tested_module.insert_new_generation(
@@ -750,12 +908,12 @@ def test_read_last_generation_time_range_end() -> None:
             start_time=datetime(2000, i, i, i, i),
         )
 
-    expected_generations_collection_content = datetime(2000, 3, 3, 3)
+    expected_last_generation_time_range_end = datetime(2000, 3, 3, 3)
 
-    actual_generations_collection_content = (
+    actual_last_generation_time_range_end = (
         tested_module.read_last_generation_time_range_end()
     )
 
     assert (
-        actual_generations_collection_content == expected_generations_collection_content
+        actual_last_generation_time_range_end == expected_last_generation_time_range_end
     )
