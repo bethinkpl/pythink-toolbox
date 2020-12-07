@@ -11,6 +11,7 @@ from typing import Dict, List, Callable, Iterator, Any, Type, Literal
 import pandas as pd
 import pymongo.errors
 import pytest
+import pytest_mock
 import pytest_steps
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
@@ -320,9 +321,8 @@ def test__return_status() -> None:
 
 
 class _CommitTransactionWithRetryScenario(Scenario):
-  : pymongo.errors.PyMongoError
-    custom_exception: 
-      [RuntimeError]
+    mongo_exception: pymongo.errors.PyMongoError
+    custom_exception: Type[RuntimeError]
 
 
 @parametrize(  # type: ignore[misc]
