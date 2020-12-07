@@ -104,17 +104,17 @@ def _calculate_intervals_for_time_range(
 
 @contextmanager
 def _save_generation_data(time_range: custom_types.TimeRange) -> Iterator[None]:
-    generation_start_time = datetime.now()
+    start_time = datetime.now()
     generation_id = storage_operations.insert_new_generation(
-        time_range=time_range, start_time=generation_start_time
+        time_range=time_range, start_time=start_time
     )
     yield None
 
-    generation_end_time = datetime.now()
+    end_time = datetime.now()
     storage_operations.update_generation_end_time(
-        generation_id=generation_id, end_time=generation_end_time
+        generation_id=generation_id, end_time=end_time
     )
-    logger.info("Generation took %s", generation_end_time - generation_start_time)
+    logger.info("Generation took %s", end_time - start_time)
 
 
 def _generate_activity_sessions(
@@ -146,7 +146,9 @@ def _generate_activity_sessions_for_users_with_failed_status(
     for user_id_and_start_time in user_ids_and_start_times:
 
         user_id: int = user_id_and_start_time["user_id"]
-        start_time: datetime = user_id_and_start_time["generation_end_time"]
+        start_time: datetime = user_id_and_start_time[
+            "last_successful_generation_end_time"
+        ]
 
         activity_events = activity_events_source.read_activity_events_between_datetimes(
             start_time=start_time,
