@@ -6,10 +6,12 @@
 # pylint: disable=too-many-statements
 
 from datetime import datetime
-from typing import Any, Callable, Dict, Iterator, List, Literal
+from typing import Any, Callable, Dict, Iterator, List, Literal, Type
 
 import pandas as pd
+import pymongo.errors
 import pytest
+import pytest_mock
 import pytest_steps
 from pythink_toolbox.testing.parametrization import Scenario, parametrize
 
@@ -313,6 +315,50 @@ def test__return_status() -> None:
         raise Exception
 
     assert _test_func_err() == "failed"
+
+
+# =====================================================================================
+
+
+class _CommitTransactionWithRetryScenario(Scenario):
+    mongo_exception: pymongo.errors.PyMongoError
+    custom_exception: Type[RuntimeError]
+
+
+@parametrize(  # type: ignore[misc]
+    [
+        _CommitTransactionWithRetryScenario(
+            desc="ConnectionFailure",
+            mongo_exception=pymongo.errors.ConnectionFailure(),
+            custom_exception=RuntimeError,
+        ),
+        _CommitTransactionWithRetryScenario(
+            desc="OperationFailure",
+            mongo_exception=pymongo.errors.OperationFailure(error=None),
+            custom_exception=RuntimeError,
+        ),
+        _CommitTransactionWithRetryScenario(
+            desc="OperationFailure",
+            mongo_exception=pymongo.errors.OperationFailure(
+                error=None, details={"errorLabels": ["UnknownTransactionCommitResult"]}
+            ),
+            custom_exception=RecursionError,
+        ),
+    ]
+)
+def test__commit_transaction_with_retry(
+    mocker: pytest_mock.MockerFixture,
+    mongo_client: pymongo.MongoClient,
+    mongo_exception: pymongo.errors.PyMongoError,
+    custom_exception: Type[RuntimeError],
+) -> None:
+    with mongo_client.start_session() as session:
+
+        session.commit_transaction = mocker.Mock(
+            side_effect=mongo_exception,
+        )
+        with pytest.raises(custom_exception):
+            tested_module._commit_transaction_with_retry(session=session)
 
 
 # =====================================================================================
@@ -827,7 +873,6 @@ def test_extract_min_last_successful_generation_end_time(
 def test_insert_new_generation(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
 ) -> None:
-
     tested_module.insert_new_generation(
         time_range=custom_types.TimeRange(
             start=datetime(2000, 1, 1), end=datetime(2000, 1, 1, 1)
@@ -861,7 +906,6 @@ def test_insert_new_generation(
 def test_update_generation_end_time(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
 ) -> None:
-
     generation_id = tested_module.insert_new_generation(
         time_range=custom_types.TimeRange(
             start=datetime(2000, 1, 1), end=datetime(2000, 1, 1, 1)

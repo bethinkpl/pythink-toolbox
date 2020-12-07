@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, Iterator, List
 
 import _pytest.config
 import _pytest.main
+from pymongo import MongoClient
 import pytest
 
 from chronos.storage import schemas
@@ -31,6 +32,14 @@ def pytest_sessionfinish(
     from chronos.storage.mongo_specs import mongo_specs
 
     mongo_specs.client.drop_database(mongo_specs.database.name)
+
+
+@pytest.fixture()
+def mongo_client() -> MongoClient:
+    """Getter for mongo client"""
+    from chronos.storage.mongo_specs import mongo_specs
+
+    return mongo_specs.client
 
 
 @pytest.fixture(name="get_collection_content_without_id_factory")
