@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Union, List, Literal
+from typing import Optional, Dict, Union, List, Literal, Callable, Any
 from datetime import datetime
 
 import bson
@@ -32,40 +32,33 @@ def save_new_activity_sessions(
     )
 
     with mongo_specs.client.start_session() as session:
-        status: Literal["failed", "succeed"]
-        try:
-            _run_user_crud_operations_transaction(
-                user_id=user_id, activity_events=activity_events, session=session
-            )
+        status: Literal["failed", "succeed"] = _run_user_crud_operations_transaction(
+            user_id=user_id,
+            activity_events=activity_events,
+            session=session,
+        )
 
-        except Exception as err:  # pylint: disable=broad-except
-            logger.error(
-                "%s has failed with error:\n%s",
-                _run_user_crud_operations_transaction.__name__,
-                err,
-            )
-            status = "failed"
-
-        else:
-            status = "succeed"
-
-        finally:
-            _users_generation_statuses_update(
-                user_id=user_id, status=status, time_range_end=time_range_end
-            )
+        _users_generation_statuses_update(
+            user_id=user_id,
+            status=status,
+            last_successful_generation_end_time=time_range_end,
+        )
 
 
 def _users_generation_statuses_update(
-    user_id: int, status: Literal["failed", "succeed"], time_range_end: datetime
+    user_id: int,
+    status: Literal["failed", "succeed"],
+    last_successful_generation_end_time: datetime,
 ) -> None:
+
     generation_status = UsersGenerationStatuesSchema(
-        user_id=user_id, version=chronos.__version__
+        user_id=user_id, last_status=status, version=chronos.__version__
     )
 
-    generation_status["last_status"] = status
-
     if status == "succeed":
-        generation_status["time_until_generations_successful"] = time_range_end
+        generation_status[
+            "last_successful_generation_end_time"
+        ] = last_successful_generation_end_time
 
     mongo_specs.collections.users_generation_statuses.update_one(
         filter={"user_id": user_id},
@@ -74,11 +67,35 @@ def _users_generation_statuses_update(
     )
 
 
+def _return_status(
+    func: Callable[..., Any]
+) -> Callable[..., Literal["failed", "succeed"]]:
+    def wrapper(*args: Any, **kwargs: Any) -> Literal["failed", "succeed"]:
+        try:
+            func(*args, **kwargs)
+        except Exception as err:  # pylint: disable=broad-except
+            logger.error(
+                "%s has failed with error:\n%s",
+                func.__name__,
+                err,
+            )
+            return "failed"
+        else:
+            return "succeed"
+
+    return wrapper
+
+
+@_return_status
 def _run_user_crud_operations_transaction(
     user_id: int, activity_events: pd.Series, session: ClientSession
 ) -> None:
 
-    with session.start_transaction(write_concern=pymongo.WriteConcern(w="majority")):
+    with session.start_transaction(
+        read_preference=pymongo.ReadPreference.PRIMARY,
+        read_concern=pymongo.read_concern.ReadConcern(level="local"),
+        write_concern=pymongo.write_concern.WriteConcern(w=1),
+    ):
 
         collection = mongo_specs.collections.activity_sessions
 
@@ -90,8 +107,6 @@ def _run_user_crud_operations_transaction(
             sort=[("end_time", pymongo.DESCENDING)],
             session=session,
         )
-
-        logger.debug("last_active_session from mongo: \n%s", last_active_session)
 
         user_activity_sessions = generate_user_activity_sessions(
             user_id=user_id,
@@ -148,11 +163,15 @@ def update_materialized_views(reference_time: datetime) -> None:
             reference_time=reference_time,
         )
 
+    logger.info("Materialized views updated 🙌🏼")
 
-def extract_users_with_failed_last_generation() -> List[UsersGenerationStatuesSchema]:
+
+def extract_user_ids_and_time_when_last_status_failed_from_generations() -> List[
+    UsersGenerationStatuesSchema
+]:
     """
     Returns:
-        List of user_ids
+        List of doc with user_id and last_successful_generation_end_time fields.
     """
 
     return list(
@@ -161,10 +180,36 @@ def extract_users_with_failed_last_generation() -> List[UsersGenerationStatuesSc
             projection={
                 "_id": False,
                 "user_id": True,
-                "time_until_generations_successful": True,
+                "last_successful_generation_end_time": True,
             },
         )
     )
+
+
+def extract_min_last_successful_generation_end_time() -> Optional[datetime]:
+    """
+    Returns:
+        time of earliest timestamp of docs with last_status="failed"
+    """
+
+    doc = mongo_specs.collections.users_generation_statuses.find_one(
+        filter={
+            "last_status": "failed",
+            "last_successful_generation_end_time": {"$exists": True},
+        },
+        projection={
+            "_id": False,
+            "last_successful_generation_end_time": True,
+        },
+        sort=[("last_successful_generation_end_time", 1)],
+    )
+    try:
+        last_successful_generation_end_time: datetime = doc[
+            "last_successful_generation_end_time"
+        ]
+        return last_successful_generation_end_time
+    except TypeError:
+        return None
 
 
 def insert_new_generation(time_range: TimeRange, start_time: datetime) -> bson.ObjectId:
@@ -205,7 +250,7 @@ def update_generation_end_time(
     )
 
 
-def read_last_generation_time_range_end() -> datetime:
+def read_last_generation_time_range_end() -> Optional[datetime]:
     """
     Returns:
         Document from generation collection
@@ -220,7 +265,7 @@ def read_last_generation_time_range_end() -> datetime:
     )
 
     if not document:
-        raise ValueError("No time_range.end in the collection.")
+        return None
 
     time_range_end: datetime = document["time_range"]["end"]
     return time_range_end

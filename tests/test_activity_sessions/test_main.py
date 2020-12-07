@@ -1,13 +1,15 @@
 # pylint: disable=missing-function-docstring
+# pylint: disable=missing-class-docstring
 # pylint: disable=protected-access
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Union, Callable, Any
+from typing import List, Dict, Union, Callable, Any, Optional
 
 import freezegun
 import pytest
 from pytest_mock import MockerFixture
 from pythink_toolbox.testing.mocking import transform_function_to_target_string
+from pythink_toolbox.testing.parametrization import parametrize, Scenario
 import pandas as pd
 
 from chronos import __version__
@@ -18,68 +20,107 @@ from chronos.activity_sessions.activity_events_source import (
 )
 from chronos.storage import schemas
 from chronos.storage.mongo_specs import mongo_specs
+from chronos.storage.schemas import GenerationsSchema
 
 
-@freezegun.freeze_time("2000-01-01")  # type: ignore[misc]
-def test_main(mocker: MockerFixture) -> None:
-    """Checks which function is called depending on conditions."""
+class MainScenario(Scenario):
+    read_last_generation_time_range_end_return: Optional[datetime]
+    extract_min_last_successful_generation_end_time_return: Optional[datetime]
+    expected_time_range: TimeRange
+    expected_reference_time: datetime
 
-    # ================================== TEST CASE ====================================
+
+test_scenarios: List[MainScenario] = [
+    MainScenario(
+        desc="all Nones",
+        read_last_generation_time_range_end_return=None,
+        extract_min_last_successful_generation_end_time_return=None,
+        expected_time_range=TimeRange(
+            start=datetime(2019, 8, 11), end=datetime(2020, 1, 1)
+        ),
+        expected_reference_time=datetime(2019, 8, 11),
+    ),
+    MainScenario(
+        desc="read_last_generation_time_range_end_return not None",
+        read_last_generation_time_range_end_return=datetime(2019, 12, 1),
+        extract_min_last_successful_generation_end_time_return=None,
+        expected_time_range=TimeRange(
+            start=datetime(2019, 12, 1), end=datetime(2020, 1, 1)
+        ),
+        expected_reference_time=datetime(2019, 12, 1),
+    ),
+    MainScenario(
+        desc="extract_min_last_successful_generation_end_time_return not None",
+        read_last_generation_time_range_end_return=None,
+        extract_min_last_successful_generation_end_time_return=datetime(2019, 9, 8),
+        expected_time_range=TimeRange(
+            start=datetime(2019, 8, 11), end=datetime(2020, 1, 1)
+        ),
+        expected_reference_time=datetime(2019, 9, 8),
+    ),
+    MainScenario(
+        desc="both not None",
+        read_last_generation_time_range_end_return=datetime(2019, 12, 1),
+        extract_min_last_successful_generation_end_time_return=datetime(2019, 9, 8),
+        expected_time_range=TimeRange(
+            start=datetime(2019, 12, 1), end=datetime(2020, 1, 1)
+        ),
+        expected_reference_time=datetime(2019, 9, 8),
+    ),
+]
+
+
+@freezegun.freeze_time("2020-01-01")
+@parametrize(test_scenarios)  # type: ignore[misc]
+def test_main(
+    mocker: MockerFixture,
+    read_last_generation_time_range_end_return: Optional[datetime],
+    extract_min_last_successful_generation_end_time_return: Optional[datetime],
+    expected_time_range: TimeRange,
+    expected_reference_time: datetime,
+) -> None:
+    """Makes sure that functions are called with proper arguments."""
+
     mocker.patch(
         "chronos.activity_sessions.main.read_last_generation_time_range_end",
-        return_value=datetime(1999, 12, 31),
+        return_value=read_last_generation_time_range_end_return,
     )
 
-    mocked__run_activity_sessions_generation_for_all_users = mocker.patch(
+    mocker.patch(
+        "chronos.activity_sessions.main.extract_min_last_successful_generation_end_time",
+        return_value=extract_min_last_successful_generation_end_time_return,
+    )
+
+    mocked__run_activity_sessions_generation = mocker.patch(
         transform_function_to_target_string(
-            tested_module._run_activity_sessions_generation_for_all_users
+            tested_module._run_activity_sessions_generation
         )
     )
-    mocked__run_activity_sessions_generation_for_all_users_from_scratch = mocker.patch(
+    mocked_update_materialized_views = mocker.patch(
         transform_function_to_target_string(
-            tested_module._run_activity_sessions_generation_for_all_users_from_scratch
+            tested_module.storage_operations.update_materialized_views
         )
     )
 
     tested_module.main()
 
-    mocked__run_activity_sessions_generation_for_all_users.assert_called_once_with(
-        time_range=TimeRange(start=datetime(1999, 12, 31), end=datetime(2000, 1, 1))
+    mocked__run_activity_sessions_generation.assert_called_once_with(
+        time_range=expected_time_range
     )
-
-    mocked__run_activity_sessions_generation_for_all_users_from_scratch.assert_not_called()
-
-    # ================================== TEST CASE ====================================
-    mocker.patch(
-        "chronos.activity_sessions.main.read_last_generation_time_range_end",
-        side_effect=ValueError("mocked err"),
-    )
-
-    mocked__run_activity_sessions_generation_for_all_users.reset_mock()
-
-    mocked__run_activity_sessions_generation_for_all_users_from_scratch.reset_mock()
-
-    tested_module.main()
-
-    mocked__run_activity_sessions_generation_for_all_users.assert_not_called()
-
-    mocked__run_activity_sessions_generation_for_all_users_from_scratch.assert_called_once_with(
-        time_range_end=datetime(2000, 1, 1)
+    mocked_update_materialized_views.assert_called_once_with(
+        reference_time=expected_reference_time
     )
 
 
 # TODO LACE-465 When GBQ integration ready -> replace mock/add new test
-@freezegun.freeze_time("2000-1-2")  # type: ignore[misc]
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.e2e  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
-def test__run_activity_sessions_generation_for_all_users(
+@freezegun.freeze_time("2000-1-2")
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.e2e
+@pytest.mark.integration
+def test__run_activity_sessions_generation(
     mocker: MockerFixture,
     get_collection_content_without_id_factory: Callable[
         [str], List[Dict[str, Union[int, datetime, bool]]]
-    ],
-    get_materialized_view_content_factory: Callable[
-        [str], List[schemas.MaterializedViewSchema]
     ],
 ) -> None:
     """End-to-end overall happy-path activity sessions creation and materialized views updates."""
@@ -123,12 +164,12 @@ def test__run_activity_sessions_generation_for_all_users(
         schemas.UsersGenerationStatuesSchema(
             user_id=3,
             last_status="failed",
-            time_until_generations_successful=datetime(1999, 12, 31, 1),
+            last_successful_generation_end_time=datetime(1999, 12, 31, 1),
             version=__version__,
         )
     )
 
-    tested_module._run_activity_sessions_generation_for_all_users(
+    tested_module._run_activity_sessions_generation(
         time_range=TimeRange(datetime(2000, 1, 1), datetime(2000, 1, 2))
     )
 
@@ -187,89 +228,6 @@ def test__run_activity_sessions_generation_for_all_users(
     )
 
     # ===================================== CHECK =====================================
-    expected_learning_time_sessions_duration_mv_data = [
-        {
-            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1)},
-            "end_time": datetime(2000, 1, 1, 0, 35),
-            "duration_ms": int(
-                (datetime(2000, 1, 1, 0, 35) - datetime(2000, 1, 1))
-                / timedelta(milliseconds=1)
-            ),
-        },
-        {
-            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1, 0, 35)},
-            "end_time": datetime(2000, 1, 1, 1),
-            "duration_ms": int(
-                (datetime(2000, 1, 1, 1) - datetime(2000, 1, 1, 0, 35))
-                / timedelta(milliseconds=1)
-            ),
-        },
-        {
-            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1, 1)},
-            "end_time": datetime(2000, 1, 1, 1, 30),
-            "duration_ms": int(
-                (datetime(2000, 1, 1, 1, 30) - datetime(2000, 1, 1, 1))
-                / timedelta(milliseconds=1)
-            ),
-        },
-        {
-            "_id": {"user_id": 2, "start_time": datetime(2000, 1, 1)},
-            "end_time": datetime(2000, 1, 1, 0, 1),
-            "duration_ms": int(
-                (datetime(2000, 1, 1, 0, 1) - datetime(2000, 1, 1))
-                / timedelta(milliseconds=1)
-            ),
-        },
-    ]
-
-    assert (
-        get_materialized_view_content_factory("learning_time_sessions_duration_mv")
-        == expected_learning_time_sessions_duration_mv_data
-    )
-
-    # ===================================== CHECK =====================================
-    expected_break_sessions_duration_mv_data = [
-        {
-            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1, 0, 35)},
-            "end_time": datetime(2000, 1, 1, 1),
-            "duration_ms": int(
-                (datetime(2000, 1, 1, 1) - datetime(2000, 1, 1, 0, 35))
-                / timedelta(milliseconds=1)
-            ),
-        }
-    ]
-
-    assert (
-        get_materialized_view_content_factory("break_sessions_duration_mv")
-        == expected_break_sessions_duration_mv_data
-    )
-
-    # ===================================== CHECK =====================================
-    expected_focus_sessions_duration_mv_data = [
-        {
-            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1)},
-            "end_time": datetime(2000, 1, 1, 0, 35),
-            "duration_ms": int(
-                (datetime(2000, 1, 1, 0, 35) - datetime(2000, 1, 1))
-                / timedelta(milliseconds=1)
-            ),
-        },
-        {
-            "_id": {"user_id": 1, "start_time": datetime(2000, 1, 1, 1)},
-            "end_time": datetime(2000, 1, 1, 1, 30),
-            "duration_ms": int(
-                (datetime(2000, 1, 1, 1, 30) - datetime(2000, 1, 1, 1))
-                / timedelta(milliseconds=1)
-            ),
-        },
-    ]
-
-    assert (
-        get_materialized_view_content_factory("focus_sessions_duration_mv")
-        == expected_focus_sessions_duration_mv_data
-    )
-
-    # ===================================== CHECK =====================================
     expected_generations_data = [
         {
             "time_range": {"start": datetime(2000, 1, 1), "end": datetime(2000, 1, 2)},
@@ -284,21 +242,81 @@ def test__run_activity_sessions_generation_for_all_users(
     )
 
 
-def test__run_activity_sessions_generation_for_all_users_from_scratch(
-    mocker: MockerFixture,
+class CalculateIntervalsForTimeRangeScenario(Scenario):
+    time_range: TimeRange
+    expected: List[TimeRange]
+
+
+test_scenarios: List[CalculateIntervalsForTimeRangeScenario] = [  # type: ignore[no-redef]
+    CalculateIntervalsForTimeRangeScenario(
+        desc="no range",
+        time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 1)),
+        expected=[],
+    ),
+    CalculateIntervalsForTimeRangeScenario(
+        desc="one range",
+        time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
+        expected=[
+            TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
+        ],
+    ),
+    CalculateIntervalsForTimeRangeScenario(
+        desc="two ranges",
+        time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31, 1)),
+        expected=[
+            TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
+            TimeRange(start=datetime(2000, 1, 31), end=datetime(2000, 1, 31, 1)),
+        ],
+    ),
+    CalculateIntervalsForTimeRangeScenario(
+        desc="many ranges",
+        time_range=TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 3, 15)),
+        expected=[
+            TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31)),
+            TimeRange(start=datetime(2000, 1, 31), end=datetime(2000, 3, 1)),
+            TimeRange(start=datetime(2000, 3, 1), end=datetime(2000, 3, 15)),
+        ],
+    ),
+]
+
+
+@parametrize(test_scenarios)  # type: ignore[misc]
+def test__calculate_intervals_for_time_range(
+    time_range: TimeRange, expected: List[TimeRange]
 ) -> None:
-    """Checks how many times _run_activity_sessions_generation_for_all_users is called."""
 
-    mocked__run_activity_sessions_generation_for_all_users = mocker.patch(
-        transform_function_to_target_string(
-            tested_module._run_activity_sessions_generation_for_all_users
+    interval_size: timedelta = timedelta(days=30)
+
+    actual = tested_module._calculate_intervals_for_time_range(
+        time_range=time_range, interval_size=interval_size
+    )
+
+    assert expected == actual
+
+
+@freezegun.freeze_time("2000-03-04")
+def test__save_generation_data(
+    get_collection_content_without_id_factory: Callable[
+        [str], List[Dict[str, Union[int, datetime, bool]]]
+    ],
+) -> None:
+
+    time_range = TimeRange(start=datetime(2000, 1, 1), end=datetime(2000, 1, 31))
+
+    with tested_module._save_generation_data(time_range=time_range):
+        assert get_collection_content_without_id_factory("generations") == [
+            GenerationsSchema(
+                time_range={"start": time_range.start, "end": time_range.end},
+                start_time=datetime(2000, 3, 4),
+                version=__version__,
+            )
+        ]
+
+    assert get_collection_content_without_id_factory("generations") == [
+        GenerationsSchema(
+            time_range={"start": time_range.start, "end": time_range.end},
+            start_time=datetime(2000, 3, 4),
+            end_time=datetime(2000, 3, 4),
+            version=__version__,
         )
-    )
-
-    time_range_end = datetime(2019, 8, 11) + timedelta(days=301)
-
-    tested_module._run_activity_sessions_generation_for_all_users_from_scratch(
-        time_range_end=time_range_end
-    )
-
-    assert mocked__run_activity_sessions_generation_for_all_users.call_count == 3
+    ]

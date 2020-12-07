@@ -26,11 +26,11 @@ class MaterializedViewSchema(TypedDict):
 
 
 class UsersGenerationStatuesSchema(TypedDict, total=False):
-    """Users Generation  Statues schema."""
+    """Users Generation Statues schema."""
 
     user_id: int
     last_status: Literal["succeed", "failed"]
-    time_until_generations_successful: datetime
+    last_successful_generation_end_time: datetime
     version: str
 
 

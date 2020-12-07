@@ -6,14 +6,12 @@
 # pylint: disable=too-many-statements
 
 from datetime import datetime
-from typing import Dict, List, Callable, Iterator, Any, Type
+from typing import Dict, List, Callable, Iterator, Any, Type, Literal
 
 import pandas as pd
 import pymongo.errors
 import pytest
-import pytest_mock
 import pytest_steps
-from pythink_toolbox.testing import mocking
 from pythink_toolbox.testing.parametrization import parametrize, Scenario
 
 import chronos.activity_sessions.storage_operations as tested_module
@@ -25,21 +23,18 @@ from chronos.storage import schemas
 TEST_USER_ID = 108
 
 
-@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.integration
 @pytest_steps.test_steps(  # type: ignore[misc]
     "Empty activity events",
     "Initial input - creates two separate active sessions and inactive in the middle",
     "Takes last active session & extends its duration.",
     "Takes last active session & extends its duration, so it changes to focus session.",
     "Add new sessions one focused in the end and on that is 'break' before.",
-    "Exception raised - check data in failed_generation is correct.",
-    "Exception raised - for other user.",
     "Other user - proper generation.",
 )
 def test_save_new_activity_sessions(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]],
     clear_storage_factory: Callable[[], None],
-    mocker: pytest_mock.MockerFixture,
 ) -> Iterator[None]:
     def _save_new_activity_sessions_and_get_its_content(
         _activity_events: pd.Series,
@@ -56,7 +51,7 @@ def test_save_new_activity_sessions(
         {
             "user_id": TEST_USER_ID,
             "last_status": "succeed",
-            "time_until_generations_successful": datetime(1970, 1, 1),
+            "last_successful_generation_end_time": datetime(1970, 1, 1),
             "version": chronos.__version__,
         }
     ]
@@ -215,67 +210,7 @@ def test_save_new_activity_sessions(
     yield
 
     # ================================= TEST STEP =====================================
-    # Exception raised - check data in failed_generation is correct.
-
-    mocker.patch(
-        mocking.transform_function_to_target_string(
-            tested_module._run_user_crud_operations_transaction
-        ),
-        side_effect=RuntimeError("mocked error"),
-        __name__="test",
-    )
-
-    tested_module.save_new_activity_sessions(
-        user_id=TEST_USER_ID,
-        activity_events=pd.Series([datetime(2000, 1, 1)]),
-        time_range_end=datetime(2013, 1, 1),
-    )
-
-    assert (
-        get_collection_content_without_id_factory("activity_sessions")
-        == expected_collection_content
-    )
-
-    users_generation_statuses_default_val[0]["last_status"] = "failed"
-    assert (
-        get_collection_content_without_id_factory("users_generation_statuses")
-        == users_generation_statuses_default_val
-    )
-
-    yield
-
-    # ================================= TEST STEP =====================================
-    # Exception raised - for other user
-
-    tested_module.save_new_activity_sessions(
-        user_id=TEST_USER_ID + 1,
-        activity_events=pd.Series([datetime(2000, 1, 1)]),
-        time_range_end=datetime(2013, 1, 1),
-    )
-
-    assert (
-        get_collection_content_without_id_factory("activity_sessions")
-        == expected_collection_content
-    )
-
-    expected_users_generation_statuses = users_generation_statuses_default_val + [
-        {
-            "user_id": TEST_USER_ID + 1,
-            "last_status": "failed",
-            "version": chronos.__version__,
-        }
-    ]
-    assert (
-        get_collection_content_without_id_factory("users_generation_statuses")
-        == expected_users_generation_statuses
-    )
-
-    yield
-
-    # ================================= TEST STEP =====================================
     # Other user - proper generation.
-
-    mocker.stopall()
 
     tested_module.save_new_activity_sessions(
         user_id=TEST_USER_ID + 1,
@@ -299,16 +234,6 @@ def test_save_new_activity_sessions(
         == expected_collection_content
     )
 
-    expected_users_generation_statuses[1]["last_status"] = "succeed"
-    expected_users_generation_statuses[1][
-        "time_until_generations_successful"
-    ] = datetime(2013, 1, 1)
-
-    assert (
-        get_collection_content_without_id_factory("users_generation_statuses")
-        == expected_users_generation_statuses
-    )
-
     clear_storage_factory()
     yield
 
@@ -316,9 +241,88 @@ def test_save_new_activity_sessions(
 # =====================================================================================
 
 
+class UsersGenerationStatusesUpdateScenario(Scenario):
+    status: Literal["failed", "succeed"]
+    time_range_end: datetime
+    expected_users_generation_statuses_content: List[
+        schemas.UsersGenerationStatuesSchema
+    ]
+
+
+test_scenarios = [
+    UsersGenerationStatusesUpdateScenario(
+        desc="status failed",
+        status="failed",
+        time_range_end=datetime(2000, 1, 1),
+        expected_users_generation_statuses_content=[
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID, last_status="failed", version=chronos.__version__
+            )
+        ],
+    ),
+    UsersGenerationStatusesUpdateScenario(
+        desc="status succeed",
+        status="succeed",
+        time_range_end=datetime(2000, 1, 1),
+        expected_users_generation_statuses_content=[
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 1, 1),
+                version=chronos.__version__,
+            )
+        ],
+    ),
+]
+
+
+@pytest.mark.usefixtures("clear_storage")
+@parametrize(test_scenarios)  # type: ignore[misc]
+def test__users_generation_statuses_update(
+    get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]],
+    status: Literal["failed", "succeed"],
+    time_range_end: datetime,
+    expected_users_generation_statuses_content: List[
+        schemas.UsersGenerationStatuesSchema
+    ],
+) -> None:
+
+    tested_module._users_generation_statuses_update(
+        user_id=TEST_USER_ID,
+        status=status,
+        last_successful_generation_end_time=time_range_end,
+    )
+
+    assert (
+        get_collection_content_without_id_factory("users_generation_statuses")
+        == expected_users_generation_statuses_content
+    )
+
+
+# =====================================================================================
+
+
+def test__return_status() -> None:
+    @tested_module._return_status
+    def _test_func() -> None:
+        pass
+
+    assert _test_func() == "succeed"
+
+    @tested_module._return_status
+    def _test_func_err() -> None:
+        raise Exception
+
+    assert _test_func_err() == "failed"
+
+
+# =====================================================================================
+
+
 class _CommitTransactionWithRetryScenario(Scenario):
-    mongo_exception: pymongo.errors.PyMongoError
-    custom_exception: Type[RuntimeError]
+  : pymongo.errors.PyMongoError
+    custom_exception: 
+      [RuntimeError]
 
 
 @parametrize(  # type: ignore[misc]
@@ -724,8 +728,8 @@ TEST_DATA = [
 ]
 
 
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.integration
 @parametrize(TEST_DATA)  # type: ignore[misc]
 def test_update_materialized_views(
     activity_sessions_content: List[schemas.ActivitySessionSchema],
@@ -735,11 +739,12 @@ def test_update_materialized_views(
     get_materialized_view_content_factory: Callable[
         [str], List[schemas.MaterializedViewSchema]
     ],
-    insert_data_to_activity_sessions_collection_factory: Callable[
-        [List[schemas.ActivitySessionSchema]], None
+    insert_data_to_collection_factory: Callable[
+        [str, List[schemas.ActivitySessionSchema]], None
     ],
 ) -> None:
-    insert_data_to_activity_sessions_collection_factory(activity_sessions_content)
+
+    insert_data_to_collection_factory("activity_sessions", activity_sessions_content)
 
     tested_module.update_materialized_views(reference_time=datetime(1970, 1, 1))
 
@@ -757,8 +762,114 @@ def test_update_materialized_views(
     assert expected_materialized_views_content == actual_materialized_views_content
 
 
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
+# =====================================================================================
+
+
+@pytest.mark.usefixtures("clear_storage")
+def test_extract_user_ids_and_time_when_last_status_failed_from_generations(
+    insert_data_to_collection_factory: Callable[
+        [str, List[schemas.UsersGenerationStatuesSchema]], None
+    ]
+) -> None:
+
+    assert (
+        tested_module.extract_user_ids_and_time_when_last_status_failed_from_generations()
+        == []
+    )
+
+    insert_data_to_collection_factory(
+        "users_generation_statuses",
+        [
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 1, 1),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="failed",
+                last_successful_generation_end_time=datetime(2000, 2, 2),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 3, 3),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID + 1,
+                last_status="failed",
+                last_successful_generation_end_time=datetime(2000, 4, 4),
+                version=chronos.__version__,
+            ),
+        ],
+    )
+
+    assert tested_module.extract_user_ids_and_time_when_last_status_failed_from_generations() == [
+        schemas.UsersGenerationStatuesSchema(
+            user_id=TEST_USER_ID,
+            last_successful_generation_end_time=datetime(2000, 2, 2),
+        ),
+        schemas.UsersGenerationStatuesSchema(
+            user_id=TEST_USER_ID + 1,
+            last_successful_generation_end_time=datetime(2000, 4, 4),
+        ),
+    ]
+
+
+# =====================================================================================
+
+
+def test_extract_min_last_successful_generation_end_time(
+    insert_data_to_collection_factory: Callable[
+        [str, List[schemas.UsersGenerationStatuesSchema]], None
+    ]
+) -> None:
+
+    assert tested_module.extract_min_last_successful_generation_end_time() is None
+
+    insert_data_to_collection_factory(
+        "users_generation_statuses",
+        [
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 1, 1),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="failed",
+                last_successful_generation_end_time=datetime(2000, 2, 2),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID,
+                last_status="succeed",
+                last_successful_generation_end_time=datetime(2000, 3, 3),
+                version=chronos.__version__,
+            ),
+            schemas.UsersGenerationStatuesSchema(
+                user_id=TEST_USER_ID + 1,
+                last_status="failed",
+                last_successful_generation_end_time=datetime(2000, 4, 4),
+                version=chronos.__version__,
+            ),
+        ],
+    )
+
+    assert tested_module.extract_min_last_successful_generation_end_time() == datetime(
+        2000, 2, 2
+    )
+
+
+# =====================================================================================
+
+
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.integration
 def test_insert_new_generation(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
 ) -> None:
@@ -787,8 +898,11 @@ def test_insert_new_generation(
     )
 
 
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
+# =====================================================================================
+
+
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.integration
 def test_update_generation_end_time(
     get_collection_content_without_id_factory: Callable[[str], List[Dict[str, Any]]]
 ) -> None:
@@ -821,11 +935,14 @@ def test_update_generation_end_time(
     )
 
 
-@pytest.mark.usefixtures("clear_storage")  # type: ignore[misc]
-@pytest.mark.integration  # type: ignore[misc]
+# =====================================================================================
+
+
+@pytest.mark.usefixtures("clear_storage")
+@pytest.mark.integration
 def test_read_last_generation_time_range_end() -> None:
-    with pytest.raises(ValueError):
-        tested_module.read_last_generation_time_range_end()
+
+    assert tested_module.read_last_generation_time_range_end() is None
 
     for i in range(1, 4):
         tested_module.insert_new_generation(

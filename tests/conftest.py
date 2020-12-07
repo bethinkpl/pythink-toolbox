@@ -105,16 +105,17 @@ def get_materialized_view_content_factory_as_fixture() -> Callable[
     return _get_materialized_view_content
 
 
-@pytest.fixture(name="insert_data_to_activity_sessions_collection_factory")
-def insert_data_to_activity_sessions_collection_factory_as_fixture() -> Callable[
-    [List[schemas.ActivitySessionSchema]], None
+@pytest.fixture(name="insert_data_to_collection_factory")
+def insert_data_to_collection_factory_as_fixture() -> Callable[
+    [str, List[schemas.ActivitySessionSchema]], None
 ]:
     """Inserts data to activity_sessions collection."""
     from chronos.storage.mongo_specs import mongo_specs
 
     def _insert_data_to_activity_sessions_collection(
+        collection_name: str,
         data: List[schemas.ActivitySessionSchema],
     ) -> None:
-        mongo_specs.collections.activity_sessions.insert_many(data)
+        mongo_specs.database.get_collection(collection_name).insert_many(data)
 
     return _insert_data_to_activity_sessions_collection

@@ -13,7 +13,7 @@ TEST_DATA = {
 USER_ID = 299
 
 
-@pytest.mark.integration  # type: ignore[misc]
+@pytest.mark.integration
 def test_get_users_learning_daily_time(
     api_client: TestClient, status_ok: int, headers: Dict[str, str]
 ) -> None:
