@@ -25,7 +25,7 @@ from chronos.storage.schemas import GenerationsSchema
 
 class MainScenario(Scenario):
     read_last_generation_time_range_end_return: Optional[datetime]
-    extract_min_time_when_last_status_failed_from_generations_return: Optional[datetime]
+    extract_min_last_successful_generation_end_time_return: Optional[datetime]
     expected_time_range: TimeRange
     expected_reference_time: datetime
 
@@ -34,7 +34,7 @@ test_scenarios: List[MainScenario] = [
     MainScenario(
         desc="all Nones",
         read_last_generation_time_range_end_return=None,
-        extract_min_time_when_last_status_failed_from_generations_return=None,
+        extract_min_last_successful_generation_end_time_return=None,
         expected_time_range=TimeRange(
             start=datetime(2019, 8, 11), end=datetime(2020, 1, 1)
         ),
@@ -43,18 +43,16 @@ test_scenarios: List[MainScenario] = [
     MainScenario(
         desc="read_last_generation_time_range_end_return not None",
         read_last_generation_time_range_end_return=datetime(2019, 12, 1),
-        extract_min_time_when_last_status_failed_from_generations_return=None,
+        extract_min_last_successful_generation_end_time_return=None,
         expected_time_range=TimeRange(
             start=datetime(2019, 12, 1), end=datetime(2020, 1, 1)
         ),
         expected_reference_time=datetime(2019, 12, 1),
     ),
     MainScenario(
-        desc="extract_min_time_when_last_status_failed_from_generations_return not None",
+        desc="extract_min_last_successful_generation_end_time_return not None",
         read_last_generation_time_range_end_return=None,
-        extract_min_time_when_last_status_failed_from_generations_return=datetime(
-            2019, 9, 8
-        ),
+        extract_min_last_successful_generation_end_time_return=datetime(2019, 9, 8),
         expected_time_range=TimeRange(
             start=datetime(2019, 8, 11), end=datetime(2020, 1, 1)
         ),
@@ -63,9 +61,7 @@ test_scenarios: List[MainScenario] = [
     MainScenario(
         desc="both not None",
         read_last_generation_time_range_end_return=datetime(2019, 12, 1),
-        extract_min_time_when_last_status_failed_from_generations_return=datetime(
-            2019, 9, 8
-        ),
+        extract_min_last_successful_generation_end_time_return=datetime(2019, 9, 8),
         expected_time_range=TimeRange(
             start=datetime(2019, 12, 1), end=datetime(2020, 1, 1)
         ),
@@ -79,9 +75,7 @@ test_scenarios: List[MainScenario] = [
 def test_main(
     mocker: MockerFixture,
     read_last_generation_time_range_end_return: Optional[datetime],
-    extract_min_time_when_last_status_failed_from_generations_return: Optional[
-        datetime
-    ],
+    extract_min_last_successful_generation_end_time_return: Optional[datetime],
     expected_time_range: TimeRange,
     expected_reference_time: datetime,
 ) -> None:
@@ -93,8 +87,8 @@ def test_main(
     )
 
     mocker.patch(
-        "chronos.activity_sessions.main.extract_min_time_when_last_status_failed_from_generations",
-        return_value=extract_min_time_when_last_status_failed_from_generations_return,
+        "chronos.activity_sessions.main.extract_min_last_successful_generation_end_time",
+        return_value=extract_min_last_successful_generation_end_time_return,
     )
 
     mocked__run_activity_sessions_generation = mocker.patch(
