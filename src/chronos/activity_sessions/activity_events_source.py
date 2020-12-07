@@ -25,7 +25,7 @@ def read_activity_events_between_datetimes(
 
     exclude_user_ids_condition = ""
     if exclude_user_ids:
-        exclude_user_ids_condition = "AND user_id NOT IN @exclude_user_ids"
+        exclude_user_ids_condition = "AND user_id NOT IN UNNEST(@exclude_user_ids)"
         params["exclude_user_ids"] = exclude_user_ids
 
     query = f"""
