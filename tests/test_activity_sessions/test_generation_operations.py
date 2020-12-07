@@ -4,13 +4,13 @@
 # pylint: disable=duplicate-code
 
 from datetime import datetime
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 import hypothesis
-from hypothesis.extra.pandas import series, indexes, data_frames, column
 import pandas as pd
 import pandera.errors
 import pytest
+from hypothesis.extra.pandas import column, data_frames, indexes, series
 from pythink_toolbox.testing import parametrization
 
 import chronos

@@ -1,6 +1,6 @@
 # pylint: disable=import-outside-toplevel
 import os
-from typing import List, Dict, Callable, Iterator, Any
+from typing import Any, Callable, Dict, Iterator, List
 
 import _pytest.config
 import _pytest.main
@@ -8,7 +8,6 @@ from pymongo import MongoClient
 import pytest
 
 from chronos.storage import schemas
-
 
 os.environ["CHRONOS_MONGO_DATABASE"] = "test_db"
 

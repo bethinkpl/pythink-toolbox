@@ -6,18 +6,18 @@
 # pylint: disable=too-many-statements
 
 from datetime import datetime
-from typing import Dict, List, Callable, Iterator, Any, Type, Literal
+from typing import Any, Callable, Dict, Iterator, List, Literal, Type
 
 import pandas as pd
 import pymongo.errors
 import pytest
 import pytest_mock
 import pytest_steps
-from pythink_toolbox.testing.parametrization import parametrize, Scenario
+from pythink_toolbox.testing.parametrization import Scenario, parametrize
 
-import chronos.activity_sessions.storage_operations as tested_module
 import chronos
 import chronos.activity_sessions.generation_operations
+import chronos.activity_sessions.storage_operations as tested_module
 from chronos import custom_types
 from chronos.storage import schemas
 

@@ -5,7 +5,6 @@ from typing import Dict
 import pytest
 from starlette.testclient import TestClient
 
-
 TEST_DATA = {
     "range-start": datetime(2000, 1, 1).isoformat(),
     "range-end": datetime(2021, 1, 1).isoformat(),

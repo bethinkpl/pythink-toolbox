@@ -1,13 +1,13 @@
-from dataclasses import dataclass
 import json
-from time import sleep
-from typing import Dict, Any, List, Optional
+from dataclasses import dataclass
 from datetime import datetime
+from time import sleep
+from typing import Any, Dict, List, Optional
 
+import pymongo.errors
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
-import pymongo.errors
 
 from chronos import settings
 

@@ -1,6 +1,8 @@
 import logging
+
 import sentry_sdk
-from chronos.settings import SENTRY_DSN_API, LOG_LEVEL
+
+from chronos.settings import LOG_LEVEL, SENTRY_DSN_API
 
 
 def init_for_api() -> None:

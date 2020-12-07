@@ -1,6 +1,6 @@
-from datetime import datetime
 import logging
-from typing import List, Optional, Union, Dict
+from datetime import datetime
+from typing import Dict, List, Optional, Union
 
 import pandas as pd
 import pandera

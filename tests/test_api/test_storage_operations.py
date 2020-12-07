@@ -2,14 +2,14 @@
 # pylint: disable=duplicate-code
 
 from datetime import datetime, timedelta
-from typing import Tuple, List, Iterator
+from typing import Iterator, List, Tuple
 
 import pytest
-from pythink_toolbox.testing.parametrization import parametrize, Scenario
+from pythink_toolbox.testing.parametrization import Scenario, parametrize
 
-import chronos.api.storage_operations as tested_module
 import chronos
 import chronos.activity_sessions.storage_operations
+import chronos.api.storage_operations as tested_module
 import chronos.settings
 from chronos.storage.mongo_specs import mongo_specs
 
