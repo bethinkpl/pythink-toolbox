@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Dict, List, Union
 
@@ -5,6 +6,8 @@ import datatosk
 import pandas as pd
 
 from chronos.settings import BIGQUERY_PLATFORM_DATASET_ID
+
+logger = logging.getLogger(__name__)
 
 
 def read_activity_events_between_datetimes(
@@ -37,5 +40,7 @@ def read_activity_events_between_datetimes(
         "end_time": end_time,
         "user_ids": user_ids,
     }
+
+    logger.info("Reading activity events from bigquery...")
 
     return bigquery_source.read(query=query, params=params)

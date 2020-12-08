@@ -131,7 +131,7 @@ def _generate_activity_sessions(
 
     users_activity_events_groups = users_activity_events.groupby("user_id").client_time
 
-    for user_id, activity_events in users_activity_events_groups:
+    for user_id, activity_events in tqdm(users_activity_events_groups):
         storage_operations.save_new_activity_sessions(
             user_id, activity_events, time_range_end=time_range.end
         )
