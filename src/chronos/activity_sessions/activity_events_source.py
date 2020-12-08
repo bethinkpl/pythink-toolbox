@@ -14,6 +14,11 @@ def read_activity_events_between_datetimes(
     user_exclude: bool = False,
 ) -> pd.DataFrame:
     """Read activity events from bigquery."""
+    user_query = ""
+    if user_ids and user_exclude:
+        user_query = "AND user_id NOT IN UNNEST(@user_ids)"
+    elif user_ids and not user_exclude:
+        user_query = "AND user_id IN UNNEST(@user_ids)"
 
     bigquery_source = datatosk.gbq("prod")
 
@@ -22,7 +27,7 @@ def read_activity_events_between_datetimes(
         FROM `{BIGQUERY_PLATFORM_DATASET_ID}.user_activity_events`
         WHERE client_time >= @start_time
           AND client_time < @end_time
-          AND user_id{" NOT " if user_exclude else " "}IN UNNEST(@user_ids)
+          {user_query}
         GROUP BY user_id, client_time
         ORDER BY user_id, client_time;
         """
