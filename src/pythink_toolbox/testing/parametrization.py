@@ -1,5 +1,6 @@
-from typing import Sequence, Mapping, Tuple, List, Any, TypedDict
+from typing import Sequence, Mapping, Tuple, Any, TypedDict, Union, Iterable, List
 
+import _pytest.mark
 import pytest
 
 
@@ -14,21 +15,27 @@ class Scenario(TypedDict):
 
 
 def _transform_scenarios_for_parametrization(
-    scenarios: Sequence[Mapping[str, object]],
-) -> Tuple[str, List[Tuple[object, ...]]]:
+    scenarios: Sequence[Mapping[str, Any]],
+) -> Tuple[str, Iterable[Union[object, Sequence[object]]]]:
     """Helper function for `parametrize()`"""
 
     argnames = ",".join([arg for arg in scenarios[0].keys() if arg != "desc"])
 
-    argvalues = [
-        tuple(scenario[parameter] for parameter in scenario if parameter != "desc")
-        for scenario in scenarios
-    ]
+    argvalues: List[Union[object, Sequence[object]]] = []
+    for scenario in scenarios:
+        scenario = dict(scenario)
+        scenario.pop("desc")
+        if len(scenario) == 1:
+            argvalues.append(*scenario.values())
+        else:
+            argvalues.append(tuple(scenario.values()))
 
     return argnames, argvalues
 
 
-def parametrize(scenarios: Sequence[Mapping[str, object]]) -> Any:
+def parametrize(
+    scenarios: Sequence[Mapping[str, object]]
+) -> _pytest.mark.MarkDecorator:
     """Used for parametrization of tests with use of Scenario-based parameters.
     Examples:
     >>> @parametrize(
@@ -41,6 +48,5 @@ def parametrize(scenarios: Sequence[Mapping[str, object]]) -> Any:
     ...     assert field.startswith("bar")
     """
 
-    return pytest.mark.parametrize(  # pylint: disable=not-callable
-        *_transform_scenarios_for_parametrization(scenarios)
-    )
+    argnames, argvalues = _transform_scenarios_for_parametrization(scenarios)
+    return pytest.mark.parametrize(argnames, argvalues)
