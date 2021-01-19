@@ -9,7 +9,7 @@ from pythink_toolbox.testing.parametrization import parametrize
 import pythink_toolbox.validating
 
 
-@pytest.mark.parametrize(  # type: ignore[misc]
+@pytest.mark.parametrize(
     "function, expected_output",
     [
         (parametrize, "pythink_toolbox.testing.parametrization.parametrize"),
