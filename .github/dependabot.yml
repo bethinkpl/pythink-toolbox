@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "pip" # Handles poetry too
+    directory: "/"
+    schedule:
+      interval: "daily"
