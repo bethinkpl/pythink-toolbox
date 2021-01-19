@@ -69,7 +69,7 @@ SCENARIOS = [
 ]
 
 
-@pythink_toolbox.testing.parametrization.parametrize(SCENARIOS)  # type: ignore[misc]
+@pythink_toolbox.testing.parametrization.parametrize(SCENARIOS)
 def test_check_output(
     dtype: Type[Any],
     checks: Optional[List[Callable[..., Any]]],
@@ -107,7 +107,7 @@ SCENARIOS = [
 ]
 
 
-@pythink_toolbox.testing.parametrization.parametrize(SCENARIOS)  # type: ignore[misc]
+@pythink_toolbox.testing.parametrization.parametrize(SCENARIOS)
 def test_is_json(test_string: str, expected_output: bool) -> None:
     assert pythink_toolbox.validating.is_json(test_string) == expected_output
 
@@ -223,7 +223,7 @@ CHECK_SCENARIOS = [
 ]
 
 
-@pythink_toolbox.testing.parametrization.parametrize(CHECK_SCENARIOS)  # type: ignore[misc]
+@pythink_toolbox.testing.parametrization.parametrize(CHECK_SCENARIOS)
 def test_Check(  # pylint: disable=invalid-name
     check: Callable[..., Any], value: Any, should_pass: bool
 ) -> None:
