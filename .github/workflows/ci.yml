@@ -40,7 +40,9 @@ jobs:
         restore-keys: venv-${{ matrix.python-version }}-
 
     - name: Install dependiencies
-      run: poetry install
+      run: |
+        poetry install
+        pip list
 
     - name: Run Nox-based CI
       run: poetry run nox
