@@ -141,7 +141,7 @@ python-versions = "*"
 
 [[package]]
 name = "hypothesis"
-version = "6.1.1"
+version = "6.2.0"
 description = "A library for property-based testing"
 category = "dev"
 optional = false
@@ -540,7 +540,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "b8034926c773e76c34817bae7839b116b3de719a82e431b3cae30ab7410f19d3"
+content-hash = "ea34e15e5bda1ea2008975391a018b54ad8558ca251170dc9e3d7474698ba50b"
 
 [metadata.files]
 appdirs = [
@@ -642,8 +642,8 @@ filelock = [
     {file = "filelock-3.0.12.tar.gz", hash = "sha256:18d82244ee114f543149c66a6e0c14e9c4f8a1044b5cdaadd0f82159d6a6ff59"},
 ]
 hypothesis = [
-    {file = "hypothesis-6.1.1-py3-none-any.whl", hash = "sha256:4da042e6df01417308d389afa8769de0a762b827476f431eb7848852f4a02647"},
-    {file = "hypothesis-6.1.1.tar.gz", hash = "sha256:47673d3c0cb87055f5b4d322d3d16a7556ae5962e9677aa98d6f5503ffd74f7a"},
+    {file = "hypothesis-6.2.0-py3-none-any.whl", hash = "sha256:32c1706ee12a493befb5192e91a74b355fc2d6b70ce89e21c5b54e24713fc821"},
+    {file = "hypothesis-6.2.0.tar.gz", hash = "sha256:c16fbde26b65c98a2464c48209b066c2f6dab5e8e38acd9d959021eb8d58b6c0"},
 ]
 identify = [
     {file = "identify-1.5.10-py2.py3-none-any.whl", hash = "sha256:cc86e6a9a390879dcc2976cef169dd9cc48843ed70b7380f321d1b118163c60e"},
