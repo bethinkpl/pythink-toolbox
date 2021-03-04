@@ -14,7 +14,7 @@ pylint = "^2.7.0"
 mypy = "^0.800"
 pytest = "^6.2.2"
 pytest-cov = "^2.11.1"
-coverage = {version = "^5.4",  extras = ["toml"]}
+coverage = {version = "^5.5",  extras = ["toml"]}
 hypothesis = {version = "^6.4.2", extras = ["numpy", "pandas"]}
 nox = "^2020.12.31"
 pre-commit = "^2.10.1"
