@@ -10,11 +10,11 @@ pandera = ">=0.4.4,<0.7.0"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
-pylint = "^2.7.0"
+pylint = "^2.7.2"
 mypy = "^0.800"
 pytest = "^6.2.2"
 pytest-cov = "^2.11.1"
-coverage = {version = "^5.4",  extras = ["toml"]}
+coverage = {version = "^5.5",  extras = ["toml"]}
 hypothesis = {version = "^6.4.2", extras = ["numpy", "pandas"]}
 nox = "^2020.12.31"
 pre-commit = "^2.10.1"
