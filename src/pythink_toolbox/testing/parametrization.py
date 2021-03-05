@@ -4,6 +4,7 @@ import _pytest.mark
 import pytest
 
 
+# pylint:disable=too-few-public-methods
 class Scenario(TypedDict):
     """Default scenario for parametrization.
     Examples:

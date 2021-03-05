@@ -1,6 +1,7 @@
-# pylint: disable=missing-class-docstring
-# pylint: disable=missing-function-docstring
-# pylint: disable=protected-access
+# pylint:disable=missing-class-docstring
+# pylint:disable=missing-function-docstring
+# pylint:disable=protected-access
+# pylint:disable=too-few-public-methods
 import typing
 
 import pythink_toolbox.testing.parametrization as tested_module
