@@ -302,7 +302,7 @@ test = ["pytest (>=4.0.2)", "pytest-xdist", "hypothesis (>=3.58)"]
 
 [[package]]
 name = "pandera"
-version = "0.6.2"
+version = "0.6.3"
 description = "A light-weight and flexible validation package for pandas data structures."
 category = "main"
 optional = false
@@ -316,7 +316,7 @@ typing-inspect = ">=0.6.0"
 wrapt = "*"
 
 [package.extras]
-all = ["scipy", "pyyaml (>=5.1)", "hypothesis (>=5.41.1)", "black"]
+all = ["scipy", "black", "hypothesis (>=5.41.1)", "pyyaml (>=5.1)"]
 hypotheses = ["scipy"]
 io = ["pyyaml (>=5.1)", "black"]
 strategies = ["hypothesis (>=5.41.1)"]
@@ -792,8 +792,8 @@ pandas = [
     {file = "pandas-1.1.5.tar.gz", hash = "sha256:f10fc41ee3c75a474d3bdf68d396f10782d013d7f67db99c0efbfd0acb99701b"},
 ]
 pandera = [
-    {file = "pandera-0.6.2-py3-none-any.whl", hash = "sha256:2480148f73d9af91253e04cce9667a957f1190758c96ad29f7e93527c0a05081"},
-    {file = "pandera-0.6.2.tar.gz", hash = "sha256:039a8a5a2a34a869078bc67a6bb80bfdc7cbdac663cd967e910dd028bae6f5bf"},
+    {file = "pandera-0.6.3-py3-none-any.whl", hash = "sha256:bcca3616d55794cf78f420c68bb78dae848086ba4a6df5d72d0d46b9a6e2f616"},
+    {file = "pandera-0.6.3.tar.gz", hash = "sha256:74419f6928ad3a392e32bf88ffbe03284157f9caf2c0011be8e6b2b5eaf3e1cf"},
 ]
 pathspec = [
     {file = "pathspec-0.8.1-py2.py3-none-any.whl", hash = "sha256:aa0cb481c4041bf52ffa7b0d8fa6cd3e88a2ca4879c533c9153882ee2556790d"},
