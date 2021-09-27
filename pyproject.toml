@@ -15,7 +15,7 @@ mypy = "^0.812"
 pytest = "^6.2.2"
 pytest-cov = "^2.11.1"
 coverage = {version = "^5.5",  extras = ["toml"]}
-hypothesis = {version = "^6.6.0", extras = ["numpy", "pandas"]}
+hypothesis = {version = "^6.23.0", extras = ["numpy", "pandas"]}
 nox = "^2020.12.31"
 pre-commit = "^2.11.0"
 click = "^7.1.2"
