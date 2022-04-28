@@ -18,7 +18,7 @@ coverage = {version = "^5.5",  extras = ["toml"]}
 hypothesis = {version = "^6.6.0", extras = ["numpy", "pandas"]}
 nox = "^2020.12.31"
 pre-commit = "^2.11.0"
-click = "^7.1.2"
+click = "^8.1.3"
 
 [tool.poetry.scripts]
 cli = 'cli:main'
