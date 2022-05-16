@@ -140,11 +140,11 @@ python-versions = "*"
 
 [[package]]
 name = "hypothesis"
-version = "6.6.0"
+version = "6.46.5"
 description = "A library for property-based testing"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 attrs = ">=19.2.0"
@@ -153,11 +153,11 @@ pandas = {version = ">=0.25", optional = true, markers = "extra == \"pandas\""}
 sortedcontainers = ">=2.1.0,<3.0.0"
 
 [package.extras]
-all = ["black (>=19.10b0)", "click (>=7.0)", "django (>=2.2)", "dpcontracts (>=0.4)", "lark-parser (>=0.6.5)", "libcst (>=0.3.16)", "numpy (>=1.9.0)", "pandas (>=0.25)", "pytest (>=4.6)", "python-dateutil (>=1.4)", "pytz (>=2014.1)", "redis (>=3.0.0)", "importlib-resources (>=3.3.0)", "importlib-metadata", "backports.zoneinfo (>=0.2.1)", "tzdata (>=2020.4)"]
-cli = ["click (>=7.0)", "black (>=19.10b0)"]
+all = ["black (>=19.10b0)", "click (>=7.0)", "django (>=2.2)", "dpcontracts (>=0.4)", "lark-parser (>=0.6.5)", "libcst (>=0.3.16)", "numpy (>=1.9.0)", "pandas (>=0.25)", "pytest (>=4.6)", "python-dateutil (>=1.4)", "pytz (>=2014.1)", "redis (>=3.0.0)", "rich (>=9.0.0)", "importlib-metadata (>=3.6)", "backports.zoneinfo (>=0.2.1)", "tzdata (>=2022.1)"]
+cli = ["click (>=7.0)", "black (>=19.10b0)", "rich (>=9.0.0)"]
 codemods = ["libcst (>=0.3.16)"]
 dateutil = ["python-dateutil (>=1.4)"]
-django = ["pytz (>=2014.1)", "django (>=2.2)"]
+django = ["django (>=2.2)"]
 dpcontracts = ["dpcontracts (>=0.4)"]
 ghostwriter = ["black (>=19.10b0)"]
 lark = ["lark-parser (>=0.6.5)"]
@@ -166,7 +166,7 @@ pandas = ["pandas (>=0.25)"]
 pytest = ["pytest (>=4.6)"]
 pytz = ["pytz (>=2014.1)"]
 redis = ["redis (>=3.0.0)"]
-zoneinfo = ["importlib-resources (>=3.3.0)", "backports.zoneinfo (>=0.2.1)", "tzdata (>=2020.4)"]
+zoneinfo = ["backports.zoneinfo (>=0.2.1)", "tzdata (>=2022.1)"]
 
 [[package]]
 name = "identify"
@@ -542,7 +542,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "8468d616eb79dcf836474ee5bf10dc3f990b6762aa00063e6cf843c97a73c0c7"
+content-hash = "7591bb4c6370a0012d762c2838f3f36bab6637cd073a2c0bec62943d8230e0f5"
 
 [metadata.files]
 appdirs = [
@@ -647,8 +647,8 @@ filelock = [
     {file = "filelock-3.0.12.tar.gz", hash = "sha256:18d82244ee114f543149c66a6e0c14e9c4f8a1044b5cdaadd0f82159d6a6ff59"},
 ]
 hypothesis = [
-    {file = "hypothesis-6.6.0-py3-none-any.whl", hash = "sha256:6a23d0c342d01a88f3b30b54ad459246beb01b0ce28d865cf06623a9209aac03"},
-    {file = "hypothesis-6.6.0.tar.gz", hash = "sha256:0f6b970178b7676267029eb5d352ea7ff4fda4533d2d2eaa3adbda660db54b65"},
+    {file = "hypothesis-6.46.5-py3-none-any.whl", hash = "sha256:40ebd37782b029b4063f50932c8678b2c494d97b5ec5fadcb02fca4e411a62dc"},
+    {file = "hypothesis-6.46.5.tar.gz", hash = "sha256:67c17f4555957f76831a831c31f77eb5c6051b671277cf4973d17e0f5169f648"},
 ]
 identify = [
     {file = "identify-1.5.10-py2.py3-none-any.whl", hash = "sha256:cc86e6a9a390879dcc2976cef169dd9cc48843ed70b7380f321d1b118163c60e"},
